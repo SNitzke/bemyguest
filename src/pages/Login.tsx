@@ -3,6 +3,7 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 import LoginForm from "../components/auth/LoginForm";
 import { useAuth } from "../contexts/AuthContext";
+import { Mail, Phone } from "lucide-react";
 
 const Login: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -18,7 +19,7 @@ const Login: React.FC = () => {
           <LoginForm />
         </div>
         
-        <div className="hidden md:block w-1/2 bg-bmg-500 p-12 text-white flex items-center justify-center">
+        <div className="hidden md:block w-1/2 bg-bmg-500 p-12 text-white flex flex-col justify-center">
           <div>
             <h2 className="text-3xl font-heading font-bold mb-6">Welcome to BeMyGuest</h2>
             <p className="mb-8">The complete solution for property management and tenant communication.</p>
@@ -48,6 +49,17 @@ const Login: React.FC = () => {
                 Simplified Communication
               </li>
             </ul>
+            
+            <div className="mt-8 space-y-2">
+              <div className="flex items-center gap-3">
+                <Mail className="h-6 w-6" />
+                <span>bemigest@gmail.com</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Phone className="h-6 w-6" />
+                <span>+52 55 6425 9421</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
