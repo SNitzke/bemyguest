@@ -1,6 +1,5 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { User } from "../types";
+import { User, Invitation, PaymentMethod } from "../types";
 import { users, getCurrentUser } from "../utils/mockData";
 import { toast } from "sonner";
 
@@ -12,6 +11,9 @@ interface AuthContextType {
   isAuthenticated: boolean;
   switchRole: () => void; // For demo purposes only
   signup: (userData: SignupData) => Promise<void>;
+  createTenantInvitation: (inviteData: InviteData) => Promise<string>;
+  acceptInvitation: (inviteCode: string, tenantData: TenantData) => Promise<void>;
+  verifyInvitation: (inviteCode: string) => Promise<Invitation | null>;
 }
 
 interface SignupData {
@@ -27,6 +29,24 @@ interface SignupData {
     accountName: string;
     accountNumber: string;
     bankName: string;
+  };
+}
+
+interface InviteData {
+  email: string;
+  propertyId: string;
+  unitNumber: string;
+}
+
+interface TenantData {
+  fullName: string;
+  email: string;
+  password: string;
+  paymentMethod: PaymentMethod;
+  paymentInfo: {
+    accountName?: string;
+    accountNumber?: string;
+    bankName?: string;
   };
 }
 
@@ -123,6 +143,126 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     toast.info(`Switched to ${newRole} view`);
   };
 
+  // New functions for invitation flow
+  const createTenantInvitation = async (inviteData: InviteData): Promise<string> => {
+    setIsLoading(true);
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // In a real app, this would create an invitation in your database
+      // For now, we'll create a mock invitation code
+      const inviteCode = `INVITE-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+      
+      // Store the invitation code in sessionStorage for demo purposes
+      const invitations = JSON.parse(sessionStorage.getItem("bemyguest-invitations") || "[]");
+      const newInvitation: Invitation = {
+        id: `invitation-${Date.now()}`,
+        email: inviteData.email,
+        propertyId: inviteData.propertyId,
+        unitNumber: inviteData.unitNumber,
+        landlordId: user?.id || "",
+        status: "pending",
+        createdAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+      };
+      
+      invitations.push({ code: inviteCode, invitation: newInvitation });
+      sessionStorage.setItem("bemyguest-invitations", JSON.stringify(invitations));
+      
+      toast.success(`Invitation sent to ${inviteData.email}`);
+      return inviteCode;
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to create invitation");
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const verifyInvitation = async (inviteCode: string): Promise<Invitation | null> => {
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Look for the invitation in sessionStorage
+      const invitations = JSON.parse(sessionStorage.getItem("bemyguest-invitations") || "[]");
+      const inviteRecord = invitations.find((inv: any) => inv.code === inviteCode);
+      
+      if (!inviteRecord) {
+        throw new Error("Invalid invitation code");
+      }
+      
+      const invitation: Invitation = inviteRecord.invitation;
+      
+      // Check if invitation is expired
+      if (new Date(invitation.expiresAt) < new Date()) {
+        throw new Error("Invitation has expired");
+      }
+      
+      return invitation;
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to verify invitation");
+      return null;
+    }
+  };
+
+  const acceptInvitation = async (inviteCode: string, tenantData: TenantData): Promise<void> => {
+    setIsLoading(true);
+    
+    try {
+      // Verify invitation first
+      const invitation = await verifyInvitation(inviteCode);
+      
+      if (!invitation) {
+        throw new Error("Invalid or expired invitation");
+      }
+      
+      // Simulate API call to create tenant account
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Create the tenant user
+      const newUser: User = {
+        id: `user-${Date.now()}`,
+        name: tenantData.fullName,
+        email: tenantData.email,
+        role: "tenant",
+        avatarUrl: undefined,
+      };
+      
+      // In a real app, you would update the invitation status to "accepted"
+      // and create a tenant record in your database
+      
+      // For the mock app, we'll update the invitation in sessionStorage
+      const invitations = JSON.parse(sessionStorage.getItem("bemyguest-invitations") || "[]");
+      const updatedInvitations = invitations.map((inv: any) => {
+        if (inv.code === inviteCode) {
+          return {
+            ...inv,
+            invitation: {
+              ...inv.invitation,
+              status: "accepted"
+            }
+          };
+        }
+        return inv;
+      });
+      sessionStorage.setItem("bemyguest-invitations", JSON.stringify(updatedInvitations));
+      
+      // Log in the new user
+      setUser(newUser);
+      sessionStorage.setItem("bemyguest-user", JSON.stringify(newUser));
+      
+      toast.success("Account created successfully!");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to accept invitation");
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -133,6 +273,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: !!user,
         switchRole,
         signup,
+        createTenantInvitation,
+        verifyInvitation,
+        acceptInvitation,
       }}
     >
       {children}

@@ -16,6 +16,8 @@ import Payments from "./pages/Payments";
 import Messages from "./pages/Messages";
 import Index from "./pages/Index";
 import SignUp from "./pages/SignUp";
+import InviteTenant from "./pages/InviteTenant";
+import TenantInvitation from "./pages/TenantInvitation";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +42,7 @@ const AppRoutes = () => {
       <Route path="/" element={<Index />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
+      <Route path="/invitation" element={<TenantInvitation />} />
       <Route path="/" element={
         <ProtectedRoute>
           <AppLayout />
@@ -50,6 +53,7 @@ const AppRoutes = () => {
         <Route path="issues" element={<Issues />} />
         <Route path="payments" element={<Payments />} />
         <Route path="messages" element={<Messages />} />
+        <Route path="invite-tenant" element={<InviteTenant />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

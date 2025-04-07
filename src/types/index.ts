@@ -1,5 +1,5 @@
-
 export type UserRole = "landlord" | "tenant" | "admin";
+export type PaymentMethod = "credit" | "debit" | "cash";
 
 export interface User {
   id: string;
@@ -25,6 +25,18 @@ export interface Tenant {
   unitNumber: string;
   moveInDate: string;
   leaseEndDate: string;
+  paymentMethod: PaymentMethod;
+}
+
+export interface Invitation {
+  id: string;
+  email: string;
+  propertyId: string;
+  unitNumber: string;
+  landlordId: string;
+  status: "pending" | "accepted" | "expired";
+  createdAt: string;
+  expiresAt: string;
 }
 
 export interface Issue {
