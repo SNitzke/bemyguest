@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
@@ -164,8 +163,8 @@ const Index = () => {
             <div className="space-y-2">
               <div className="flex items-center gap-3">
                 <div className="text-gray-300">Email:</div>
-                <a href="mailto:bemigest@gmail.com" className="text-gray-300 hover:text-white">
-                  bemigest@gmail.com
+                <a href="mailto:bemeguestt@gmail.com" className="text-gray-300 hover:text-white">
+                  bemeguestt@gmail.com
                 </a>
               </div>
               <div className="flex items-center gap-3">
