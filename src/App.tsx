@@ -13,6 +13,8 @@ import ReportIssue from "./pages/ReportIssue";
 import Issues from "./pages/Issues";
 import Payments from "./pages/Payments";
 import Messages from "./pages/Messages";
+import Index from "./pages/Index";
+import SignUp from "./pages/SignUp";
 
 const queryClient = new QueryClient();
 
@@ -24,9 +26,10 @@ const App = () => (
         <Sonner />
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
             <Route path="/" element={<AppLayout />}>
-              <Route index element={<Dashboard />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="report-issue" element={<ReportIssue />} />
               <Route path="issues" element={<Issues />} />
