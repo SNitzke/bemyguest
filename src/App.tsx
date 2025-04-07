@@ -3,8 +3,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
+import { useAuth } from "./contexts/AuthContext";
 import AppLayout from "./components/layout/AppLayout";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
@@ -18,6 +19,43 @@ import SignUp from "./pages/SignUp";
 
 const queryClient = new QueryClient();
 
+// Protected route component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  
+  if (isLoading) {
+    return <div className="flex h-screen items-center justify-center">Loading...</div>;
+  }
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
+const AppRoutes = () => {
+  return (
+    <Routes>
+      <Route path="/" element={<Index />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/" element={
+        <ProtectedRoute>
+          <AppLayout />
+        </ProtectedRoute>
+      }>
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="report-issue" element={<ReportIssue />} />
+        <Route path="issues" element={<Issues />} />
+        <Route path="payments" element={<Payments />} />
+        <Route path="messages" element={<Messages />} />
+      </Route>
+      <Route path="*" element={<NotFound />} />
+    </Routes>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -25,19 +63,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/" element={<AppLayout />}>
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="report-issue" element={<ReportIssue />} />
-              <Route path="issues" element={<Issues />} />
-              <Route path="payments" element={<Payments />} />
-              <Route path="messages" element={<Messages />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AppRoutes />
         </BrowserRouter>
       </AuthProvider>
     </TooltipProvider>

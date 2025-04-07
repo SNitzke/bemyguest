@@ -11,6 +11,23 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   switchRole: () => void; // For demo purposes only
+  signup: (userData: SignupData) => Promise<void>;
+}
+
+interface SignupData {
+  fullName: string;
+  email: string;
+  role: "tenant" | "landlord";
+  propertyInfo?: {
+    name: string;
+    address: string;
+    units: number;
+  };
+  paymentInfo: {
+    accountName: string;
+    accountNumber: string;
+    bankName: string;
+  };
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -57,6 +74,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const signup = async (userData: SignupData) => {
+    setIsLoading(true);
+    
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // In a real app, this would send data to your backend/database
+      // For now, we'll create a mock user and add it
+      const newUser: User = {
+        id: `user-${Date.now()}`,
+        name: userData.fullName,
+        email: userData.email,
+        role: userData.role,
+        avatarUrl: undefined,
+      };
+      
+      // Simulate storing the new user
+      // In a real app with Supabase, you would insert this data into your database
+      
+      setUser(newUser);
+      sessionStorage.setItem("bemyguest-user", JSON.stringify(newUser));
+      toast.success("Account created successfully");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to create account");
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
     setUser(null);
     sessionStorage.removeItem("bemyguest-user");
@@ -84,6 +132,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         logout,
         isAuthenticated: !!user,
         switchRole,
+        signup,
       }}
     >
       {children}
