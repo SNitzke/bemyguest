@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Invitation, PaymentMethod } from "../types";
 import { users, getCurrentUser } from "../utils/mockData";
@@ -67,6 +68,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, []);
 
+  // Function to send notification email (mock implementation)
+  const sendNotificationEmail = async (userData: any, userType: "landlord" | "tenant") => {
+    try {
+      // In a real implementation, this would be an API call to your backend
+      // For now, we'll mock the email sending functionality
+      console.log(`Sending notification email to bemeguestt@gmail.com about new ${userType} registration`);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Log the data that would be sent in the email
+      console.log("User data:", {
+        type: userType,
+        name: userData.fullName || userData.name,
+        email: userData.email,
+        registeredAt: new Date().toISOString(),
+      });
+      
+      // In a real implementation with a backend, you would use a service like:
+      // - Nodemailer if using Node.js
+      // - SendGrid API
+      // - Amazon SES
+      // - Or other email service providers
+      
+      console.log("Notification email sent successfully");
+    } catch (error) {
+      console.error("Failed to send notification email:", error);
+    }
+  };
+
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     
@@ -113,6 +144,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Simulate storing the new user
       // In a real app with Supabase, you would insert this data into your database
+      
+      // Send notification email about new landlord registration
+      await sendNotificationEmail(userData, userData.role);
       
       setUser(newUser);
       sessionStorage.setItem("bemyguest-user", JSON.stringify(newUser));
@@ -249,6 +283,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return inv;
       });
       sessionStorage.setItem("bemyguest-invitations", JSON.stringify(updatedInvitations));
+      
+      // Send notification email about new tenant registration
+      await sendNotificationEmail({
+        ...tenantData,
+        invitationDetails: invitation
+      }, "tenant");
       
       // Log in the new user
       setUser(newUser);
