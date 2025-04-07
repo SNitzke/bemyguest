@@ -1,4 +1,3 @@
-
 import { User, Property, Tenant, Issue, Payment, Message, FinancialData } from "../types";
 
 // Mock users (landlords and tenants)
@@ -55,6 +54,7 @@ export const tenants: Tenant[] = [
     unitNumber: "101",
     moveInDate: "2023-01-15",
     leaseEndDate: "2024-01-14",
+    paymentMethod: "credit",
   },
   {
     id: "2",
@@ -63,6 +63,7 @@ export const tenants: Tenant[] = [
     unitNumber: "102",
     moveInDate: "2023-03-01",
     leaseEndDate: "2024-02-28",
+    paymentMethod: "debit",
   }
 ];
 
