@@ -6,7 +6,7 @@ import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { toast } from "sonner";
-import { FileImage } from "lucide-react";
+import { FileImage, ShieldCheck, CheckCircle, CodeCheck } from "lucide-react";
 
 const IssueReportForm: React.FC = () => {
   const [title, setTitle] = useState("");
@@ -65,22 +65,22 @@ const IssueReportForm: React.FC = () => {
             <Label htmlFor="images">Attach Images (optional)</Label>
             <div className="border rounded-md p-4 bg-muted/30">
               <div className="flex flex-col items-center gap-2">
-                <FileImage className="h-8 w-8 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground mb-2">Upload clear photos of the issue</p>
+                <ShieldCheck className="h-8 w-8 text-green-500" />
+                <p className="text-sm text-muted-foreground mb-2">Upload clear photos of resolved issues</p>
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   <img 
-                    src="https://images.unsplash.com/photo-1605117882932-f9e32b03fea9?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&q=80" 
-                    alt="Example of a maintenance issue" 
+                    src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80" 
+                    alt="Solved technical problem" 
                     className="w-full h-24 object-cover rounded-md"
                   />
                   <img 
-                    src="https://images.unsplash.com/photo-1584477712087-69fa7e911b86?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&q=80" 
-                    alt="Example of a maintenance issue" 
+                    src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80" 
+                    alt="Resolved coding issue" 
                     className="w-full h-24 object-cover rounded-md"
                   />
                   <img 
-                    src="https://images.unsplash.com/photo-1590496794008-383c8070b711?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=300&q=80" 
-                    alt="Example of a maintenance issue" 
+                    src="https://images.unsplash.com/photo-1605810230434-7631ac76ec81?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=300&q=80" 
+                    alt="Collaborative problem solving" 
                     className="w-full h-24 object-cover rounded-md opacity-50"
                   />
                 </div>
