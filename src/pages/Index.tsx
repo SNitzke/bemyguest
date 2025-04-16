@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
@@ -53,8 +54,8 @@ const Index = () => {
               <Card className="bg-white border-0">
                 <CardContent className="p-0">
                   <img 
-                    src="https://images.unsplash.com/photo-1594621930969-df84646bc2e1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1073&q=80" 
-                    alt="Property handshake" 
+                    src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1073&q=80" 
+                    alt="Modern property management" 
                     className="w-full h-80 object-cover"
                   />
                 </CardContent>
