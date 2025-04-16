@@ -53,8 +53,8 @@ const Index = () => {
               <Card className="bg-white border-0">
                 <CardContent className="p-0">
                   <img 
-                    src="https://images.unsplash.com/photo-1721322800607-8c38375eef04?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1073&q=80" 
-                    alt="Professional property management meeting" 
+                    src="https://images.unsplash.com/photo-1531538606174-0f90ff5594a6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1173&q=80" 
+                    alt="Professionals closing a property deal" 
                     className="w-full h-80 object-cover"
                   />
                 </CardContent>
