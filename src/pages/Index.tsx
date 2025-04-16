@@ -1,8 +1,11 @@
+
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { ArrowRight, Check, Home, MessageSquare, ShieldCheck, Wallet } from "lucide-react";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../components/ui/carousel";
+import { AspectRatio } from "../components/ui/aspect-ratio";
 
 const Index = () => {
   return (
@@ -51,13 +54,72 @@ const Index = () => {
               <Card className="bg-white border-0">
                 <CardContent className="p-0">
                   <img 
-                    src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1073&q=80" 
-                    alt="Property management" 
+                    src="https://images.unsplash.com/photo-1594621930969-df84646bc2e1?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1073&q=80" 
+                    alt="Property handshake" 
                     className="w-full h-80 object-cover"
                   />
                 </CardContent>
               </Card>
             </div>
+          </div>
+        </section>
+
+        {/* Image Gallery Section */}
+        <section className="py-12 bg-white">
+          <div className="max-w-7xl mx-auto px-4 md:px-8">
+            <Carousel className="w-full">
+              <CarouselContent>
+                <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                  <div className="p-1">
+                    <Card>
+                      <CardContent className="flex aspect-square items-center justify-center p-0">
+                        <AspectRatio ratio={4/3}>
+                          <img 
+                            src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1073&q=80" 
+                            alt="Modern apartment building" 
+                            className="rounded-md object-cover w-full h-full"
+                          />
+                        </AspectRatio>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CarouselItem>
+                <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                  <div className="p-1">
+                    <Card>
+                      <CardContent className="flex aspect-square items-center justify-center p-0">
+                        <AspectRatio ratio={4/3}>
+                          <img 
+                            src="https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1073&q=80" 
+                            alt="Beautiful house" 
+                            className="rounded-md object-cover w-full h-full"
+                          />
+                        </AspectRatio>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CarouselItem>
+                <CarouselItem className="md:basis-1/2 lg:basis-1/3">
+                  <div className="p-1">
+                    <Card>
+                      <CardContent className="flex aspect-square items-center justify-center p-0">
+                        <AspectRatio ratio={4/3}>
+                          <img 
+                            src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1073&q=80" 
+                            alt="Luxury home" 
+                            className="rounded-md object-cover w-full h-full"
+                          />
+                        </AspectRatio>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </CarouselItem>
+              </CarouselContent>
+              <div className="hidden md:flex">
+                <CarouselPrevious className="-left-4" />
+                <CarouselNext className="-right-4" />
+              </div>
+            </Carousel>
           </div>
         </section>
 
@@ -76,22 +138,69 @@ const Index = () => {
                 icon={<Wallet />}
                 title="Payment Management"
                 description="Handle rent payments, generate receipts, and send reminders automatically."
+                image="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
               />
               <FeatureCard 
                 icon={<MessageSquare />}
                 title="Issue Reporting"
                 description="Report problems with attached photos and track resolution status."
+                image="https://images.unsplash.com/photo-1593510987185-1ec2256148ce?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
               />
               <FeatureCard 
                 icon={<Home />}
                 title="Property Oversight"
                 description="Manage multiple properties and tenants from a single dashboard."
+                image="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
               />
               <FeatureCard 
                 icon={<ShieldCheck />}
                 title="Document Management"
                 description="Store contracts, receipts, and identity documents securely."
+                image="https://images.unsplash.com/photo-1618044733300-9472054094ee?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
               />
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonial Section */}
+        <section className="py-16 bg-white px-4 md:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold font-heading mb-4">What Our Clients Say</h2>
+            </div>
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card className="p-6 shadow-md border-0 bg-gray-50">
+                <CardContent className="p-0 space-y-4">
+                  <p className="italic text-gray-600">"BeMyGuest has transformed how I manage my rental properties. The payment system is seamless and the tenant communication tools save me hours every week."</p>
+                  <div className="flex items-center gap-4">
+                    <img 
+                      src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&q=80" 
+                      alt="Sarah Johnson" 
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div>
+                      <p className="font-semibold">Sarah Johnson</p>
+                      <p className="text-sm text-gray-500">Property Owner</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="p-6 shadow-md border-0 bg-gray-50">
+                <CardContent className="p-0 space-y-4">
+                  <p className="italic text-gray-600">"As a tenant, I love how easy it is to report issues and make payments. The interface is intuitive and I always know where I stand with my lease."</p>
+                  <div className="flex items-center gap-4">
+                    <img 
+                      src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=100&q=80" 
+                      alt="Michael Rodriguez" 
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                    <div>
+                      <p className="font-semibold">Michael Rodriguez</p>
+                      <p className="text-sm text-gray-500">Tenant</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>
@@ -215,15 +324,20 @@ const Index = () => {
 };
 
 // Feature Card Component
-const FeatureCard = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => {
+const FeatureCard = ({ icon, title, description, image }: { icon: React.ReactNode, title: string, description: string, image: string }) => {
   return (
     <Card className="border-0 shadow-md h-full">
-      <CardContent className="p-6 space-y-4">
-        <div className="h-12 w-12 rounded-full bg-bmg-100 text-bmg-500 flex items-center justify-center">
-          {icon}
+      <CardContent className="p-0">
+        <div className="h-40 overflow-hidden">
+          <img src={image} alt={title} className="w-full h-full object-cover" />
         </div>
-        <h3 className="font-semibold text-xl">{title}</h3>
-        <p className="text-gray-600">{description}</p>
+        <div className="p-6 space-y-3">
+          <div className="h-12 w-12 rounded-full bg-bmg-100 text-bmg-500 flex items-center justify-center">
+            {icon}
+          </div>
+          <h3 className="font-semibold text-xl">{title}</h3>
+          <p className="text-gray-600">{description}</p>
+        </div>
       </CardContent>
     </Card>
   );
