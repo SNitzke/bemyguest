@@ -1,6 +1,5 @@
-
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { ArrowRight, Check, Home, MessageSquare, ShieldCheck, Wallet } from "lucide-react";
@@ -8,6 +7,12 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { AspectRatio } from "../components/ui/aspect-ratio";
 
 const Index = () => {
+  const navigate = useNavigate();
+  
+  const handlePricingButtonClick = (path: string) => {
+    navigate(path);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-bmg-50 to-bmg-100">
       {/* Hero Section */}
@@ -228,6 +233,7 @@ const Index = () => {
                 ]}
                 buttonText="Get Started"
                 buttonVariant="outline"
+                onButtonClick={() => handlePricingButtonClick('/signup')}
               />
               <PricingCard 
                 title="Professional"
@@ -243,6 +249,7 @@ const Index = () => {
                 buttonText="Try Pro"
                 buttonVariant="default"
                 highlighted={true}
+                onButtonClick={() => handlePricingButtonClick('/signup')}
               />
               <PricingCard 
                 title="Enterprise"
@@ -257,6 +264,7 @@ const Index = () => {
                 ]}
                 buttonText="Contact Us"
                 buttonVariant="outline"
+                onButtonClick={() => handlePricingButtonClick('/signup')}
               />
             </div>
           </div>
@@ -351,7 +359,8 @@ const PricingCard = ({
   features, 
   buttonText, 
   buttonVariant = "default",
-  highlighted = false
+  highlighted = false,
+  onButtonClick
 }: { 
   title: string, 
   price: string, 
@@ -359,7 +368,8 @@ const PricingCard = ({
   features: string[], 
   buttonText: string, 
   buttonVariant?: "default" | "outline",
-  highlighted?: boolean
+  highlighted?: boolean,
+  onButtonClick: () => void
 }) => {
   return (
     <Card className={`border-0 ${highlighted ? 'shadow-xl ring-2 ring-bmg-500' : 'shadow-md'} h-full`}>
@@ -380,14 +390,13 @@ const PricingCard = ({
         </ul>
         
         <div className="pt-4">
-          <Link to="/signup">
-            <Button 
-              variant={buttonVariant} 
-              className={`w-full ${highlighted ? 'bg-bmg-500 hover:bg-bmg-600' : ''}`}
-            >
-              {buttonText}
-            </Button>
-          </Link>
+          <Button 
+            variant={buttonVariant} 
+            className={`w-full ${highlighted ? 'bg-bmg-500 hover:bg-bmg-600' : ''}`}
+            onClick={onButtonClick}
+          >
+            {buttonText}
+          </Button>
         </div>
       </CardContent>
     </Card>
