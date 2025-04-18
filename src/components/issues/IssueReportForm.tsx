@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -6,7 +5,7 @@ import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { toast } from "sonner";
-import { FileImage, ShieldCheck, CheckCircle, CodeCheck } from "lucide-react";
+import { FileImage, ShieldCheck, CheckCircle } from "lucide-react";
 
 const IssueReportForm: React.FC = () => {
   const [title, setTitle] = useState("");
@@ -65,7 +64,7 @@ const IssueReportForm: React.FC = () => {
             <Label htmlFor="images">Attach Images (optional)</Label>
             <div className="border rounded-md p-4 bg-muted/30">
               <div className="flex flex-col items-center gap-2">
-                <ShieldCheck className="h-8 w-8 text-green-500" />
+                <CheckCircle className="h-8 w-8 text-green-500" />
                 <p className="text-sm text-muted-foreground mb-2">Upload clear photos of resolved issues</p>
                 <div className="grid grid-cols-3 gap-2 mb-4">
                   <img 
