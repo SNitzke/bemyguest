@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "../ui/button";
 import {
   Dialog,
@@ -11,17 +11,39 @@ import {
 } from "../ui/dialog";
 import { Input } from "../ui/input";
 import { Property } from "../../types";
-import { Edit } from "lucide-react";
+import { Edit, Upload, X } from "lucide-react";
 
 interface EditPropertyModalProps {
   property: Property;
 }
 
 const EditPropertyModal: React.FC<EditPropertyModalProps> = ({ property }) => {
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setSelectedFiles(prev => [...prev, ...files]);
+    
+    // Create preview URLs
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviews(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+    setPreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log("Property updated");
+    // Handle form submission with files
+    console.log("Property updated with files:", selectedFiles);
   };
 
   return (
@@ -50,6 +72,7 @@ const EditPropertyModal: React.FC<EditPropertyModalProps> = ({ property }) => {
               placeholder="Enter property name"
             />
           </div>
+          
           <div className="space-y-2">
             <label htmlFor="address" className="text-sm font-medium">
               Address
@@ -60,6 +83,7 @@ const EditPropertyModal: React.FC<EditPropertyModalProps> = ({ property }) => {
               placeholder="Enter address"
             />
           </div>
+          
           <div className="space-y-2">
             <label htmlFor="units" className="text-sm font-medium">
               Number of Units
@@ -71,8 +95,52 @@ const EditPropertyModal: React.FC<EditPropertyModalProps> = ({ property }) => {
               placeholder="Enter number of units"
             />
           </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Property Images</label>
+            <div className="grid grid-cols-2 gap-2">
+              {previews.map((preview, index) => (
+                <div key={index} className="relative group">
+                  <img
+                    src={preview}
+                    alt={`Upload preview ${index + 1}`}
+                    className="w-full h-24 object-cover rounded-md"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeFile(index)}
+                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="mt-2">
+              <label className="block">
+                <span className="sr-only">Choose property images</span>
+                <Input
+                  id="images"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileSelect}
+                  className="block w-full text-sm text-slate-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-full file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-primary file:text-primary-foreground
+                    hover:file:bg-primary/90"
+                />
+              </label>
+            </div>
+          </div>
+
           <div className="flex justify-end gap-3">
-            <Button type="submit">Save changes</Button>
+            <Button type="submit">
+              <Upload className="mr-2 h-4 w-4" />
+              Save changes
+            </Button>
           </div>
         </form>
       </DialogContent>
