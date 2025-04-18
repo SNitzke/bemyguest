@@ -18,6 +18,7 @@ import SignUp from "./pages/SignUp";
 import InviteTenant from "./pages/InviteTenant";
 import TenantInvitation from "./pages/TenantInvitation";
 import Properties from "./pages/Properties";
+import PropertyDetails from "./pages/PropertyDetails";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const AppRoutes = () => {
         <Route path="messages" element={<Messages />} />
         <Route path="invite-tenant" element={<InviteTenant />} />
         <Route path="properties" element={<Properties />} />
+        <Route path="properties/:id" element={<PropertyDetails />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

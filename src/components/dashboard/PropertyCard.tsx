@@ -4,13 +4,14 @@ import { Card, CardContent, CardFooter } from "../ui/card";
 import { Property } from "../../types";
 import { MapPin, DollarSign } from "lucide-react";
 import PropertyStatusBadge from "../properties/PropertyStatusBadge";
+import { useNavigate } from "react-router-dom";
 
 interface PropertyCardProps {
   property: Property;
 }
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
-  // Assuming we add these fields to the Property type
+  const navigate = useNavigate();
   const rentRate = "$1,200/month"; // This should come from the property object
   const status = "available" as const; // This should come from the property object
 
@@ -42,8 +43,11 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
           <span className="text-sm text-muted-foreground">{property.units} units</span>
         </div>
       </CardContent>
-      <CardFooter className="pt-0 px-4 pb-4 flex justify-between">
-        <button className="text-sm text-primary hover:underline">
+      <CardFooter className="pt-0 px-4 pb-4">
+        <button 
+          onClick={() => navigate(`/properties/${property.id}`)}
+          className="text-sm text-primary hover:underline"
+        >
           View Details
         </button>
       </CardFooter>
