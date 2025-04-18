@@ -1,11 +1,10 @@
-
-import React, { useState } from "react";
-import PropertySearch from "../components/properties/PropertySearch";
-import PropertyCard from "../components/dashboard/PropertyCard";
-import { properties } from "../utils/mockData";
+import React, { useState } from 'react';
+import PropertySearch from '../components/properties/PropertySearch';
+import PropertyCard from '../components/dashboard/PropertyCard';
+import { properties } from '../utils/mockData';
 
 const Properties = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -13,12 +12,13 @@ const Properties = () => {
 
   const handleFilterClick = () => {
     // Implement filter modal/dropdown logic
-    console.log("Filter clicked");
+    console.log('Filter clicked');
   };
 
-  const filteredProperties = properties.filter((property) =>
-    property.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    property.address.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProperties = properties.filter(
+    (property) =>
+      property.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      property.address.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -30,7 +30,7 @@ const Properties = () => {
         </p>
       </div>
 
-      <PropertySearch 
+      <PropertySearch
         onSearch={handleSearch}
         onFilterClick={handleFilterClick}
       />
