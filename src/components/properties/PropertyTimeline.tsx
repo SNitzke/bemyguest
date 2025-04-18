@@ -1,7 +1,6 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { CalendarDays, FileText, Tool, UserCheck } from "lucide-react";
+import { CalendarDays, FileText, Drill, UserCheck } from "lucide-react";
 
 interface PropertyTimelineProps {
   propertyId: string;
@@ -16,7 +15,7 @@ const PropertyTimeline: React.FC<PropertyTimelineProps> = ({ propertyId }) => {
       title: "HVAC Repair",
       date: "2024-04-15",
       description: "Scheduled maintenance for HVAC system",
-      icon: Tool,
+      icon: Drill,
     },
     {
       id: 2,
