@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +17,7 @@ import Index from "./pages/Index";
 import SignUp from "./pages/SignUp";
 import InviteTenant from "./pages/InviteTenant";
 import TenantInvitation from "./pages/TenantInvitation";
+import Properties from "./pages/Properties";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +54,7 @@ const AppRoutes = () => {
         <Route path="payments" element={<Payments />} />
         <Route path="messages" element={<Messages />} />
         <Route path="invite-tenant" element={<InviteTenant />} />
+        <Route path="properties" element={<Properties />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
