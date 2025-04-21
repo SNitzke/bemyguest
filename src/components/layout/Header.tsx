@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Bell, MessageSquare, User } from "lucide-react";
+import { Bell, MessageSquare, User, Globe } from "lucide-react";
 import { Button } from "../ui/button";
 import { useAuth } from "../../contexts/AuthContext";
 import {
@@ -12,9 +12,15 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { useLanguage } from "../../contexts/LanguageContext";
 
 const Header = () => {
   const { user, logout, switchRole } = useAuth();
+  const { language, setLanguage } = useLanguage();
+
+  const handleToggleLanguage = () => {
+    setLanguage(language === "en" ? "es" : "en");
+  };
 
   return (
     <header className="border-b bg-white px-6 py-4">
@@ -26,6 +32,11 @@ const Header = () => {
         </div>
         
         <div className="flex items-center gap-2 md:gap-4">
+          <Button variant="ghost" size="icon" onClick={handleToggleLanguage} aria-label="Change language">
+            <Globe size={20} className="text-gray-600" />
+            <span className="sr-only">Switch language</span>
+          </Button>
+
           <Button variant="outline" size="icon">
             <Bell size={20} className="text-gray-600" />
           </Button>

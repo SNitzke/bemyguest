@@ -10,16 +10,18 @@ import SecuritySettings from '../components/settings/SecuritySettings';
 import PropertyDefaults from '../components/settings/PropertyDefaults';
 import CommunicationSettings from '../components/settings/CommunicationSettings';
 import SupportSettings from '../components/settings/SupportSettings';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const Settings = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("profile");
+  const { t } = useLanguage();
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-heading font-semibold">Account Settings</h1>
-        <p className="text-muted-foreground">Manage your account preferences and property settings</p>
+        <h1 className="text-2xl font-heading font-semibold">{t("accountSettings")}</h1>
+        <p className="text-muted-foreground">{t("managePreferences")}</p>
       </div>
 
       <Tabs defaultValue="profile" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
