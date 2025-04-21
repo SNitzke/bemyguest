@@ -1,6 +1,5 @@
+
 import React from 'react';
-// import TenantCard from "../components/tenants/TenantCard"; // Placeholder for TenantCard component
-// import { tenants } from "../utils/mockData"; // Placeholder for tenant data
 
 const Tenants = () => {
   // Placeholder for fetching or using mock data
@@ -29,7 +28,7 @@ const Tenants = () => {
       rentAmount: 1850,
       contactEmail: 'charlie.b@email.com',
     },
-  ]; // Replace with actual data fetching/mock import later
+  ];
 
   return (
     <div className="space-y-6">
@@ -38,25 +37,29 @@ const Tenants = () => {
         <p className="text-muted-foreground">View and manage your tenants</p>
       </div>
 
-      {/* Add Search/Filter components later if needed */}
-      {/* <TenantSearch onSearch={...} onFilterClick={...} /> */}
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {tenantsData.map((tenant) => (
-          // Replace with actual TenantCard component later
           <div
             key={tenant.id}
-            className="border rounded-lg p-4 shadow-sm bg-card text-card-foreground"
+            className="border rounded-lg p-4 shadow-sm bg-card text-card-foreground flex flex-col gap-2 h-full"
           >
-            <h3 className="font-semibold">{tenant.name}</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="font-semibold text-lg truncate">{tenant.name}</h3>
+            <p className="text-sm text-muted-foreground break-words md:truncate" title={tenant.propertyName}>
               {tenant.propertyName}
             </p>
-            <p className="text-sm">Lease End: {tenant.leaseEndDate}</p>
-            <p className="text-sm">Rent: ${tenant.rentAmount}/month</p>
-            <p className="text-sm">Email: {tenant.contactEmail}</p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 text-sm">
+              <span className="whitespace-nowrap">Lease End:</span>
+              <span className="text-muted-foreground">{tenant.leaseEndDate}</span>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 text-sm">
+              <span className="whitespace-nowrap">Rent:</span>
+              <span className="text-green-700 font-semibold">${tenant.rentAmount}/month</span>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 text-sm break-all">
+              <span className="whitespace-nowrap">Email:</span>
+              <span className="text-blue-700 underline">{tenant.contactEmail}</span>
+            </div>
           </div>
-          // <TenantCard key={tenant.id} tenant={tenant} />
         ))}
       </div>
     </div>
