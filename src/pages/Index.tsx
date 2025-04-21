@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
-import { ArrowRight, Check, Home, MessageSquare, ShieldCheck, Wallet } from "lucide-react";
+import { ArrowRight, Check, Home, Image, ShieldCheck, Wallet } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../components/ui/carousel";
 import { AspectRatio } from "../components/ui/aspect-ratio";
 
@@ -25,6 +25,7 @@ const Index = () => {
       </header>
 
       <main className="flex-1">
+        {/* Hero Section */}
         <section className="py-16 md:py-24 px-4 md:px-8 max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
@@ -139,7 +140,7 @@ const Index = () => {
                 image="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
               />
               <FeatureCard 
-                icon={<MessageSquare />}
+                icon={<Image />}
                 title="Issue Reporting"
                 description="Report problems with attached photos and track resolution status."
                 image="https://images.unsplash.com/photo-1593510987185-1ec2256148ce?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
