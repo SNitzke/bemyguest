@@ -33,8 +33,8 @@ const LanguageContext = createContext<LanguageContextProps | undefined>(undefine
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
   const [language, setLanguage] = useState<Language>("en");
 
-  const t = (key: keyof typeof translations) => {
-    return translations[key]?.[language] || key;
+  const t = (key: keyof typeof translations): string => {
+    return translations[key]?.[language] || String(key);
   };
 
   return (
