@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
@@ -12,13 +13,14 @@ import { useForm } from "react-hook-form";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { useAuth } from "../contexts/AuthContext";
+import { UserRole } from "../types";
 
 const SignUp: React.FC = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState<"tenant" | "landlord">("tenant");
+  const [role, setRole] = useState<UserRole>("tenant");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showPropertyForm, setShowPropertyForm] = useState(false);
@@ -319,66 +321,60 @@ const SignUp: React.FC = () => {
         </Dialog>
 
         {/* Payment Information Dialog - Only show for tenants */}
-        {role === "tenant" && (
-          <Dialog open={showPaymentForm} onOpenChange={setShowPaymentForm}>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Payment Information</DialogTitle>
-                <DialogDescription>
-                  Add your payment method for rent and other payments.
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handlePaymentInfoSubmit} className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="accountName">{role === "landlord" ? "Account Holder Name" : "Cardholder Name"}</Label>
+        <Dialog open={showPaymentForm} onOpenChange={setShowPaymentForm}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Payment Information</DialogTitle>
+              <DialogDescription>
+                Add your payment method for rent and other payments.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handlePaymentInfoSubmit} className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="accountName">Cardholder Name</Label>
+                <Input
+                  id="accountName"
+                  placeholder="John Doe"
+                  value={accountName}
+                  onChange={(e) => setAccountName(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="accountNumber">Card Number</Label>
+                <div className="relative">
+                  <CreditCard className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
-                    id="accountName"
-                    placeholder="John Doe"
-                    value={accountName}
-                    onChange={(e) => setAccountName(e.target.value)}
+                    id="accountNumber"
+                    placeholder="XXXX XXXX XXXX XXXX"
+                    value={accountNumber}
+                    onChange={(e) => setAccountNumber(e.target.value)}
+                    className="pl-10"
                     required
                   />
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="accountNumber">
-                    {role === "landlord" ? "Account Number" : "Card Number"}
-                  </Label>
-                  <div className="relative">
-                    <CreditCard className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                    <Input
-                      id="accountNumber"
-                      placeholder={role === "landlord" ? "XXXX-XXXX-XXXX-XXXX" : "XXXX XXXX XXXX XXXX"}
-                      value={accountNumber}
-                      onChange={(e) => setAccountNumber(e.target.value)}
-                      className="pl-10"
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="bankName">
-                    {role === "landlord" ? "Bank Name" : "Expiration Date & CVV"}
-                  </Label>
-                  <Input
-                    id="bankName"
-                    placeholder={role === "landlord" ? "Bank of America" : "MM/YY & CVV"}
-                    value={bankName}
-                    onChange={(e) => setBankName(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <DialogFooter>
-                  <Button type="submit" className="w-full bg-bmg-500 hover:bg-bmg-600">
-                    Complete Sign Up
-                  </Button>
-                </DialogFooter>
-              </form>
-            </DialogContent>
-          </Dialog>
-        )}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="bankName">Expiration Date & CVV</Label>
+                <Input
+                  id="bankName"
+                  placeholder="MM/YY & CVV"
+                  value={bankName}
+                  onChange={(e) => setBankName(e.target.value)}
+                  required
+                />
+              </div>
+              
+              <DialogFooter>
+                <Button type="submit" className="w-full bg-bmg-500 hover:bg-bmg-600">
+                  Complete Sign Up
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
