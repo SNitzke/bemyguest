@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -28,9 +29,12 @@ export const EnhancedSignUpForm = () => {
   const { data: plans } = useQuery({
     queryKey: ['subscriptionPlans'],
     queryFn: async () => {
-      // Using RPC without the .select() method since the RPC function itself returns the data
+      // Using a type assertion to work around the TypeScript limitation for RPC functions
       const { data, error } = await supabase
-        .rpc('get_subscription_plans');
+        .rpc('get_subscription_plans') as unknown as { 
+          data: SubscriptionPlan[], 
+          error: any 
+        };
         
       if (error) {
         console.error('Error fetching subscription plans:', error);
