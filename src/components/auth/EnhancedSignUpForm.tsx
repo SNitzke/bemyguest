@@ -25,15 +25,20 @@ export const EnhancedSignUpForm = () => {
     subscriptionPlan: 'Basic'
   });
 
+  // Fetch subscription plans from Supabase
   const { data: plans } = useQuery({
     queryKey: ['subscriptionPlans'],
     queryFn: async () => {
+      // We need to use a raw query here since the table isn't in the types yet
       const { data, error } = await supabase
         .from('subscription_plans')
         .select('*')
         .order('monthly_price');
+        
       if (error) throw error;
-      return data as SubscriptionPlan[];
+      
+      // Explicitly cast the data to match our SubscriptionPlan type
+      return data as unknown as SubscriptionPlan[];
     }
   });
 

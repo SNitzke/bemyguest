@@ -1,3 +1,4 @@
+
 export type UserRole = "landlord" | "tenant" | "admin";
 export type PaymentMethod = "credit" | "debit" | "cash";
 
@@ -7,6 +8,7 @@ export interface User {
   email: string;
   role: UserRole;
   avatarUrl?: string;
+  phoneNumber?: string;
 }
 
 export interface Property {
@@ -59,6 +61,8 @@ export interface Payment {
   type: "rent" | "utilities" | "other";
   tenantId: string;
   propertyId: string;
+  landlordId?: string;
+  description?: string;
 }
 
 export interface Message {
@@ -75,15 +79,6 @@ export interface FinancialData {
   income: number;
   expenses: number;
   netProfit: number;
-}
-
-export interface Property {
-  id: string;
-  name: string;
-  address: string;
-  units: number;
-  landlordId: string;
-  imageUrl: string;
 }
 
 export interface SubscriptionPlan {
@@ -103,4 +98,14 @@ export interface PaymentDetails {
   due_date?: string;
   payment_date?: string;
   status: 'pending' | 'completed' | 'failed';
+}
+
+export interface LandlordSubscription {
+  id: string;
+  landlord_id: string;
+  plan_id: string;
+  status: string;
+  start_date: string;
+  end_date?: string;
+  plan?: SubscriptionPlan;
 }
