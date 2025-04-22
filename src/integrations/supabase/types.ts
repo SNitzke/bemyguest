@@ -54,6 +54,27 @@ export type Database = {
         }
         Relationships: []
       }
+      Tenants: {
+        Row: {
+          colum_name: string | null
+          colum_number: string | null
+          created_at: string
+          id: number
+        }
+        Insert: {
+          colum_name?: string | null
+          colum_number?: string | null
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          colum_name?: string | null
+          colum_number?: string | null
+          created_at?: string
+          id?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
