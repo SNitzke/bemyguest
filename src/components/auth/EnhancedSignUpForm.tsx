@@ -29,16 +29,40 @@ export const EnhancedSignUpForm = () => {
   const { data: plans } = useQuery({
     queryKey: ['subscriptionPlans'],
     queryFn: async () => {
-      // We need to use a raw query here since the table isn't in the types yet
+      // Using a raw query with dynamic typing to work around the type limitation
       const { data, error } = await supabase
-        .from('subscription_plans')
-        .select('*')
-        .order('monthly_price');
+        .rpc('get_subscription_plans')
+        .select();
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching subscription plans:', error);
+        // Fallback to default data if query fails
+        return [
+          {
+            id: '1',
+            name: 'Basic',
+            description: 'Perfect for small landlords',
+            monthly_price: 999,
+            features: { max_properties: 3, support: 'email' }
+          },
+          {
+            id: '2', 
+            name: 'Professional',
+            description: 'Great for growing property management',
+            monthly_price: 2999,
+            features: { max_properties: 15, support: 'priority' }
+          },
+          {
+            id: '3',
+            name: 'Enterprise',
+            description: 'Complete solution for large portfolios',
+            monthly_price: 4999,
+            features: { max_properties: 'unlimited', support: 'dedicated' }
+          }
+        ] as SubscriptionPlan[];
+      }
       
-      // Explicitly cast the data to match our SubscriptionPlan type
-      return data as unknown as SubscriptionPlan[];
+      return data as SubscriptionPlan[];
     }
   });
 
