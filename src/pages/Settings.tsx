@@ -17,7 +17,7 @@ import { User } from '@supabase/supabase-js';
 const adaptUser = (supabaseUser: User | null) => {
   if (!supabaseUser) return null;
   
-  const userMetadata = supabaseUser.user_metadata as { full_name?: string, role?: string } | undefined;
+  const userMetadata = supabaseUser.user_metadata as { full_name?: string, role?: string, avatar_url?: string } | undefined;
   
   return {
     id: supabaseUser.id,
