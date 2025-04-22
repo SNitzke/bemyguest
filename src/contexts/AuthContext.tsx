@@ -12,6 +12,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (data: SignupData) => Promise<void>;
   logout: () => Promise<void>;
+  switchRole: () => Promise<void>; // Added switchRole
 }
 
 interface SignupData {
@@ -88,6 +89,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw error;
     }
   };
+  
+  // Add switchRole function
+  const switchRole = async () => {
+    try {
+      // This is a placeholder function - in a real app, you would update the user's role in your database
+      toast.info("This feature is not yet implemented");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to switch role");
+    }
+  };
 
   return (
     <AuthContext.Provider value={{
@@ -97,6 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       login,
       signup,
       logout,
+      switchRole,
     }}>
       {children}
     </AuthContext.Provider>

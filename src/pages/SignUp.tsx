@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
 import { toast } from "sonner";
 import { useAuth } from "../contexts/AuthContext";
-import { UserRole } from "../types";
 import { SignUpForm } from "../components/auth/SignUpForm";
 import { PropertyForm } from "../components/auth/PropertyForm";
 import { PaymentForm } from "../components/auth/PaymentForm";
@@ -16,19 +15,19 @@ const SignUp: React.FC = () => {
   const [showPropertyForm, setShowPropertyForm] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const navigate = useNavigate();
-  const { signup } = useAuth();
+  const { signup, login } = useAuth();
   
   const [signUpData, setSignUpData] = useState<{
     email: string;
     password: string;
-    role: UserRole;
+    role: "tenant" | "landlord";
   } | null>(null);
 
   const handleSignUp = async (data: { 
     fullName: string;
     email: string;
     password: string;
-    role: UserRole;
+    role: "tenant" | "landlord";
   }) => {
     setIsSubmitting(true);
     

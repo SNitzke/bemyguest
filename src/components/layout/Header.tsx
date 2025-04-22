@@ -17,6 +17,8 @@ import { useLanguage } from "../../contexts/LanguageContext";
 const Header = () => {
   const { user, logout, switchRole } = useAuth();
   const { language, setLanguage } = useLanguage();
+  const userMetadata = user?.user_metadata as { full_name?: string } | undefined;
+  const fullName = userMetadata?.full_name || 'User';
 
   const handleToggleLanguage = () => {
     setLanguage(language === "en" ? "es" : "en");
@@ -49,12 +51,12 @@ const Header = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative flex items-center gap-2 h-10 rounded-full">
                 <Avatar className="h-8 w-8">
-                  <AvatarImage src={user?.avatarUrl || ""} alt={user?.name} />
+                  <AvatarImage src="" alt={fullName} />
                   <AvatarFallback className="bg-bmg-500 text-white">
-                    {user?.name?.charAt(0) || "U"}
+                    {fullName.charAt(0) || "U"}
                   </AvatarFallback>
                 </Avatar>
-                <span className="hidden md:inline-block font-medium text-sm">{user?.name}</span>
+                <span className="hidden md:inline-block font-medium text-sm">{fullName}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
@@ -63,7 +65,7 @@ const Header = () => {
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem>Settings</DropdownMenuItem>
               <DropdownMenuItem onClick={switchRole}>
-                Switch to {user?.role === "landlord" ? "Tenant" : "Landlord"} View
+                Switch to {user?.user_metadata?.role === "landlord" ? "Tenant" : "Landlord"} View
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={logout}>Log out</DropdownMenuItem>
