@@ -16,7 +16,7 @@ const SignUp: React.FC = () => {
   const [showPropertyForm, setShowPropertyForm] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { signup } = useAuth();
   
   const [signUpData, setSignUpData] = useState<{
     email: string;
@@ -33,6 +33,13 @@ const SignUp: React.FC = () => {
     setIsSubmitting(true);
     
     try {
+      await signup({
+        email: data.email,
+        password: data.password,
+        fullName: data.fullName,
+        role: data.role,
+      });
+      
       setSignUpData({
         email: data.email,
         password: data.password,
@@ -44,8 +51,6 @@ const SignUp: React.FC = () => {
       } else {
         setShowPaymentForm(true);
       }
-    } catch (error) {
-      toast.error("Failed to create account. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
