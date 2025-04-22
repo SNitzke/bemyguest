@@ -85,3 +85,22 @@ export interface Property {
   landlordId: string;
   imageUrl: string;
 }
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  description: string;
+  monthly_price: number;
+  features: {
+    max_properties: number | 'unlimited';
+    support: 'email' | 'priority' | 'dedicated';
+  };
+}
+
+export interface PaymentDetails {
+  amount: number;
+  description?: string;
+  due_date?: string;
+  payment_date?: string;
+  status: 'pending' | 'completed' | 'failed';
+}

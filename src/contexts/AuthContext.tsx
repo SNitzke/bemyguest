@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
@@ -25,6 +24,8 @@ interface SignupData {
   password: string;
   fullName: string;
   role: "tenant" | "landlord";
+  phoneNumber: string;
+  subscriptionPlan?: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -70,6 +71,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           data: {
             full_name: data.fullName,
             role: data.role,
+            phone_number: data.phoneNumber,
+            subscription_plan: data.subscriptionPlan
           },
         },
       });
