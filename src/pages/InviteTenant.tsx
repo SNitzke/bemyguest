@@ -1,6 +1,6 @@
 
 import React from "react";
-import InviteTenantForm from "../components/tenant/InviteTenantForm";
+import { InviteTenantForm } from "../components/tenant/InviteTenantForm";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "../components/ui/button";
@@ -16,8 +16,9 @@ const mockProperties = [
 const InviteTenant: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const userMetadata = user?.user_metadata as { role?: string } | undefined;
   
-  if (user?.role !== "landlord") {
+  if (userMetadata?.role !== "landlord") {
     return (
       <div className="container max-w-6xl mx-auto py-8 px-4">
         <div className="text-center">
@@ -42,7 +43,13 @@ const InviteTenant: React.FC = () => {
       
       <h1 className="text-3xl font-bold mb-8 text-center">Invite a Tenant</h1>
       
-      <InviteTenantForm properties={mockProperties} />
+      <div className="max-w-md mx-auto">
+        <InviteTenantForm 
+          properties={mockProperties} 
+          onSubmit={(values) => console.log(values)}
+          isSubmitting={false}
+        />
+      </div>
     </div>
   );
 };

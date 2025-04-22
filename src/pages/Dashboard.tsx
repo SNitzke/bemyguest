@@ -10,14 +10,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 
 const Dashboard: React.FC = () => {
   const { user } = useAuth();
-  const isLandlord = user?.role === "landlord";
+  const userMetadata = user?.user_metadata as { full_name?: string, role?: string } | undefined;
+  const fullName = userMetadata?.full_name || 'User';
+  const isLandlord = userMetadata?.role === "landlord";
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-heading font-semibold">Dashboard</h1>
         <p className="text-muted-foreground">
-          Welcome back, {user?.name}. Here's an overview of your {isLandlord ? "properties" : "rental"}.
+          Welcome back, {fullName}. Here's an overview of your {isLandlord ? "properties" : "rental"}.
         </p>
       </div>
 
