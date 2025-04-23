@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
-import { ArrowRight, Check, Home, Image, ShieldCheck, Wallet } from "lucide-react";
+import { ArrowRight, Check, Home, Image, ShieldCheck, Wallet, User } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../components/ui/carousel";
 import { AspectRatio } from "../components/ui/aspect-ratio";
 
@@ -143,7 +143,7 @@ const Index = () => {
                 icon={<Image />}
                 title="Issue Reporting"
                 description="Report problems with attached photos and track resolution status."
-                image="https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
+                image="https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
               />
               <FeatureCard 
                 icon={<Home />}
@@ -157,6 +157,84 @@ const Index = () => {
                 description="Store contracts, receipts, and identity documents securely."
                 image="https://images.unsplash.com/photo-1618044733300-9472054094ee?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=500&q=80"
               />
+            </div>
+          </div>
+        </section>
+
+        {/* Profile Preview Section */}
+        <section className="py-16 bg-white px-4 md:px-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl font-bold font-heading mb-4">Your BeMyGuest Profile</h2>
+              <p className="text-gray-600 max-w-2xl mx-auto">
+                Whether you're a landlord or tenant, get a personalized dashboard tailored to your needs.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8">
+              <Card className="relative overflow-hidden border-2 border-purple-200">
+                <CardContent className="p-6">
+                  <div className="absolute top-0 right-0 bg-purple-100 text-purple-600 px-4 py-1 rounded-bl-lg">
+                    Landlord
+                  </div>
+                  <div className="flex items-start space-x-4 mb-6">
+                    <div className="w-16 h-16 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
+                      <User className="w-8 h-8 text-purple-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold mb-1">Sarah Johnson</h3>
+                      <p className="text-gray-600">Property Manager</p>
+                      <p className="text-sm text-gray-500">Managing 3 properties</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-gray-600">Total Units</span>
+                      <span className="font-semibold">12</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-gray-600">Active Tenants</span>
+                      <span className="font-semibold">10</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-gray-600">Monthly Revenue</span>
+                      <span className="font-semibold text-green-600">$15,400</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="relative overflow-hidden border-2 border-blue-200">
+                <CardContent className="p-6">
+                  <div className="absolute top-0 right-0 bg-blue-100 text-blue-600 px-4 py-1 rounded-bl-lg">
+                    Tenant
+                  </div>
+                  <div className="flex items-start space-x-4 mb-6">
+                    <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <User className="w-8 h-8 text-blue-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-semibold mb-1">Michael Rodriguez</h3>
+                      <p className="text-gray-600">Apartment 4B</p>
+                      <p className="text-sm text-gray-500">Sunset Apartments</p>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-gray-600">Lease Ends</span>
+                      <span className="font-semibold">Dec 2024</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-gray-600">Next Payment</span>
+                      <span className="font-semibold">$1,200</span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <span className="text-gray-600">Maintenance Requests</span>
+                      <span className="font-semibold text-yellow-600">2 Open</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </section>
