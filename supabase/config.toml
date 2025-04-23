@@ -1,6 +1,10 @@
 
 project_id = "wwakwpvaszfrwunybuou"
 
+[auth]
+# Set OTP expiration to 30 minutes (1800 seconds) for improved security
+otp_exp = 1800
+
 [api]
 enabled = true
 port = 54321
