@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
@@ -128,10 +127,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
         // Create landlord details entry using a custom SQL function or via API
-        // Fix the type error by using the proper parameter type for user_id
+        // Fix the type error by using proper typing for the RPC function
         const { error: detailsError } = await supabase.rpc('create_landlord_details', {
           user_id: userId,
           plan: data.subscriptionPlan
+        } as {
+          user_id: string;
+          plan: string;
         });
           
         if (detailsError) {
