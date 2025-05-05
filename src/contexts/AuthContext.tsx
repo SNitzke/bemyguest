@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
@@ -29,6 +28,15 @@ interface SignupData {
   role: "tenant" | "landlord";
   phoneNumber: string;
   subscriptionPlan?: string;
+}
+
+// Define the LandlordDetails interface to fix type errors
+interface LandlordDetails {
+  id?: string;
+  company_name: string | null;
+  subscription_plan: string | null;
+  subscription_start_date: string | null;
+  subscription_end_date: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -99,7 +107,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signup = async (data: SignupData) => {
     try {
       setIsLoading(true);
-      const { error } = await supabase.auth.signUp({
+      const { error, data: authData } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
@@ -114,15 +122,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (error) throw error;
       
-      if (data.role === 'landlord' && data.subscriptionPlan) {
-        // Create landlord details entry
-        const { error: detailsError } = await supabase
-          .from('landlord_details')
-          .insert({
-            id: user?.id,
-            subscription_plan: data.subscriptionPlan,
-            company_name: ''  // Default empty, can be updated later
-          });
+      // Get the user ID from the signup response
+      const userId = authData?.user?.id;
+      
+      if (data.role === 'landlord' && data.subscriptionPlan && userId) {
+        // Create landlord details entry using a custom SQL function or via API
+        // This is a workaround for the type issue with supabase client
+        const { error: detailsError } = await supabase.rpc('create_landlord_details', {
+          user_id: userId,
+          plan: data.subscriptionPlan
+        });
           
         if (detailsError) {
           console.error("Error creating landlord details:", detailsError);
@@ -207,3 +216,6 @@ export const useAuth = () => {
   }
   return context;
 };
+
+// Export the LandlordDetails interface for use in other components
+export type { LandlordDetails };

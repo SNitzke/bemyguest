@@ -1,4 +1,4 @@
-
+import React, { useState, useEffect } from 'react';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as Sonner } from '@/components/ui/sonner';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -36,10 +36,10 @@ const ProtectedRoute = ({
   requiredRole?: 'tenant' | 'landlord'; 
 }) => {
   const { isAuthenticated, isLoading, getUserRole, user } = useAuth();
-  const [role, setRole] = React.useState<string | null>(null);
-  const [roleChecked, setRoleChecked] = React.useState(false);
+  const [role, setRole] = useState<string | null>(null);
+  const [roleChecked, setRoleChecked] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (user && requiredRole) {
       getUserRole().then(userRole => {
         setRole(userRole);

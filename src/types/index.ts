@@ -1,4 +1,3 @@
-
 export type UserRole = "landlord" | "tenant" | "admin";
 export type PaymentMethod = "credit" | "debit" | "cash";
 
@@ -18,6 +17,7 @@ export interface Property {
   imageUrl: string;
   units: number;
   landlordId: string;
+  status: 'vacant' | 'occupied' | 'maintenance'; // Add status property
 }
 
 export interface Tenant {

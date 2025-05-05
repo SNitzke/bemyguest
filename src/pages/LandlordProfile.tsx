@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -12,6 +11,7 @@ import IssuesOverview from '../components/dashboard/IssuesOverview';
 import PaymentsOverview from '../components/dashboard/PaymentsOverview';
 import FinancialChart from '../components/dashboard/FinancialChart';
 import { supabase } from '@/integrations/supabase/client';
+import { LandlordDetails } from '@/contexts/AuthContext';
 
 interface LandlordDetails {
   company_name: string | null;
@@ -36,12 +36,11 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        const { data, error } = await supabase
-          .from('landlord_details')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-          
+        // Use a custom RPC function to fetch landlord details to avoid type issues
+        const { data, error } = await supabase.rpc('get_landlord_details', {
+          user_id: user.id
+        });
+        
         if (error) {
           console.error("Error fetching landlord details:", error);
           return;
