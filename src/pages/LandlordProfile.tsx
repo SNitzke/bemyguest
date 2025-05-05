@@ -11,7 +11,7 @@ import IssuesOverview from '../components/dashboard/IssuesOverview';
 import PaymentsOverview from '../components/dashboard/PaymentsOverview';
 import FinancialChart from '../components/dashboard/FinancialChart';
 import { supabase } from '@/integrations/supabase/client';
-import { LandlordDetails } from '@/contexts/AuthContext';
+import { LandlordDetails } from '@/types/auth';
 
 const LandlordProfile: React.FC = () => {
   const { user } = useAuth();
