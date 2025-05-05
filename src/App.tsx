@@ -23,6 +23,7 @@ import Properties from './pages/Properties';
 import PropertyDetails from './pages/PropertyDetails';
 import Tenants from './pages/Tenants';
 import Settings from './pages/Settings';
+import LandlordProfile from './pages/LandlordProfile';
 
 const queryClient = new QueryClient();
 
@@ -70,6 +71,7 @@ const AppRoutes = () => {
         <Route path="properties/:id" element={<PropertyDetails />} />
         <Route path="tenants" element={<Tenants />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="landlord-profile" element={<LandlordProfile />} />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

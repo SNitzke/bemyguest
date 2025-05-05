@@ -9,11 +9,12 @@ import { Button } from "../ui/button";
 const Sidebar: React.FC = () => {
   const { pathname } = useLocation();
   const { user } = useAuth();
-  const isLandlord = user?.role === "landlord";
+  const isLandlord = user?.user_metadata?.role === "landlord";
 
   const landlordLinks = [
     { name: "Dashboard", path: "/dashboard", icon: <Home size={20} /> },
     { name: "Properties", path: "/properties", icon: <Image size={20} /> },
+    { name: "Profile", path: "/landlord-profile", icon: <User size={20} /> },
     { name: "Tenants", path: "/tenants", icon: <User size={20} /> },
     { name: "Payments", path: "/payments", icon: <Calendar size={20} /> },
     { name: "Issues", path: "/issues", icon: <Check size={20} /> },

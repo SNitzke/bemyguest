@@ -2,7 +2,7 @@
 import React from 'react';
 import { Label } from '../../ui/label';
 import { RadioGroup, RadioGroupItem } from '../../ui/radio-group';
-import { Building2 } from 'lucide-react';
+import { Building2, User } from 'lucide-react';
 
 interface RoleSelectorProps {
   role: 'tenant' | 'landlord';
@@ -25,7 +25,7 @@ export const RoleSelector: React.FC<RoleSelectorProps> = ({ role, onChange }) =>
           }`}
         >
           <RadioGroupItem value="tenant" id="tenant" className="sr-only" />
-          <Building2 className="mr-2 h-5 w-5" />
+          <User className="mr-2 h-5 w-5" />
           Tenant
         </Label>
 
