@@ -1,39 +1,72 @@
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Button } from '../components/ui/button';
-import { Building2, User } from 'lucide-react';
+import { Building2, User, Check, Calendar } from 'lucide-react';
 import PropertyCard from '../components/dashboard/PropertyCard';
-import { properties } from '../utils/mockData';
+import { properties, issues, payments, financialData } from '../utils/mockData';
 import { useNavigate } from 'react-router-dom';
+import IssuesOverview from '../components/dashboard/IssuesOverview';
+import PaymentsOverview from '../components/dashboard/PaymentsOverview';
+import FinancialChart from '../components/dashboard/FinancialChart';
 
 const LandlordProfile: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('properties');
   const userMetadata = user?.user_metadata as { full_name?: string, role?: string, phone_number?: string } | undefined;
-  const fullName = userMetadata?.full_name || 'User';
+  const fullName = userMetadata?.full_name || 'Landlord';
   const phoneNumber = userMetadata?.phone_number || 'Not provided';
   
-  // Ensure the user is a landlord
-  useEffect(() => {
-    if (userMetadata?.role !== 'landlord') {
-      navigate('/dashboard');
-    }
-  }, [userMetadata?.role, navigate]);
-
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-heading font-semibold">Landlord Profile</h1>
+        <h1 className="text-2xl font-heading font-semibold">Landlord Dashboard</h1>
         <p className="text-muted-foreground">
-          Manage your profile and property portfolio
+          Welcome back, {fullName}. Manage your property portfolio
         </p>
+      </div>
+      
+      {/* Key Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Total Properties</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{properties.length}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Open Issues</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{issues.filter(i => i.status !== "resolved").length}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{payments.filter(p => p.status === "pending").length}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">$12,450</div>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Profile Card */}
         <Card className="md:col-span-1">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -68,6 +101,7 @@ const LandlordProfile: React.FC = () => {
           </CardContent>
         </Card>
 
+        {/* Main Content Area */}
         <div className="md:col-span-2">
           <Tabs defaultValue="properties" value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="mb-4">
@@ -75,10 +109,16 @@ const LandlordProfile: React.FC = () => {
                 <Building2 size={16} />
                 Properties
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center gap-2">
-                Stats & Analytics
+              <TabsTrigger value="issues" className="flex items-center gap-2">
+                <Check size={16} />
+                Issues
+              </TabsTrigger>
+              <TabsTrigger value="payments" className="flex items-center gap-2">
+                <Calendar size={16} />
+                Payments
               </TabsTrigger>
             </TabsList>
+            
             <TabsContent value="properties" className="space-y-4">
               <div className="flex justify-between items-center">
                 <h2 className="text-lg font-medium">Your Properties</h2>
@@ -104,21 +144,21 @@ const LandlordProfile: React.FC = () => {
                 </Button>
               )}
             </TabsContent>
-            <TabsContent value="analytics">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Property Performance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">
-                    Analytics features coming soon. Here you'll be able to see occupancy rates, 
-                    financial performance, and other metrics for your property portfolio.
-                  </p>
-                </CardContent>
-              </Card>
+            
+            <TabsContent value="issues">
+              <IssuesOverview issues={issues} />
+            </TabsContent>
+            
+            <TabsContent value="payments">
+              <PaymentsOverview payments={payments} />
             </TabsContent>
           </Tabs>
         </div>
+      </div>
+      
+      {/* Financial Chart */}
+      <div className="mt-6">
+        <FinancialChart data={financialData} />
       </div>
     </div>
   );

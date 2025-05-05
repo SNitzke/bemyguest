@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Settings, MessageSquare, Check, Calendar, Image, User, Plus } from "lucide-react";
+import { Home, Settings, MessageSquare, Check, Calendar, Image, User, Plus, Building2 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAuth } from "../../contexts/AuthContext";
 import { Button } from "../ui/button";
@@ -12,9 +12,8 @@ const Sidebar: React.FC = () => {
   const isLandlord = user?.user_metadata?.role === "landlord";
 
   const landlordLinks = [
-    { name: "Dashboard", path: "/dashboard", icon: <Home size={20} /> },
+    { name: "Dashboard", path: "/landlord-profile", icon: <Building2 size={20} /> },
     { name: "Properties", path: "/properties", icon: <Image size={20} /> },
-    { name: "Profile", path: "/landlord-profile", icon: <User size={20} /> },
     { name: "Tenants", path: "/tenants", icon: <User size={20} /> },
     { name: "Payments", path: "/payments", icon: <Calendar size={20} /> },
     { name: "Issues", path: "/issues", icon: <Check size={20} /> },
@@ -37,7 +36,7 @@ const Sidebar: React.FC = () => {
     <aside className="w-16 md:w-64 bg-white border-r shrink-0">
       <div className="h-full px-3 py-6 flex flex-col">
         <div className="mb-6 flex justify-center md:justify-start">
-          <Link to="/dashboard" className="flex items-center gap-2">
+          <Link to={isLandlord ? "/landlord-profile" : "/dashboard"} className="flex items-center gap-2">
             <div className="bg-bmg-500 text-white h-8 w-8 md:h-10 md:w-10 rounded-md flex items-center justify-center font-bold text-lg">
               BG
             </div>

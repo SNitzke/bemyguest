@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Label } from '../../ui/label';
-import { RadioGroup, RadioGroupItem } from '../../ui/radio-group';
+import { RadioGroup } from '../../ui/radio-group';
 import { Building2, User } from 'lucide-react';
 
 interface RoleSelectorProps {
@@ -18,27 +18,45 @@ export const RoleSelector: React.FC<RoleSelectorProps> = ({ role, onChange }) =>
         onValueChange={(value: 'tenant' | 'landlord') => onChange(value)}
         className="grid grid-cols-2 gap-4"
       >
-        <Label
-          htmlFor="tenant"
-          className={`flex cursor-pointer items-center justify-center rounded-lg border p-4 ${
-            role === 'tenant' ? 'border-primary bg-primary/10' : 'border-muted'
+        <div
+          onClick={() => onChange('tenant')}
+          className={`flex cursor-pointer items-center justify-center rounded-lg border p-6 ${
+            role === 'tenant' ? 'border-primary bg-primary/10' : 'border-muted bg-background'
           }`}
         >
-          <RadioGroupItem value="tenant" id="tenant" className="sr-only" />
-          <User className="mr-2 h-5 w-5" />
-          Tenant
-        </Label>
+          <div className="flex flex-col items-center space-y-2">
+            <User className="h-6 w-6 text-gray-600" />
+            <span>Tenant</span>
+          </div>
+          <input 
+            type="radio" 
+            name="role" 
+            value="tenant" 
+            checked={role === 'tenant'} 
+            onChange={() => {}} 
+            className="sr-only" 
+          />
+        </div>
 
-        <Label
-          htmlFor="landlord"
-          className={`flex cursor-pointer items-center justify-center rounded-lg border p-4 ${
-            role === 'landlord' ? 'border-primary bg-primary/10' : 'border-muted'
+        <div
+          onClick={() => onChange('landlord')}
+          className={`flex cursor-pointer items-center justify-center rounded-lg border p-6 ${
+            role === 'landlord' ? 'border-primary bg-primary/10' : 'border-muted bg-background'
           }`}
         >
-          <RadioGroupItem value="landlord" id="landlord" className="sr-only" />
-          <Building2 className="mr-2 h-5 w-5" />
-          Landlord
-        </Label>
+          <div className="flex flex-col items-center space-y-2">
+            <Building2 className="h-6 w-6 text-gray-600" />
+            <span>Landlord</span>
+          </div>
+          <input 
+            type="radio" 
+            name="role" 
+            value="landlord" 
+            checked={role === 'landlord'} 
+            onChange={() => {}} 
+            className="sr-only" 
+          />
+        </div>
       </RadioGroup>
     </div>
   );
