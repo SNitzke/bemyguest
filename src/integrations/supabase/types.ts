@@ -9,24 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      Landlords: {
-        Row: {
-          created_at: string
-          id: number
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          id?: number
-          name: string
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          name?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -51,27 +33,6 @@ export type Database = {
           id?: string
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string | null
-        }
-        Relationships: []
-      }
-      Tenants: {
-        Row: {
-          colum_name: string | null
-          colum_number: string | null
-          created_at: string
-          id: number
-        }
-        Insert: {
-          colum_name?: string | null
-          colum_number?: string | null
-          created_at?: string
-          id?: number
-        }
-        Update: {
-          colum_name?: string | null
-          colum_number?: string | null
-          created_at?: string
-          id?: number
         }
         Relationships: []
       }

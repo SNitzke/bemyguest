@@ -27,20 +27,48 @@ import LandlordProfile from './pages/LandlordProfile';
 
 const queryClient = new QueryClient();
 
-// Protected route component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+// Protected route component with role check
+const ProtectedRoute = ({ 
+  children, 
+  requiredRole
+}: { 
+  children: React.ReactNode;
+  requiredRole?: 'tenant' | 'landlord'; 
+}) => {
+  const { isAuthenticated, isLoading, getUserRole, user } = useAuth();
+  const [role, setRole] = React.useState<string | null>(null);
+  const [roleChecked, setRoleChecked] = React.useState(false);
 
-  if (isLoading) {
+  React.useEffect(() => {
+    if (user && requiredRole) {
+      getUserRole().then(userRole => {
+        setRole(userRole);
+        setRoleChecked(true);
+      });
+    } else {
+      setRoleChecked(true);
+    }
+  }, [user, requiredRole, getUserRole]);
+
+  if (isLoading || !roleChecked) {
     return (
       <div className="flex h-screen items-center justify-center">
-        Loading...
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (requiredRole && role !== requiredRole) {
+    // Redirect landlords to landlord profile, tenants to dashboard
+    if (role === 'landlord') {
+      return <Navigate to="/landlord-profile" replace />;
+    } else {
+      return <Navigate to="/dashboard" replace />;
+    }
   }
 
   return <>{children}</>;
@@ -61,17 +89,50 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       >
-        <Route path="dashboard" element={<Dashboard />} />
-        <Route path="report-issue" element={<ReportIssue />} />
+        {/* Tenant Routes */}
+        <Route path="dashboard" element={
+          <ProtectedRoute requiredRole="tenant">
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="report-issue" element={
+          <ProtectedRoute requiredRole="tenant">
+            <ReportIssue />
+          </ProtectedRoute>
+        } />
+        
+        {/* Shared Routes */}
         <Route path="issues" element={<Issues />} />
         <Route path="payments" element={<Payments />} />
         <Route path="messages" element={<Messages />} />
-        <Route path="invite-tenant" element={<InviteTenant />} />
-        <Route path="properties" element={<Properties />} />
-        <Route path="properties/:id" element={<PropertyDetails />} />
-        <Route path="tenants" element={<Tenants />} />
         <Route path="settings" element={<Settings />} />
-        <Route path="landlord-profile" element={<LandlordProfile />} />
+        
+        {/* Landlord Routes */}
+        <Route path="landlord-profile" element={
+          <ProtectedRoute requiredRole="landlord">
+            <LandlordProfile />
+          </ProtectedRoute>
+        } />
+        <Route path="properties" element={
+          <ProtectedRoute requiredRole="landlord">
+            <Properties />
+          </ProtectedRoute>
+        } />
+        <Route path="properties/:id" element={
+          <ProtectedRoute requiredRole="landlord">
+            <PropertyDetails />
+          </ProtectedRoute>
+        } />
+        <Route path="tenants" element={
+          <ProtectedRoute requiredRole="landlord">
+            <Tenants />
+          </ProtectedRoute>
+        } />
+        <Route path="invite-tenant" element={
+          <ProtectedRoute requiredRole="landlord">
+            <InviteTenant />
+          </ProtectedRoute>
+        } />
       </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>

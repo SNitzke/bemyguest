@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { useAuth } from '@/contexts/AuthContext';
@@ -9,10 +10,13 @@ import { PersonalInfoFields } from './signup/PersonalInfoFields';
 import { RoleSelector } from './signup/RoleSelector';
 import { SubscriptionPlans } from './signup/SubscriptionPlans';
 import { PasswordFields } from './signup/PasswordFields';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 
 export const EnhancedSignUpForm = () => {
   const { signup } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -69,6 +73,10 @@ export const EnhancedSignUpForm = () => {
     setIsSubmitting(true);
 
     try {
+      if (!acceptedTerms) {
+        throw new Error("Please accept the terms and conditions");
+      }
+      
       if (formData.password !== formData.confirmPassword) {
         throw new Error("Passwords don't match");
       }
@@ -82,7 +90,7 @@ export const EnhancedSignUpForm = () => {
         phoneNumber: formData.phoneNumber
       });
 
-      toast.success('Account created successfully!');
+      toast.success('Account created successfully! Please check your email for verification.');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to create account');
     } finally {
@@ -115,6 +123,22 @@ export const EnhancedSignUpForm = () => {
         confirmPassword={formData.confirmPassword}
         onChange={handleFieldChange}
       />
+      
+      <div className="flex items-center space-x-2">
+        <Checkbox 
+          id="terms" 
+          checked={acceptedTerms}
+          onCheckedChange={(checked) => {
+            setAcceptedTerms(checked === true);
+          }}
+        />
+        <Label
+          htmlFor="terms"
+          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+        >
+          I accept the Terms of Service and Privacy Policy
+        </Label>
+      </div>
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? 'Creating Account...' : 'Sign Up'}
