@@ -34,6 +34,7 @@ export const properties: Property[] = [
     imageUrl: "/placeholder.svg",
     units: 12,
     landlordId: "1",
+    status: "occupied", // Adding the required status property
   },
   {
     id: "2",
@@ -42,6 +43,7 @@ export const properties: Property[] = [
     imageUrl: "/placeholder.svg",
     units: 24,
     landlordId: "1",
+    status: "vacant", // Adding the required status property
   }
 ];
 

@@ -13,13 +13,6 @@ import FinancialChart from '../components/dashboard/FinancialChart';
 import { supabase } from '@/integrations/supabase/client';
 import { LandlordDetails } from '@/contexts/AuthContext';
 
-interface LandlordDetails {
-  company_name: string | null;
-  subscription_plan: string | null;
-  subscription_start_date: string | null;
-  subscription_end_date: string | null;
-}
-
 const LandlordProfile: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();

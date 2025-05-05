@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
@@ -31,7 +32,7 @@ interface SignupData {
 }
 
 // Define the LandlordDetails interface to fix type errors
-interface LandlordDetails {
+export interface LandlordDetails {
   id?: string;
   company_name: string | null;
   subscription_plan: string | null;
@@ -127,7 +128,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
         // Create landlord details entry using a custom SQL function or via API
-        // This is a workaround for the type issue with supabase client
+        // Fix the type error by using the proper parameter type for user_id
         const { error: detailsError } = await supabase.rpc('create_landlord_details', {
           user_id: userId,
           plan: data.subscriptionPlan
