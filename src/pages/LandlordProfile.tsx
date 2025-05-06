@@ -13,11 +13,6 @@ import DashboardTabs from '../components/landlord/DashboardTabs';
 import LoadingState from '../components/landlord/LoadingState';
 import FinancialChart from '../components/dashboard/FinancialChart';
 
-// Define TypeScript interface for our RPC function parameters
-interface GetLandlordDetailsParams {
-  user_id: string;
-}
-
 const LandlordProfile: React.FC = () => {
   const { user } = useAuth();
   const [landlordDetails, setLandlordDetails] = useState<LandlordDetails | null>(null);
@@ -28,7 +23,7 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        const { data, error } = await supabase.rpc<LandlordDetails, GetLandlordDetailsParams>(
+        const { data, error } = await supabase.rpc(
           'get_landlord_details',
           {
             user_id: user.id
@@ -40,7 +35,8 @@ const LandlordProfile: React.FC = () => {
           return;
         }
         
-        setLandlordDetails(data);
+        // Type assertion to ensure data is treated as LandlordDetails
+        setLandlordDetails(data as LandlordDetails);
       } catch (err) {
         console.error("Error in landlord details fetch:", err);
       } finally {
