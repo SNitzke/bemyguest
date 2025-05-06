@@ -6,6 +6,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SignupData } from "@/types/auth";
 
+// Define TypeScript interfaces for our RPC function parameters
+interface CreateLandlordDetailsParams {
+  user_id: string;
+  plan: string;
+}
+
 export function useAuthService() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -72,14 +78,13 @@ export function useAuthService() {
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
         // Create landlord details entry
-        // Fix: Explicitly type the RPC function parameters
-        const { error: detailsError } = await supabase.rpc('create_landlord_details', {
-          user_id: userId,
-          plan: data.subscriptionPlan
-        } as {
-          user_id: string;
-          plan: string;
-        });
+        const { error: detailsError } = await supabase.rpc<null, CreateLandlordDetailsParams>(
+          'create_landlord_details',
+          {
+            user_id: userId,
+            plan: data.subscriptionPlan
+          }
+        );
           
         if (detailsError) {
           console.error("Error creating landlord details:", detailsError);
