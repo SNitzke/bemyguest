@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
@@ -83,7 +82,7 @@ export function useAuthService() {
           {
             user_id: userId,
             plan: data.subscriptionPlan
-          }
+          } as CreateLandlordDetailsParams // Type assertion to fix the 'never' issue
         );
           
         if (detailsError) {
