@@ -72,10 +72,13 @@ export function useAuthService() {
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
         // Create landlord details entry
-        // Fix: Remove type assertions, let Supabase infer the types
+        // Fix: Explicitly type the RPC function parameters
         const { error: detailsError } = await supabase.rpc('create_landlord_details', {
           user_id: userId,
           plan: data.subscriptionPlan
+        } as {
+          user_id: string;
+          plan: string;
         });
           
         if (detailsError) {
