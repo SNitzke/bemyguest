@@ -72,12 +72,10 @@ export function useAuthService() {
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
         // Create landlord details entry
+        // Fix: Properly type the parameters for the RPC call
         const { error: detailsError } = await supabase.rpc('create_landlord_details', {
           user_id: userId,
           plan: data.subscriptionPlan
-        } as {
-          user_id: string;
-          plan: string;
         });
           
         if (detailsError) {
