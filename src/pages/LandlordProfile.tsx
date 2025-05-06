@@ -23,7 +23,7 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        // Call the RPC function without type assertion
+        // Fix: Remove type assertions, let Supabase infer the types
         const { data, error } = await supabase.rpc('get_landlord_details', {
           user_id: user.id
         });
