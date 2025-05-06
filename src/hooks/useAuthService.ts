@@ -1,15 +1,10 @@
+
 import { useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SignupData } from "@/types/auth";
-
-// Define TypeScript interfaces for our RPC function parameters
-interface CreateLandlordDetailsParams {
-  user_id: string;
-  plan: string;
-}
 
 export function useAuthService() {
   const [isLoading, setIsLoading] = useState(false);
@@ -77,12 +72,14 @@ export function useAuthService() {
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
         // Create landlord details entry
-        const { error: detailsError } = await supabase.rpc(
+        interface CreateLandlordResponse { success: boolean }
+        
+        const { error: detailsError } = await supabase.rpc<CreateLandlordResponse>(
           'create_landlord_details',
           {
             user_id: userId,
             plan: data.subscriptionPlan
-          } as CreateLandlordDetailsParams // Type assertion to fix the 'never' issue
+          }
         );
           
         if (detailsError) {
