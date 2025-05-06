@@ -23,7 +23,7 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        const { data, error } = await supabase.rpc<LandlordDetails>(
+        const { data, error } = await supabase.rpc<LandlordDetails, { user_id: string }>(
           'get_landlord_details',
           { user_id: user.id }
         );

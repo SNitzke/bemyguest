@@ -74,7 +74,7 @@ export function useAuthService() {
         // Create landlord details entry
         interface CreateLandlordResponse { success: boolean }
         
-        const { error: detailsError } = await supabase.rpc<CreateLandlordResponse>(
+        const { error: detailsError } = await supabase.rpc<CreateLandlordResponse, { user_id: string; plan: string }>(
           'create_landlord_details',
           {
             user_id: userId,
