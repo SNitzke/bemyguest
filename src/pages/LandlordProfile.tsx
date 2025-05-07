@@ -23,11 +23,11 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        // Fetch landlord details using RPC
+        // Fetch landlord details using properly typed RPC call
         const { data, error } = await supabase.rpc(
           'get_landlord_details',
           { user_id: user.id }
-        );
+        ) as { data: LandlordDetails | null; error: any };
         
         if (error) {
           console.error("Error fetching landlord details:", error);
