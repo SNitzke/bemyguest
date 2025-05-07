@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,8 +22,8 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        // Fetch landlord details without specifying generic type
-        const response = await supabase.rpc(
+        // Solucionar el problema de tipo usando <string>
+        const response = await supabase.rpc<string>(
           'get_landlord_details',
           { user_id: user.id }
         );

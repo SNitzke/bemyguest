@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
@@ -71,8 +70,8 @@ export function useAuthService() {
       const userId = authData?.user?.id;
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
-        // Create landlord details entry without specifying generic type
-        const rpcResponse = await supabase.rpc(
+        // Fix type for RPC call
+        const rpcResponse = await supabase.rpc<string>(
           'create_landlord_details',
           {
             user_id: userId,
