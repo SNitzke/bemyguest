@@ -23,19 +23,19 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        // Fetch landlord details using properly typed RPC call
-        const { data, error } = await supabase.rpc(
+        // Fetch landlord details without specifying generic type
+        const response = await supabase.rpc(
           'get_landlord_details',
           { user_id: user.id }
-        ) as { data: LandlordDetails | null; error: any };
+        );
         
-        if (error) {
-          console.error("Error fetching landlord details:", error);
+        if (response.error) {
+          console.error("Error fetching landlord details:", response.error);
           return;
         }
         
-        if (data) {
-          setLandlordDetails(data as LandlordDetails);
+        if (response.data) {
+          setLandlordDetails(response.data as LandlordDetails);
         }
       } catch (err) {
         console.error("Error in landlord details fetch:", err);

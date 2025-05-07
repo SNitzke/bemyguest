@@ -71,17 +71,17 @@ export function useAuthService() {
       const userId = authData?.user?.id;
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
-        // Create landlord details entry using type assertion
-        const { error: detailsError } = await supabase.rpc(
+        // Create landlord details entry without specifying generic type
+        const rpcResponse = await supabase.rpc(
           'create_landlord_details',
           {
             user_id: userId,
             plan: data.subscriptionPlan
           }
-        ) as { data: null; error: any };
+        );
           
-        if (detailsError) {
-          console.error("Error creating landlord details:", detailsError);
+        if (rpcResponse.error) {
+          console.error("Error creating landlord details:", rpcResponse.error);
         }
       }
       
