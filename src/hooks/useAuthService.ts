@@ -71,18 +71,8 @@ export function useAuthService() {
       const userId = authData?.user?.id;
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
-        // Define types for the RPC function
-        type CreateLandlordDetails = {
-          success: boolean;
-        }
-
-        type CreateLandlordParams = {
-          user_id: string;
-          plan: string;
-        }
-        
         // Create landlord details entry
-        const { error: detailsError } = await supabase.rpc<CreateLandlordDetails, CreateLandlordParams>(
+        const { error: detailsError } = await supabase.rpc(
           'create_landlord_details',
           {
             user_id: userId,

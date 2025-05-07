@@ -23,12 +23,8 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        // Define types for the RPC function
-        type GetLandlordDetailsParams = {
-          user_id: string;
-        }
-        
-        const { data, error } = await supabase.rpc<LandlordDetails, GetLandlordDetailsParams>(
+        // Fetch landlord details using RPC
+        const { data, error } = await supabase.rpc(
           'get_landlord_details',
           { user_id: user.id }
         );
