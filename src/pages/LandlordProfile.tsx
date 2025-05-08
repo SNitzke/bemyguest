@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -23,8 +22,8 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        // Fix typing by using string type parameter for RPC
-        const response = await supabase.rpc<string>(
+        // Fix typing by providing both output and input type parameters for RPC
+        const response = await supabase.rpc<LandlordDetails, { user_id: string }>(
           'get_landlord_details',
           { user_id: user.id }
         );
@@ -35,8 +34,7 @@ const LandlordProfile: React.FC = () => {
         }
         
         if (response.data) {
-          // Use type assertion here
-          setLandlordDetails(response.data as LandlordDetails);
+          setLandlordDetails(response.data);
         }
       } catch (err) {
         console.error("Error in landlord details fetch:", err);
