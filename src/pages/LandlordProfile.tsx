@@ -23,8 +23,8 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        // Solucionar el problema de tipo usando ambos parámetros genéricos
-        const response = await supabase.rpc<LandlordDetails, {user_id: string}>(
+        // Fix typing by removing generics and using type assertion
+        const response = await supabase.rpc(
           'get_landlord_details',
           { user_id: user.id }
         );
@@ -35,7 +35,8 @@ const LandlordProfile: React.FC = () => {
         }
         
         if (response.data) {
-          setLandlordDetails(response.data);
+          // Use type assertion here
+          setLandlordDetails(response.data as LandlordDetails);
         }
       } catch (err) {
         console.error("Error in landlord details fetch:", err);

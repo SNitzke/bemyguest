@@ -71,8 +71,8 @@ export function useAuthService() {
       const userId = authData?.user?.id;
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
-        // Fix type for RPC call - especificando ambos parámetros de tipo
-        const rpcResponse = await supabase.rpc<void, {user_id: string, plan: string}>(
+        // Fix for RPC call typing - using type assertion instead of generics
+        const rpcResponse = await supabase.rpc(
           'create_landlord_details',
           {
             user_id: userId,
