@@ -23,8 +23,8 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        // Fix typing by removing generics and using type assertion
-        const response = await supabase.rpc(
+        // Fix typing by using string type parameter for RPC
+        const response = await supabase.rpc<string>(
           'get_landlord_details',
           { user_id: user.id }
         );
