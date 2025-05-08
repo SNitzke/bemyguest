@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -22,8 +23,8 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        // Solucionar el problema de tipo usando <string>
-        const response = await supabase.rpc<string>(
+        // Solucionar el problema de tipo usando ambos parámetros genéricos
+        const response = await supabase.rpc<LandlordDetails, {user_id: string}>(
           'get_landlord_details',
           { user_id: user.id }
         );
@@ -34,7 +35,7 @@ const LandlordProfile: React.FC = () => {
         }
         
         if (response.data) {
-          setLandlordDetails(response.data as LandlordDetails);
+          setLandlordDetails(response.data);
         }
       } catch (err) {
         console.error("Error in landlord details fetch:", err);

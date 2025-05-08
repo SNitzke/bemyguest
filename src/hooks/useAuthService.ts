@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
@@ -70,8 +71,8 @@ export function useAuthService() {
       const userId = authData?.user?.id;
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
-        // Fix type for RPC call
-        const rpcResponse = await supabase.rpc<string>(
+        // Fix type for RPC call - especificando ambos parámetros de tipo
+        const rpcResponse = await supabase.rpc<void, {user_id: string, plan: string}>(
           'create_landlord_details',
           {
             user_id: userId,
