@@ -31,8 +31,8 @@ const LandlordProfile: React.FC = () => {
         // Create properly typed parameters object
         const params: GetLandlordDetailsParams = { user_id: user.id };
         
-        // Call RPC with proper typing
-        const response = await supabase.rpc('get_landlord_details', params);
+        // Use type assertion to avoid the 'never' type constraint
+        const response = await supabase.rpc('get_landlord_details', params as any);
         
         if (response.error) {
           console.error("Error fetching landlord details:", response.error);

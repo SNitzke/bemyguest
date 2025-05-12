@@ -83,8 +83,8 @@ export function useAuthService() {
           plan: data.subscriptionPlan
         };
         
-        // Use type assertion to tell TypeScript about the return type
-        const rpcResponse = await supabase.rpc('create_landlord_details', params);
+        // Use type assertion to avoid the 'never' type constraint
+        const rpcResponse = await supabase.rpc('create_landlord_details', params as any);
           
         if (rpcResponse.error) {
           console.error("Error creating landlord details:", rpcResponse.error);
