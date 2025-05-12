@@ -5,6 +5,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { ArrowRight, Check, Home, Image, ShieldCheck, Wallet, User } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "../components/ui/carousel";
 import { AspectRatio } from "../components/ui/aspect-ratio";
+import DashboardPreviews from "../components/landing/DashboardPreviews";
 
 const Index = () => {
   return (
@@ -62,6 +63,9 @@ const Index = () => {
             </div>
           </div>
         </section>
+
+        {/* Dashboard Previews Section */}
+        <DashboardPreviews />
 
         {/* Image Gallery Section */}
         <section className="py-12 bg-white">

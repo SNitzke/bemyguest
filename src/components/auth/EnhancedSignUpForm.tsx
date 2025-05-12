@@ -12,9 +12,11 @@ import { SubscriptionPlans } from './signup/SubscriptionPlans';
 import { PasswordFields } from './signup/PasswordFields';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { useNavigate } from 'react-router-dom';
 
 export const EnhancedSignUpForm = () => {
   const { signup } = useAuth();
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [formData, setFormData] = useState({
@@ -90,7 +92,9 @@ export const EnhancedSignUpForm = () => {
         phoneNumber: formData.phoneNumber
       });
 
-      toast.success('Account created successfully! Please check your email for verification.');
+      // After successful signup, redirect to login page with success message
+      toast.success('Account created successfully! Please log in to access your account.');
+      navigate('/login');
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to create account');
     } finally {

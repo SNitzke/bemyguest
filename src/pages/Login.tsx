@@ -31,6 +31,7 @@ const Login = () => {
     setIsSubmitting(true);
     try {
       await login(email, password);
+      // The redirection is now handled in the useAuthService hook based on user role
     } catch (error) {
       console.error("Login error:", error);
     } finally {
