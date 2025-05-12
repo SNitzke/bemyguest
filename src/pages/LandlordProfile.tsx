@@ -1,11 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { LandlordDetails } from '@/types/auth';
 import { properties, issues, payments, financialData } from '../utils/mockData';
 
-// Import our new components
+// Import our components
 import SubscriptionCard from '../components/landlord/SubscriptionCard';
 import MetricsCards from '../components/landlord/MetricsCards';
 import ProfileInfoCard from '../components/landlord/ProfileInfoCard';
@@ -16,6 +14,15 @@ import FinancialChart from '../components/dashboard/FinancialChart';
 // Define proper types for the RPC function parameters
 interface GetLandlordDetailsParams {
   user_id: string;
+}
+
+// Define a proper interface for the landlord details
+export interface LandlordDetails {
+  id?: string;
+  company_name: string | null;
+  subscription_plan: string | null;
+  subscription_start_date: string | null;
+  subscription_end_date: string | null;
 }
 
 const LandlordProfile: React.FC = () => {
@@ -40,7 +47,7 @@ const LandlordProfile: React.FC = () => {
         }
         
         if (response.data) {
-          // Use type assertion to explicitly type the response data
+          // Use type assertion with the interface defined
           setLandlordDetails(response.data as LandlordDetails);
         }
       } catch (err) {

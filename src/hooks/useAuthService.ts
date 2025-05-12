@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
@@ -38,10 +37,14 @@ export function useAuthService() {
     try {
       setIsLoading(true);
       const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+      
+      // Añade una verificación de tipo
       if (error) throw error;
-      
-      const role = await getUserRole(data.user?.id);
-      
+      if (!data || !data.user) throw new Error('No user data');
+
+      // Usa optional chaining con un valor por defecto
+      const role = await getUserRole(data.user.id ?? '');
+
       if (role === 'landlord') {
         navigate("/landlord-profile");
       } else {
