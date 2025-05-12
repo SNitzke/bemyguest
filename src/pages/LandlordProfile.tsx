@@ -13,6 +13,11 @@ import DashboardTabs from '../components/landlord/DashboardTabs';
 import LoadingState from '../components/landlord/LoadingState';
 import FinancialChart from '../components/dashboard/FinancialChart';
 
+// Define proper types for the RPC function parameters
+interface GetLandlordDetailsParams {
+  user_id: string;
+}
+
 const LandlordProfile: React.FC = () => {
   const { user } = useAuth();
   const [landlordDetails, setLandlordDetails] = useState<LandlordDetails | null>(null);
@@ -23,11 +28,11 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        // Remove generic parameters and use type assertion instead
-        const response = await supabase.rpc(
-          'get_landlord_details',
-          { user_id: user.id }
-        );
+        // Create properly typed parameters object
+        const params: GetLandlordDetailsParams = { user_id: user.id };
+        
+        // Call RPC with proper typing
+        const response = await supabase.rpc('get_landlord_details', params);
         
         if (response.error) {
           console.error("Error fetching landlord details:", response.error);

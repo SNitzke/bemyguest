@@ -6,6 +6,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SignupData } from "@/types/auth";
 
+// Define proper types for the RPC functions
+interface CreateLandlordDetailsParams {
+  user_id: string;
+  plan: string;
+}
+
 export function useAuthService() {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -71,14 +77,14 @@ export function useAuthService() {
       const userId = authData?.user?.id;
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
-        // Fix RPC typing by using type assertion instead of generic parameters
-        const rpcResponse = await supabase.rpc(
-          'create_landlord_details',
-          {
-            user_id: userId,
-            plan: data.subscriptionPlan
-          }
-        );
+        // Fix typing by defining the parameters object explicitly
+        const params: CreateLandlordDetailsParams = {
+          user_id: userId,
+          plan: data.subscriptionPlan
+        };
+        
+        // Use type assertion to tell TypeScript about the return type
+        const rpcResponse = await supabase.rpc('create_landlord_details', params);
           
         if (rpcResponse.error) {
           console.error("Error creating landlord details:", rpcResponse.error);
