@@ -18,7 +18,7 @@ const SubscriptionCard: React.FC<SubscriptionCardProps> = ({ landlordDetails }) 
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold text-blue-800">
-              {landlordDetails?.subscription_plan || 'Basic'} Plan
+              {landlordDetails?.subscription_plan || landlordDetails?.business_name || 'Basic'} Plan
             </h3>
             <p className="text-blue-600">
               Active since {new Date(landlordDetails?.subscription_start_date || Date.now()).toLocaleDateString()}

@@ -11,13 +11,18 @@ export interface SignupData {
   subscriptionPlan?: string;
 }
 
-// Define the LandlordDetails interface to fix type errors
+// Updated LandlordDetails interface to make company_name optional
 export interface LandlordDetails {
   id?: string;
-  company_name: string | null;
-  subscription_plan: string | null;
-  subscription_start_date: string | null;
-  subscription_end_date: string | null;
+  company_name?: string | null;
+  subscription_plan?: string | null;
+  subscription_start_date?: string | null;
+  subscription_end_date?: string | null;
+  business_name?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  properties_count?: number;
+  verified?: boolean;
 }
 
 export interface AuthContextType {

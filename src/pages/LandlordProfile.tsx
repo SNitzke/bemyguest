@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { properties, issues, payments, financialData } from '../utils/mockData';
+import { LandlordDetails } from '@/types/auth';
 
 // Import components
 import SubscriptionCard from '../components/landlord/SubscriptionCard';
@@ -11,15 +12,6 @@ import ProfileInfoCard from '../components/landlord/ProfileInfoCard';
 import DashboardTabs from '../components/landlord/DashboardTabs';
 import LoadingState from '../components/landlord/LoadingState';
 import FinancialChart from '../components/dashboard/FinancialChart';
-
-// Define interfaces for landlord details
-export interface LandlordDetails {
-  id?: string;
-  company_name?: string | null;
-  subscription_plan?: string | null;
-  subscription_start_date?: string | null;
-  subscription_end_date?: string | null;
-}
 
 const LandlordProfile: React.FC = () => {
   const { user } = useAuth();
@@ -31,10 +23,10 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        // Uso de any como solución para problemas de tipos con RPC
+        // Fix the type issue by using proper typing for RPC
         const response = await supabase.rpc(
           'get_landlord_details', 
-          { user_id: user.id } as any
+          { user_id: user.id }
         );
         
         if (response.error) {
@@ -42,7 +34,6 @@ const LandlordProfile: React.FC = () => {
           return;
         }
         
-        // Usar aserciones de tipo para manejar la respuesta
         setLandlordDetails(response.data as LandlordDetails);
       } catch (err) {
         console.error("Error in landlord details fetch:", err);

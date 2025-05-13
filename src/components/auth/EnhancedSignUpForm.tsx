@@ -8,12 +8,14 @@ import { Button } from '../ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { SignupData } from '@/types/auth';
+import { SubscriptionPlan } from '@/types';
 
-// Plan data hardcoded for demo (normalmente se obtendrían del servidor)
-const plans = [
+// Plan data hardcoded for demo (normally these would be fetched from the server)
+const plans: SubscriptionPlan[] = [
   {
     id: '1',
     name: 'Basic',
+    description: 'Perfect for small landlords',
     monthly_price: 1999,
     features: {
       max_properties: 5,
@@ -23,6 +25,7 @@ const plans = [
   {
     id: '2',
     name: 'Pro',
+    description: 'Great for growing property management',
     monthly_price: 4999,
     features: {
       max_properties: 20,
@@ -32,6 +35,7 @@ const plans = [
   {
     id: '3',
     name: 'Enterprise',
+    description: 'Complete solution for large portfolios',
     monthly_price: 9999,
     features: {
       max_properties: 'unlimited',
@@ -70,23 +74,23 @@ export const EnhancedSignUpForm = () => {
 
   const handleNext = () => {
     if (step === 1) {
-      // Validar datos personales
+      // Validate personal data
       if (!formData.fullName || !formData.email || !formData.phoneNumber) {
-        toast.error("Por favor completa todos los campos");
+        toast.error("Please complete all fields");
         return;
       }
       if (!formData.email.includes('@')) {
-        toast.error("Por favor ingresa un email válido");
+        toast.error("Please enter a valid email");
         return;
       }
     } else if (step === 2) {
-      // Validar contraseñas
+      // Validate passwords
       if (!formData.password || formData.password.length < 6) {
-        toast.error("La contraseña debe tener al menos 6 caracteres");
+        toast.error("Password must be at least 6 characters");
         return;
       }
       if (formData.password !== formData.confirmPassword) {
-        toast.error("Las contraseñas no coinciden");
+        toast.error("Passwords don't match");
         return;
       }
     }
@@ -101,9 +105,9 @@ export const EnhancedSignUpForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validación final
+    // Final validation
     if (formData.password !== formData.confirmPassword) {
-      toast.error("Las contraseñas no coinciden");
+      toast.error("Passwords don't match");
       return;
     }
 
@@ -120,7 +124,7 @@ export const EnhancedSignUpForm = () => {
       };
       
       await signup(signupData);
-      toast.success("Cuenta creada con éxito. Por favor verifica tu email.");
+      toast.success("Account created successfully. Please verify your email.");
     } catch (error) {
       console.error("Error during signup:", error);
     } finally {
@@ -166,7 +170,7 @@ export const EnhancedSignUpForm = () => {
             onClick={handleBack}
             disabled={isSubmitting}
           >
-            Atrás
+            Back
           </Button>
         )}
         
@@ -176,7 +180,7 @@ export const EnhancedSignUpForm = () => {
             className="ml-auto"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Registrando..." : "Registrarse"}
+            {isSubmitting ? "Registering..." : "Register"}
           </Button>
         ) : (
           <Button 
@@ -184,7 +188,7 @@ export const EnhancedSignUpForm = () => {
             className="ml-auto"
             onClick={handleNext}
           >
-            Siguiente
+            Next
           </Button>
         )}
       </div>

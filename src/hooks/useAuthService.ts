@@ -3,11 +3,17 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { SignupData } from "@/types/auth";
 
-// Definir interfaces explícitas para evitar errores de TypeScript
+// Define interfaces for type safety
 interface UserRole {
   role: string;
   user_role?: string;
+}
+
+// Type for RPC parameters
+interface RpcParams {
+  [key: string]: string | number | boolean | null;
 }
 
 export function useAuthService() {
@@ -18,7 +24,6 @@ export function useAuthService() {
     if (!userId) return null;
 
     try {
-      // Usando parámetros de tipo explícitos
       const { data, error } = await supabase
         .from('profiles')
         .select('role')
@@ -49,23 +54,16 @@ export function useAuthService() {
         navigate("/dashboard");
       }
       
-      toast.success("¡Inicio de sesión exitoso!");
+      toast.success("Login successful!");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Error al iniciar sesión");
+      toast.error(error instanceof Error ? error.message : "Error logging in");
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const signup = async (data: {
-    email: string;
-    password: string;
-    fullName: string;
-    role: string;
-    phoneNumber: string;
-    subscriptionPlan?: string;
-  }) => {
+  const signup = async (data: SignupData) => {
     try {
       setIsLoading(true);
       const { error, data: authData } = await supabase.auth.signUp({
@@ -86,20 +84,19 @@ export function useAuthService() {
       const userId = authData?.user?.id;
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
-        // Usando any como solución temporal para el problema de tipos
-        await supabase.rpc(
-          'create_landlord_details', 
-          { 
-            user_id: userId, 
-            plan: data.subscriptionPlan 
-          } as any
-        );
+        // Properly typed RPC parameters
+        const params: RpcParams = { 
+          user_id: userId, 
+          plan: data.subscriptionPlan 
+        };
+        
+        await supabase.rpc('create_landlord_details', params);
       }
       
-      toast.success("Cuenta creada exitosamente. Por favor, verifica tu correo.");
+      toast.success("Account created successfully. Please verify your email.");
       navigate("/login");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Error al crear la cuenta");
+      toast.error(error instanceof Error ? error.message : "Error creating account");
       throw error;
     } finally {
       setIsLoading(false);
@@ -113,7 +110,7 @@ export function useAuthService() {
       if (error) throw error;
       navigate("/login");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Error al cerrar sesión");
+      toast.error(error instanceof Error ? error.message : "Error logging out");
       throw error;
     } finally {
       setIsLoading(false);
@@ -122,13 +119,13 @@ export function useAuthService() {
   
   const switchRole = async () => {
     try {
-      toast.info("Esta función aún no está implementada");
+      toast.info("This feature is not yet implemented");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Error al cambiar de rol");
+      toast.error(error instanceof Error ? error.message : "Error switching role");
     }
   };
 
-  // Demo login para pruebas
+  // Demo login for testing
   const demoLogin = async (role: "landlord" | "tenant") => {
     const demoCredentials = {
       landlord: { email: "landlord@demo.com", password: "password123" },
@@ -138,8 +135,8 @@ export function useAuthService() {
     try {
       await login(demoCredentials[role].email, demoCredentials[role].password);
     } catch (error) {
-      console.error(`Error en demo login (${role}):`, error);
-      toast.error(`Error en inicio de sesión de demostración: ${role}`);
+      console.error(`Error in demo login (${role}):`, error);
+      toast.error(`Error in demo login: ${role}`);
     }
   };
 
