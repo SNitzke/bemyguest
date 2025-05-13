@@ -1,152 +1,193 @@
 
 import React, { useState } from 'react';
+import { PersonalInfoFields } from './signup/PersonalInfoFields';
+import { PasswordFields } from './signup/PasswordFields';
+import { RoleSelector } from './signup/RoleSelector';
+import { SubscriptionPlans } from './signup/SubscriptionPlans';
 import { Button } from '../ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { SubscriptionPlan } from '@/types';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { PersonalInfoFields } from './signup/PersonalInfoFields';
-import { RoleSelector } from './signup/RoleSelector';
-import { SubscriptionPlans } from './signup/SubscriptionPlans';
-import { PasswordFields } from './signup/PasswordFields';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
-import { useNavigate } from 'react-router-dom';
+import { SignupData } from '@/types/auth';
+
+// Plan data hardcoded for demo (normalmente se obtendrían del servidor)
+const plans = [
+  {
+    id: '1',
+    name: 'Basic',
+    monthly_price: 1999,
+    features: {
+      max_properties: 5,
+      support: 'email'
+    }
+  },
+  {
+    id: '2',
+    name: 'Pro',
+    monthly_price: 4999,
+    features: {
+      max_properties: 20,
+      support: 'priority'
+    }
+  },
+  {
+    id: '3',
+    name: 'Enterprise',
+    monthly_price: 9999,
+    features: {
+      max_properties: 'unlimited',
+      support: '24/7'
+    }
+  }
+];
 
 export const EnhancedSignUpForm = () => {
-  const { signup } = useAuth();
-  const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
     fullName: '',
+    email: '',
     phoneNumber: '',
     role: 'tenant' as 'tenant' | 'landlord',
+    password: '',
+    confirmPassword: '',
     subscriptionPlan: 'Basic'
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { signup } = useAuth();
 
-  // Fetch subscription plans from Supabase
-  const { data: plans } = useQuery({
-    queryKey: ['subscriptionPlans'],
-    queryFn: async () => {
-      const { data, error } = await supabase.functions.invoke('get-subscription-plans');
-      
-      if (error) {
-        console.error('Error fetching subscription plans:', error);
-        return [
-          {
-            id: '1',
-            name: 'Basic',
-            description: 'Perfect for small landlords',
-            monthly_price: 999,
-            features: { max_properties: 3, support: 'email' }
-          },
-          {
-            id: '2', 
-            name: 'Professional',
-            description: 'Great for growing property management',
-            monthly_price: 2999,
-            features: { max_properties: 15, support: 'priority' }
-          },
-          {
-            id: '3',
-            name: 'Enterprise',
-            description: 'Complete solution for large portfolios',
-            monthly_price: 4999,
-            features: { max_properties: 'unlimited', support: 'dedicated' }
-          }
-        ] as SubscriptionPlan[];
+  const updateFormData = (field: string, value: string) => {
+    setFormData({
+      ...formData,
+      [field]: value
+    });
+  };
+
+  const updateRole = (role: 'tenant' | 'landlord') => {
+    setFormData({
+      ...formData,
+      role
+    });
+  };
+
+  const handleNext = () => {
+    if (step === 1) {
+      // Validar datos personales
+      if (!formData.fullName || !formData.email || !formData.phoneNumber) {
+        toast.error("Por favor completa todos los campos");
+        return;
       }
-      
-      return data as SubscriptionPlan[];
+      if (!formData.email.includes('@')) {
+        toast.error("Por favor ingresa un email válido");
+        return;
+      }
+    } else if (step === 2) {
+      // Validar contraseñas
+      if (!formData.password || formData.password.length < 6) {
+        toast.error("La contraseña debe tener al menos 6 caracteres");
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        toast.error("Las contraseñas no coinciden");
+        return;
+      }
     }
-  });
+    
+    setStep(step + 1);
+  };
 
-  const handleFieldChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+  const handleBack = () => {
+    setStep(step - 1);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    
+    // Validación final
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Las contraseñas no coinciden");
+      return;
+    }
 
     try {
-      if (!acceptedTerms) {
-        throw new Error("Please accept the terms and conditions");
-      }
+      setIsSubmitting(true);
       
-      if (formData.password !== formData.confirmPassword) {
-        throw new Error("Passwords don't match");
-      }
-
-      await signup({
+      const signupData: SignupData = {
         email: formData.email,
         password: formData.password,
         fullName: formData.fullName,
         role: formData.role,
-        subscriptionPlan: formData.role === 'landlord' ? formData.subscriptionPlan : undefined,
-        phoneNumber: formData.phoneNumber
-      });
-
-      // After successful signup, redirect to login page with success message
-      toast.success('Account created successfully! Please log in to access your account.');
-      navigate('/login');
+        phoneNumber: formData.phoneNumber,
+        ...(formData.role === 'landlord' && { subscriptionPlan: formData.subscriptionPlan })
+      };
+      
+      await signup(signupData);
+      toast.success("Cuenta creada con éxito. Por favor verifica tu email.");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to create account');
+      console.error("Error during signup:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const renderStepContent = () => {
+    switch (step) {
+      case 1:
+        return <PersonalInfoFields formData={formData} onChange={updateFormData} />;
+      case 2:
+        return <PasswordFields password={formData.password} confirmPassword={formData.confirmPassword} onChange={updateFormData} />;
+      case 3:
+        return <RoleSelector role={formData.role} onChange={updateRole} />;
+      case 4:
+        if (formData.role === 'landlord') {
+          return (
+            <SubscriptionPlans 
+              plans={plans} 
+              selectedPlan={formData.subscriptionPlan} 
+              onSelectPlan={(plan) => updateFormData('subscriptionPlan', plan)} 
+            />
+          );
+        }
+        return null;
+      default:
+        return null;
+    }
+  };
+
+  const isLastStep = formData.role === 'tenant' ? step === 3 : step === 4;
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <PersonalInfoFields 
-        formData={formData} 
-        onChange={handleFieldChange} 
-      />
-
-      <RoleSelector 
-        role={formData.role} 
-        onChange={(role) => handleFieldChange('role', role)} 
-      />
-
-      {formData.role === 'landlord' && plans && (
-        <SubscriptionPlans
-          plans={plans}
-          selectedPlan={formData.subscriptionPlan}
-          onSelectPlan={(plan) => handleFieldChange('subscriptionPlan', plan)}
-        />
-      )}
-
-      <PasswordFields
-        password={formData.password}
-        confirmPassword={formData.confirmPassword}
-        onChange={handleFieldChange}
-      />
+    <form onSubmit={isLastStep ? handleSubmit : (e) => e.preventDefault()}>
+      {renderStepContent()}
       
-      <div className="flex items-center space-x-2">
-        <Checkbox 
-          id="terms" 
-          checked={acceptedTerms}
-          onCheckedChange={(checked) => {
-            setAcceptedTerms(checked === true);
-          }}
-        />
-        <Label
-          htmlFor="terms"
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        >
-          I accept the Terms of Service and Privacy Policy
-        </Label>
+      <div className="flex justify-between mt-8">
+        {step > 1 && (
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={handleBack}
+            disabled={isSubmitting}
+          >
+            Atrás
+          </Button>
+        )}
+        
+        {isLastStep ? (
+          <Button 
+            type="submit" 
+            className="ml-auto"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Registrando..." : "Registrarse"}
+          </Button>
+        ) : (
+          <Button 
+            type="button" 
+            className="ml-auto"
+            onClick={handleNext}
+          >
+            Siguiente
+          </Button>
+        )}
       </div>
-
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? 'Creating Account...' : 'Sign Up'}
-      </Button>
     </form>
   );
 };

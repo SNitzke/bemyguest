@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { properties, issues, payments, financialData } from '../utils/mockData';
 
-// Import our components
+// Import components
 import SubscriptionCard from '../components/landlord/SubscriptionCard';
 import MetricsCards from '../components/landlord/MetricsCards';
 import ProfileInfoCard from '../components/landlord/ProfileInfoCard';
@@ -12,18 +12,13 @@ import DashboardTabs from '../components/landlord/DashboardTabs';
 import LoadingState from '../components/landlord/LoadingState';
 import FinancialChart from '../components/dashboard/FinancialChart';
 
-// Define proper types for the RPC function parameters
-interface GetLandlordDetailsParams {
-  user_id: string;
-}
-
-// Define a proper interface for the landlord details
+// Define interfaces for landlord details
 export interface LandlordDetails {
   id?: string;
-  company_name: string | null;
-  subscription_plan: string | null;
-  subscription_start_date: string | null;
-  subscription_end_date: string | null;
+  company_name?: string | null;
+  subscription_plan?: string | null;
+  subscription_start_date?: string | null;
+  subscription_end_date?: string | null;
 }
 
 const LandlordProfile: React.FC = () => {
@@ -36,13 +31,10 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        // Define the parameters with the proper type
-        const params: GetLandlordDetailsParams = { user_id: user.id };
-        
-        // Call the RPC function with the properly typed parameters
+        // Uso de any como solución para problemas de tipos con RPC
         const response = await supabase.rpc(
           'get_landlord_details', 
-          params
+          { user_id: user.id } as any
         );
         
         if (response.error) {
@@ -50,9 +42,8 @@ const LandlordProfile: React.FC = () => {
           return;
         }
         
-        if (response.data) {
-          setLandlordDetails(response.data as LandlordDetails);
-        }
+        // Usar aserciones de tipo para manejar la respuesta
+        setLandlordDetails(response.data as LandlordDetails);
       } catch (err) {
         console.error("Error in landlord details fetch:", err);
       } finally {

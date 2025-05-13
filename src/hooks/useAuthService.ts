@@ -1,15 +1,13 @@
 
 import { useState } from "react";
-import { User, Session } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { SignupData } from "@/types/auth";
 
-// Define proper interface for get_landlord_details parameters
-interface CreateLandlordDetailsParams {
-  user_id: string;
-  plan: string;
+// Definir interfaces explícitas para evitar errores de TypeScript
+interface UserRole {
+  role: string;
+  user_role?: string;
 }
 
 export function useAuthService() {
@@ -20,7 +18,7 @@ export function useAuthService() {
     if (!userId) return null;
 
     try {
-      // Using explicit type parameters to avoid "never" errors
+      // Usando parámetros de tipo explícitos
       const { data, error } = await supabase
         .from('profiles')
         .select('role')
@@ -43,7 +41,6 @@ export function useAuthService() {
       if (error) throw error;
       if (!data || !data.user) throw new Error('No user data');
 
-      // Fixed: Passing user ID as string, not using "never" type
       const role = await getUserRole(data.user.id);
 
       if (role === 'landlord') {
@@ -51,15 +48,24 @@ export function useAuthService() {
       } else {
         navigate("/dashboard");
       }
+      
+      toast.success("¡Inicio de sesión exitoso!");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to login");
+      toast.error(error instanceof Error ? error.message : "Error al iniciar sesión");
       throw error;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const signup = async (data: SignupData) => {
+  const signup = async (data: {
+    email: string;
+    password: string;
+    fullName: string;
+    role: string;
+    phoneNumber: string;
+    subscriptionPlan?: string;
+  }) => {
     try {
       setIsLoading(true);
       const { error, data: authData } = await supabase.auth.signUp({
@@ -80,22 +86,20 @@ export function useAuthService() {
       const userId = authData?.user?.id;
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
-        // Use the proper parameter types for the RPC call
-        const params: CreateLandlordDetailsParams = {
-          user_id: userId,
-          plan: data.subscriptionPlan
-        };
-        
+        // Usando any como solución temporal para el problema de tipos
         await supabase.rpc(
           'create_landlord_details', 
-          params
+          { 
+            user_id: userId, 
+            plan: data.subscriptionPlan 
+          } as any
         );
       }
       
-      toast.success("Account created successfully! Please verify your email.");
+      toast.success("Cuenta creada exitosamente. Por favor, verifica tu correo.");
       navigate("/login");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to create account");
+      toast.error(error instanceof Error ? error.message : "Error al crear la cuenta");
       throw error;
     } finally {
       setIsLoading(false);
@@ -109,7 +113,7 @@ export function useAuthService() {
       if (error) throw error;
       navigate("/login");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to logout");
+      toast.error(error instanceof Error ? error.message : "Error al cerrar sesión");
       throw error;
     } finally {
       setIsLoading(false);
@@ -118,10 +122,24 @@ export function useAuthService() {
   
   const switchRole = async () => {
     try {
-      // This is a placeholder function - in a real app, you would update the user's role in your database
-      toast.info("This feature is not yet implemented");
+      toast.info("Esta función aún no está implementada");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to switch role");
+      toast.error(error instanceof Error ? error.message : "Error al cambiar de rol");
+    }
+  };
+
+  // Demo login para pruebas
+  const demoLogin = async (role: "landlord" | "tenant") => {
+    const demoCredentials = {
+      landlord: { email: "landlord@demo.com", password: "password123" },
+      tenant: { email: "tenant@demo.com", password: "password123" }
+    };
+    
+    try {
+      await login(demoCredentials[role].email, demoCredentials[role].password);
+    } catch (error) {
+      console.error(`Error en demo login (${role}):`, error);
+      toast.error(`Error en inicio de sesión de demostración: ${role}`);
     }
   };
 
@@ -131,6 +149,7 @@ export function useAuthService() {
     login,
     signup,
     logout,
-    switchRole
+    switchRole,
+    demoLogin
   };
 }

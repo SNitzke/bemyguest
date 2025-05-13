@@ -53,6 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signup: authService.signup,
       logout: authService.logout,
       switchRole: authService.switchRole,
+      demoLogin: authService.demoLogin,
       getUserRole,
       ...invitationService
     }}>

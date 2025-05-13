@@ -12,7 +12,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { login, demoLogin, isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -31,7 +31,6 @@ const Login = () => {
     setIsSubmitting(true);
     try {
       await login(email, password);
-      // The redirection is now handled in the useAuthService hook based on user role
     } catch (error) {
       console.error("Login error:", error);
     } finally {
@@ -40,17 +39,12 @@ const Login = () => {
   };
 
   const handleDemoLogin = async (role: "landlord" | "tenant") => {
-    const demoCredentials = {
-      landlord: { email: "landlord@demo.com", password: "password123" },
-      tenant: { email: "tenant@demo.com", password: "password123" }
-    };
-    
     setIsSubmitting(true);
     try {
-      await login(demoCredentials[role].email, demoCredentials[role].password);
-      toast.success(`Logged in as ${role} demo user`);
+      await demoLogin(role);
+      toast.success(`Sesión iniciada como usuario de demostración (${role})`);
     } catch (error) {
-      toast.error(`Demo login failed: ${role}`);
+      toast.error(`Error en inicio de sesión de demostración: ${role}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -61,8 +55,8 @@ const Login = () => {
       <div className="w-full max-w-md">
         <Card>
           <CardHeader>
-            <CardTitle>Welcome back</CardTitle>
-            <CardDescription>Sign in to your account</CardDescription>
+            <CardTitle>Bienvenido</CardTitle>
+            <CardDescription>Inicia sesión en tu cuenta</CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
@@ -71,14 +65,14 @@ const Login = () => {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="name@example.com"
+                  placeholder="nombre@ejemplo.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">Contraseña</Label>
                 <Input
                   id="password"
                   type="password"
@@ -91,13 +85,13 @@ const Login = () => {
 
               <div className="text-sm text-right">
                 <Link to="/forgot-password" className="text-primary hover:underline">
-                  Forgot password?
+                  ¿Olvidaste tu contraseña?
                 </Link>
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "Signing in..." : "Sign in"}
+                {isSubmitting ? "Iniciando sesión..." : "Iniciar sesión"}
               </Button>
               
               <div className="relative w-full">
@@ -105,7 +99,7 @@ const Login = () => {
                   <span className="w-full border-t"></span>
                 </div>
                 <div className="relative flex justify-center">
-                  <span className="px-2 bg-card text-muted-foreground text-xs">OR TRY A DEMO</span>
+                  <span className="px-2 bg-card text-muted-foreground text-xs">O PRUEBA UNA DEMO</span>
                 </div>
               </div>
               
@@ -116,7 +110,7 @@ const Login = () => {
                   onClick={() => handleDemoLogin('landlord')} 
                   disabled={isSubmitting}
                 >
-                  Landlord Demo
+                  Demo Landlord
                 </Button>
                 <Button 
                   type="button" 
@@ -124,14 +118,14 @@ const Login = () => {
                   onClick={() => handleDemoLogin('tenant')} 
                   disabled={isSubmitting}
                 >
-                  Tenant Demo
+                  Demo Tenant
                 </Button>
               </div>
               
               <p className="text-sm text-center text-muted-foreground">
-                Don't have an account?{" "}
+                ¿No tienes una cuenta?{" "}
                 <Link to="/signup" className="text-primary hover:underline">
-                  Sign up
+                  Regístrate
                 </Link>
               </p>
             </CardFooter>
