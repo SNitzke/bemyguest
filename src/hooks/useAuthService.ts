@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { useNavigate } from "react-router-dom";
@@ -5,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SignupData } from "@/types/auth";
 
-// Define proper types for the RPC functions
 interface CreateLandlordDetailsParams {
   user_id: string;
   plan: string;
@@ -38,12 +38,10 @@ export function useAuthService() {
       setIsLoading(true);
       const { error, data } = await supabase.auth.signInWithPassword({ email, password });
       
-      // Añade una verificación de tipo
       if (error) throw error;
       if (!data || !data.user) throw new Error('No user data');
 
-      // Usa optional chaining con un valor por defecto
-      const role = await getUserRole(data.user.id ?? '');
+      const role = await getUserRole(data.user.id);
 
       if (role === 'landlord') {
         navigate("/landlord-profile");
@@ -76,22 +74,17 @@ export function useAuthService() {
       
       if (error) throw error;
       
-      // Get the user ID from the signup response
       const userId = authData?.user?.id;
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
-        // Fix typing by defining the parameters object explicitly
-        const params: CreateLandlordDetailsParams = {
-          user_id: userId,
-          plan: data.subscriptionPlan
-        };
-        
-        // Use type assertion to avoid the 'never' type constraint
-        const rpcResponse = await supabase.rpc('create_landlord_details', params as any);
-          
-        if (rpcResponse.error) {
-          console.error("Error creating landlord details:", rpcResponse.error);
-        }
+        // We need to use type assertion here to fix the TypeScript error
+        await supabase.rpc(
+          'create_landlord_details', 
+          { 
+            user_id: userId, 
+            plan: data.subscriptionPlan 
+          } as any
+        );
       }
       
       toast.success("Account created successfully! Please verify your email.");

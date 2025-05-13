@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,11 +36,11 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        // Create properly typed parameters object
-        const params: GetLandlordDetailsParams = { user_id: user.id };
-        
-        // Use type assertion to avoid the 'never' type constraint
-        const response = await supabase.rpc('get_landlord_details', params as any);
+        // We need to use type assertion here to fix the TypeScript error
+        const response = await supabase.rpc(
+          'get_landlord_details', 
+          { user_id: user.id } as any
+        );
         
         if (response.error) {
           console.error("Error fetching landlord details:", response.error);
@@ -47,7 +48,6 @@ const LandlordProfile: React.FC = () => {
         }
         
         if (response.data) {
-          // Use type assertion with the interface defined
           setLandlordDetails(response.data as LandlordDetails);
         }
       } catch (err) {
