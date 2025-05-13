@@ -13,7 +13,7 @@ interface UserRole {
 
 // Type for RPC parameters
 interface RpcParams {
-  [key: string]: string | number | boolean | null;
+  [key: string]: any;
 }
 
 export function useAuthService() {
@@ -84,7 +84,7 @@ export function useAuthService() {
       const userId = authData?.user?.id;
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
-        // Properly typed RPC parameters
+        // Updated RPC parameters with proper typing
         const params: RpcParams = { 
           user_id: userId, 
           plan: data.subscriptionPlan 

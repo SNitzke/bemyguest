@@ -1,3 +1,4 @@
+
 export type UserRole = "landlord" | "tenant" | "admin";
 export type PaymentMethod = "credit" | "debit" | "cash";
 
@@ -88,7 +89,7 @@ export interface SubscriptionPlan {
   monthly_price: number;
   features: {
     max_properties: number | 'unlimited';
-    support: 'email' | 'priority' | 'dedicated';
+    support: 'email' | 'priority' | 'dedicated' | '24/7';
   };
 }
 
