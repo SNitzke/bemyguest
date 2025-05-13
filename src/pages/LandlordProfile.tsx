@@ -36,10 +36,13 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        // We need to use type assertion here to fix the TypeScript error
+        // Define the parameters with the proper type
+        const params: GetLandlordDetailsParams = { user_id: user.id };
+        
+        // Call the RPC function with the properly typed parameters
         const response = await supabase.rpc(
           'get_landlord_details', 
-          { user_id: user.id } as any
+          params
         );
         
         if (response.error) {

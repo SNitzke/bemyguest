@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { SignupData } from "@/types/auth";
 
+// Define proper interface for get_landlord_details parameters
 interface CreateLandlordDetailsParams {
   user_id: string;
   plan: string;
@@ -19,6 +20,7 @@ export function useAuthService() {
     if (!userId) return null;
 
     try {
+      // Using explicit type parameters to avoid "never" errors
       const { data, error } = await supabase
         .from('profiles')
         .select('role')
@@ -41,6 +43,7 @@ export function useAuthService() {
       if (error) throw error;
       if (!data || !data.user) throw new Error('No user data');
 
+      // Fixed: Passing user ID as string, not using "never" type
       const role = await getUserRole(data.user.id);
 
       if (role === 'landlord') {
@@ -77,13 +80,15 @@ export function useAuthService() {
       const userId = authData?.user?.id;
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
-        // We need to use type assertion here to fix the TypeScript error
+        // Use the proper parameter types for the RPC call
+        const params: CreateLandlordDetailsParams = {
+          user_id: userId,
+          plan: data.subscriptionPlan
+        };
+        
         await supabase.rpc(
           'create_landlord_details', 
-          { 
-            user_id: userId, 
-            plan: data.subscriptionPlan 
-          } as any
+          params
         );
       }
       
