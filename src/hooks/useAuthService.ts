@@ -90,7 +90,7 @@ export function useAuthService() {
           plan: data.subscriptionPlan 
         };
         
-        await supabase.rpc('create_landlord_details', params);
+        await supabase.rpc('create_landlord_details', params as any);
       }
       
       toast.success("Account created successfully. Please verify your email.");
