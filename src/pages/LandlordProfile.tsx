@@ -24,7 +24,7 @@ const LandlordProfile: React.FC = () => {
       
       try {
         // Fix the type issue by using proper typing for RPC
-        const response = await supabase.rpc<string>(
+        const response = await supabase.rpc<LandlordDetails, string>(
           'get_landlord_details', 
           { user_id: user.id } as any
         );
