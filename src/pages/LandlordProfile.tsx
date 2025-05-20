@@ -23,18 +23,18 @@ const LandlordProfile: React.FC = () => {
       if (!user) return;
       
       try {
-        // Fix the type issue by using proper typing for RPC
-        const response = await supabase.rpc<LandlordDetails, string>(
+        // Remove generic type parameters completely since they're causing issues
+        const { data, error } = await supabase.rpc(
           'get_landlord_details', 
-          { user_id: user.id } as any
+          { user_id: user.id }
         );
         
-        if (response.error) {
-          console.error("Error fetching landlord details:", response.error);
+        if (error) {
+          console.error("Error fetching landlord details:", error);
           return;
         }
         
-        setLandlordDetails(response.data as LandlordDetails);
+        setLandlordDetails(data as LandlordDetails);
       } catch (err) {
         console.error("Error in landlord details fetch:", err);
       } finally {

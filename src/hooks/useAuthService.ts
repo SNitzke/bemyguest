@@ -90,7 +90,8 @@ export function useAuthService() {
           plan: data.subscriptionPlan 
         };
         
-        await supabase.rpc<null, string>('create_landlord_details', params as any);
+        // Fix the generic type parameters - use any for the ResultType to bypass constraints
+        await supabase.rpc('create_landlord_details', params);
       }
       
       toast.success("Account created successfully. Please verify your email.");
