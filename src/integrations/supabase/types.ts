@@ -9,6 +9,68 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      landlord_details: {
+        Row: {
+          address: string | null
+          business_name: string | null
+          company_name: string | null
+          created_at: string
+          id: string
+          max_properties: number
+          payment_verified: boolean
+          properties_count: number
+          subscription_end_date: string | null
+          subscription_plan: string
+          subscription_start_date: string | null
+          subscription_status: string
+          updated_at: string
+          user_id: string
+          verified: boolean
+        }
+        Insert: {
+          address?: string | null
+          business_name?: string | null
+          company_name?: string | null
+          created_at?: string
+          id?: string
+          max_properties?: number
+          payment_verified?: boolean
+          properties_count?: number
+          subscription_end_date?: string | null
+          subscription_plan?: string
+          subscription_start_date?: string | null
+          subscription_status?: string
+          updated_at?: string
+          user_id: string
+          verified?: boolean
+        }
+        Update: {
+          address?: string | null
+          business_name?: string | null
+          company_name?: string | null
+          created_at?: string
+          id?: string
+          max_properties?: number
+          payment_verified?: boolean
+          properties_count?: number
+          subscription_end_date?: string | null
+          subscription_plan?: string
+          subscription_start_date?: string | null
+          subscription_status?: string
+          updated_at?: string
+          user_id?: string
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "landlord_details_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -41,7 +103,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_landlord_details: {
+        Args: { user_id: string; plan?: string }
+        Returns: Json
+      }
+      get_landlord_details: {
+        Args: { user_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       user_role: "tenant" | "landlord" | "admin"

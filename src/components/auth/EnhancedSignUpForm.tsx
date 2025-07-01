@@ -10,12 +10,11 @@ import { toast } from 'sonner';
 import { SignupData } from '@/types/auth';
 import { SubscriptionPlan } from '@/types';
 
-// Plan data hardcoded for demo (normally these would be fetched from the server)
 const plans: SubscriptionPlan[] = [
   {
     id: '1',
     name: 'Basic',
-    description: 'Perfect for small landlords',
+    description: 'Perfecto para propietarios pequeños',
     monthly_price: 1999,
     features: {
       max_properties: 5,
@@ -25,7 +24,7 @@ const plans: SubscriptionPlan[] = [
   {
     id: '2',
     name: 'Pro',
-    description: 'Great for growing property management',
+    description: 'Ideal para gestión de propiedades en crecimiento',
     monthly_price: 4999,
     features: {
       max_properties: 20,
@@ -35,7 +34,7 @@ const plans: SubscriptionPlan[] = [
   {
     id: '3',
     name: 'Enterprise',
-    description: 'Complete solution for large portfolios',
+    description: 'Solución completa para grandes carteras',
     monthly_price: 9999,
     features: {
       max_properties: 'unlimited',
@@ -74,23 +73,21 @@ export const EnhancedSignUpForm = () => {
 
   const handleNext = () => {
     if (step === 1) {
-      // Validate personal data
       if (!formData.fullName || !formData.email || !formData.phoneNumber) {
-        toast.error("Please complete all fields");
+        toast.error("Por favor completa todos los campos");
         return;
       }
       if (!formData.email.includes('@')) {
-        toast.error("Please enter a valid email");
+        toast.error("Por favor ingresa un email válido");
         return;
       }
     } else if (step === 2) {
-      // Validate passwords
       if (!formData.password || formData.password.length < 6) {
-        toast.error("Password must be at least 6 characters");
+        toast.error("La contraseña debe tener al menos 6 caracteres");
         return;
       }
       if (formData.password !== formData.confirmPassword) {
-        toast.error("Passwords don't match");
+        toast.error("Las contraseñas no coinciden");
         return;
       }
     }
@@ -105,9 +102,8 @@ export const EnhancedSignUpForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Final validation
     if (formData.password !== formData.confirmPassword) {
-      toast.error("Passwords don't match");
+      toast.error("Las contraseñas no coinciden");
       return;
     }
 
@@ -124,9 +120,8 @@ export const EnhancedSignUpForm = () => {
       };
       
       await signup(signupData);
-      toast.success("Account created successfully. Please verify your email.");
     } catch (error) {
-      console.error("Error during signup:", error);
+      console.error("Error durante el registro:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -143,11 +138,17 @@ export const EnhancedSignUpForm = () => {
       case 4:
         if (formData.role === 'landlord') {
           return (
-            <SubscriptionPlans 
-              plans={plans} 
-              selectedPlan={formData.subscriptionPlan} 
-              onSelectPlan={(plan) => updateFormData('subscriptionPlan', plan)} 
-            />
+            <div className="space-y-6">
+              <div className="text-center">
+                <h3 className="text-lg font-semibold">Selecciona tu Plan</h3>
+                <p className="text-muted-foreground">Después del registro necesitarás realizar una transferencia bancaria para activar tu plan</p>
+              </div>
+              <SubscriptionPlans 
+                plans={plans} 
+                selectedPlan={formData.subscriptionPlan} 
+                onSelectPlan={(plan) => updateFormData('subscriptionPlan', plan)} 
+              />
+            </div>
           );
         }
         return null;
@@ -170,7 +171,7 @@ export const EnhancedSignUpForm = () => {
             onClick={handleBack}
             disabled={isSubmitting}
           >
-            Back
+            Atrás
           </Button>
         )}
         
@@ -180,7 +181,7 @@ export const EnhancedSignUpForm = () => {
             className="ml-auto"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Registering..." : "Register"}
+            {isSubmitting ? "Registrando..." : "Registrarse"}
           </Button>
         ) : (
           <Button 
@@ -188,7 +189,7 @@ export const EnhancedSignUpForm = () => {
             className="ml-auto"
             onClick={handleNext}
           >
-            Next
+            Siguiente
           </Button>
         )}
       </div>

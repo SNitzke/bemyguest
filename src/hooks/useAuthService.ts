@@ -3,18 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { SignupData } from "@/types/auth";
-
-// Define interfaces for type safety
-interface UserRole {
-  role: string;
-  user_role?: string;
-}
-
-// Type for RPC parameters
-interface RpcParams {
-  [key: string]: any;
-}
+import { SignupData, Profile } from "@/types/auth";
 
 export function useAuthService() {
   const [isLoading, setIsLoading] = useState(false);
@@ -38,13 +27,53 @@ export function useAuthService() {
     }
   };
 
+  const getProfile = async (userId: string): Promise<Profile | null> => {
+    if (!userId) return null;
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+      return data as Profile;
+    } catch (error) {
+      console.error("Error getting user profile:", error);
+      return null;
+    }
+  };
+
+  const updateProfile = async (userId: string, profileData: Partial<Profile>): Promise<void> => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          ...profileData,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', userId);
+
+      if (error) throw error;
+      toast.success("Perfil actualizado correctamente");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Error al actualizar el perfil");
+      throw error;
+    }
+  };
+
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      const { error, data } = await supabase.auth.signInWithPassword({ email, password });
+      const { error, data } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
+      });
       
       if (error) throw error;
-      if (!data || !data.user) throw new Error('No user data');
+      if (!data || !data.user) throw new Error('No se recibieron datos del usuario');
 
       const role = await getUserRole(data.user.id);
 
@@ -54,9 +83,9 @@ export function useAuthService() {
         navigate("/dashboard");
       }
       
-      toast.success("Login successful!");
+      toast.success("¡Inicio de sesión exitoso!");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Error logging in");
+      toast.error(error instanceof Error ? error.message : "Error al iniciar sesión");
       throw error;
     } finally {
       setIsLoading(false);
@@ -66,6 +95,7 @@ export function useAuthService() {
   const signup = async (data: SignupData) => {
     try {
       setIsLoading(true);
+      
       const { error, data: authData } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
@@ -84,20 +114,18 @@ export function useAuthService() {
       const userId = authData?.user?.id;
       
       if (data.role === 'landlord' && data.subscriptionPlan && userId) {
-        // Updated RPC parameters with proper typing
-        const params: RpcParams = { 
+        const params = { 
           user_id: userId, 
           plan: data.subscriptionPlan 
         };
         
-        // Fix the generic type parameters - use any for the ResultType to bypass constraints
         await supabase.rpc('create_landlord_details', params);
       }
       
-      toast.success("Account created successfully. Please verify your email.");
+      toast.success("Cuenta creada exitosamente. Por favor verifica tu email.");
       navigate("/login");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Error creating account");
+      toast.error(error instanceof Error ? error.message : "Error al crear la cuenta");
       throw error;
     } finally {
       setIsLoading(false);
@@ -110,8 +138,9 @@ export function useAuthService() {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       navigate("/login");
+      toast.success("Sesión cerrada correctamente");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Error logging out");
+      toast.error(error instanceof Error ? error.message : "Error al cerrar sesión");
       throw error;
     } finally {
       setIsLoading(false);
@@ -120,9 +149,9 @@ export function useAuthService() {
   
   const switchRole = async () => {
     try {
-      toast.info("This feature is not yet implemented");
+      toast.info("Esta funcionalidad aún no está implementada");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Error switching role");
+      toast.error(error instanceof Error ? error.message : "Error al cambiar rol");
     }
   };
 
@@ -137,13 +166,15 @@ export function useAuthService() {
       await login(demoCredentials[role].email, demoCredentials[role].password);
     } catch (error) {
       console.error(`Error in demo login (${role}):`, error);
-      toast.error(`Error in demo login: ${role}`);
+      toast.error(`Error en el login de demostración: ${role}`);
     }
   };
 
   return {
     isLoading,
     getUserRole,
+    getProfile,
+    updateProfile,
     login,
     signup,
     logout,

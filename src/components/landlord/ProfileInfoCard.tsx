@@ -5,45 +5,40 @@ import { Button } from '../ui/button';
 import { User, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { User as SupabaseUser } from '@supabase/supabase-js';
+import { Profile } from '@/types/auth';
 
 interface ProfileInfoCardProps {
   user: SupabaseUser | null;
+  profile: Profile | null;
 }
 
-const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ user }) => {
+const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ user, profile }) => {
   const navigate = useNavigate();
-  const userMetadata = user?.user_metadata as { full_name?: string, role?: string, phone_number?: string } | undefined;
-  const fullName = userMetadata?.full_name || 'Landlord';
-  const phoneNumber = userMetadata?.phone_number || 'Not provided';
   
   return (
     <Card className="md:col-span-1">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <User size={20} />
-          Profile Information
+          Información del Perfil
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <p className="text-sm text-muted-foreground">Full Name</p>
-          <p className="font-medium">{fullName}</p>
+          <p className="text-sm text-muted-foreground">Nombre Completo</p>
+          <p className="font-medium">{profile?.full_name || 'No proporcionado'}</p>
         </div>
         <div>
           <p className="text-sm text-muted-foreground">Email</p>
           <p className="font-medium">{user?.email}</p>
         </div>
         <div>
-          <p className="text-sm text-muted-foreground">Phone</p>
-          <p className="font-medium">{phoneNumber}</p>
+          <p className="text-sm text-muted-foreground">Teléfono</p>
+          <p className="font-medium">{profile?.phone_number || 'No proporcionado'}</p>
         </div>
         <div>
-          <p className="text-sm text-muted-foreground">Company</p>
-          <p className="font-medium">Not provided</p>
-        </div>
-        <div>
-          <p className="text-sm text-muted-foreground">Role</p>
-          <p className="font-medium capitalize">{userMetadata?.role || 'Landlord'}</p>
+          <p className="text-sm text-muted-foreground">Rol</p>
+          <p className="font-medium capitalize">{profile?.role || 'Propietario'}</p>
         </div>
         <Button 
           variant="outline" 
@@ -51,7 +46,7 @@ const ProfileInfoCard: React.FC<ProfileInfoCardProps> = ({ user }) => {
           onClick={() => navigate('/settings')}
         >
           <Settings className="mr-2 h-4 w-4" />
-          Edit Profile
+          Editar Perfil
         </Button>
       </CardContent>
     </Card>

@@ -1,31 +1,27 @@
 
 import React, { useState } from 'react';
-import { User } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Edit, User as UserIcon, Phone, Mail, Image, Save } from 'lucide-react';
 
-interface ProfileSettingsProps {
-  user: User | null;
-}
-
-const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user }) => {
+const ProfileSettings: React.FC = () => {
+  const { profile, updateProfile } = useAuth();
   const [profileData, setProfileData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    phone: '555-123-4567', // Mock data, would come from user object in real app
-    avatarUrl: user?.avatarUrl || '',
+    full_name: profile?.full_name || '',
+    phone_number: profile?.phone_number || '',
+    avatar_url: profile?.avatar_url || '',
   });
 
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(profileData.avatarUrl || null);
+  const [imagePreview, setImagePreview] = useState<string | null>(profileData.avatar_url || null);
   const [isEditingName, setIsEditingName] = useState(false);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
-  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -37,7 +33,6 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user }) => {
       const file = e.target.files[0];
       setImageFile(file);
       
-      // Create preview URL
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -46,21 +41,21 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user }) => {
     }
   };
 
-  const handleSaveProfile = () => {
-    // Here you would handle API call to update profile
-    // Mock implementation for now
-    toast({
-      title: "Profile updated",
-      description: "Your profile information has been updated successfully.",
-    });
-
-    setIsEditingName(false);
-    setIsEditingPhone(false);
-    setIsEditingEmail(false);
+  const handleSaveProfile = async () => {
+    try {
+      setIsSaving(true);
+      await updateProfile(profileData);
+      setIsEditingName(false);
+      setIsEditingPhone(false);
+    } catch (error) {
+      console.error("Error saving profile:", error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const userInitials = profileData.name
-    ? profileData.name
+  const userInitials = profileData.full_name
+    ? profileData.full_name
         .split(' ')
         .map(n => n[0])
         .join('')
@@ -70,14 +65,14 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user }) => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Personal Information</CardTitle>
+          <CardTitle>Información Personal</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col items-center sm:flex-row sm:items-start gap-6">
             <div className="flex flex-col items-center gap-2">
               <Avatar className="h-24 w-24">
-                {imagePreview || profileData.avatarUrl ? (
-                  <AvatarImage src={imagePreview || profileData.avatarUrl} alt={profileData.name} />
+                {imagePreview || profileData.avatar_url ? (
+                  <AvatarImage src={imagePreview || profileData.avatar_url} alt={profileData.full_name} />
                 ) : (
                   <AvatarFallback className="text-xl">{userInitials}</AvatarFallback>
                 )}
@@ -95,30 +90,30 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user }) => {
                   className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground cursor-pointer"
                 >
                   <Image size={14} />
-                  Change Picture
+                  Cambiar Foto
                 </Label>
               </div>
             </div>
             
             <div className="flex-1 space-y-4 w-full">
               <div>
-                <Label htmlFor="name" className="text-sm font-medium">
-                  Full Name
+                <Label htmlFor="full_name" className="text-sm font-medium">
+                  Nombre Completo
                 </Label>
                 <div className="flex items-center gap-2 mt-1">
                   {isEditingName ? (
                     <div className="relative flex-1">
                       <UserIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        id="name"
-                        name="name"
-                        value={profileData.name}
+                        id="full_name"
+                        name="full_name"
+                        value={profileData.full_name}
                         onChange={handleInputChange}
                         className="pl-9"
                       />
                     </div>
                   ) : (
-                    <span className="flex-1 py-2">{profileData.name}</span>
+                    <span className="flex-1 py-2">{profileData.full_name}</span>
                   )}
                   <Button
                     variant="ghost"
@@ -131,23 +126,23 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user }) => {
               </div>
               
               <div>
-                <Label htmlFor="phone" className="text-sm font-medium">
-                  Phone Number
+                <Label htmlFor="phone_number" className="text-sm font-medium">
+                  Número de Teléfono
                 </Label>
                 <div className="flex items-center gap-2 mt-1">
                   {isEditingPhone ? (
                     <div className="relative flex-1">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        id="phone"
-                        name="phone"
-                        value={profileData.phone}
+                        id="phone_number"
+                        name="phone_number"
+                        value={profileData.phone_number}
                         onChange={handleInputChange}
                         className="pl-9"
                       />
                     </div>
                   ) : (
-                    <span className="flex-1 py-2">{profileData.phone}</span>
+                    <span className="flex-1 py-2">{profileData.phone_number || 'No proporcionado'}</span>
                   )}
                   <Button
                     variant="ghost"
@@ -160,79 +155,22 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ user }) => {
               </div>
               
               <div>
-                <Label htmlFor="email" className="text-sm font-medium">
-                  Email Address
+                <Label className="text-sm font-medium">
+                  Dirección de Email
                 </Label>
                 <div className="flex items-center gap-2 mt-1">
-                  {isEditingEmail ? (
-                    <div className="relative flex-1">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="email"
-                        name="email"
-                        value={profileData.email}
-                        onChange={handleInputChange}
-                        type="email"
-                        className="pl-9"
-                      />
-                    </div>
-                  ) : (
-                    <span className="flex-1 py-2">{profileData.email}</span>
-                  )}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setIsEditingEmail(!isEditingEmail)}
-                  >
-                    <Edit size={16} />
-                  </Button>
+                  <span className="flex-1 py-2">{profile?.email}</span>
+                  <span className="text-xs text-muted-foreground">No editable</span>
                 </div>
               </div>
             </div>
           </div>
         </CardContent>
         <CardFooter className="justify-end">
-          <Button onClick={handleSaveProfile} className="gap-2">
+          <Button onClick={handleSaveProfile} className="gap-2" disabled={isSaving}>
             <Save size={16} />
-            Save Changes
+            {isSaving ? 'Guardando...' : 'Guardar Cambios'}
           </Button>
-        </CardFooter>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Password Management</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="current-password">Current Password</Label>
-            <Input id="current-password" type="password" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="new-password">New Password</Label>
-            <Input id="new-password" type="password" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="confirm-password">Confirm New Password</Label>
-            <Input id="confirm-password" type="password" />
-          </div>
-        </CardContent>
-        <CardFooter>
-          <Button>Change Password</Button>
-        </CardFooter>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>Account Closure</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Closing your account will result in the permanent deletion of all your data including property listings, tenant information, and financial records. This action cannot be undone.
-          </p>
-        </CardContent>
-        <CardFooter>
-          <Button variant="destructive">Close Account</Button>
         </CardFooter>
       </Card>
     </div>

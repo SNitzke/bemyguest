@@ -11,23 +11,39 @@ export interface SignupData {
   subscriptionPlan?: string;
 }
 
-// Updated LandlordDetails interface to make company_name optional
+export interface Profile {
+  id: string;
+  email: string;
+  full_name: string;
+  phone_number?: string;
+  role: "tenant" | "landlord";
+  avatar_url?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface LandlordDetails {
-  id?: string;
-  company_name?: string | null;
-  subscription_plan?: string | null;
-  subscription_start_date?: string | null;
-  subscription_end_date?: string | null;
-  business_name?: string | null;
-  address?: string | null;
-  phone?: string | null;
-  properties_count?: number;
-  verified?: boolean;
+  id: string;
+  user_id: string;
+  company_name?: string;
+  business_name?: string;
+  address?: string;
+  subscription_plan: string;
+  subscription_status: 'pending' | 'active' | 'inactive' | 'cancelled';
+  subscription_start_date?: string;
+  subscription_end_date?: string;
+  payment_verified: boolean;
+  properties_count: number;
+  max_properties: number;
+  verified: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface AuthContextType {
   user: User | null;
   session: Session | null;
+  profile: Profile | null;
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
@@ -36,6 +52,7 @@ export interface AuthContextType {
   switchRole: () => Promise<void>;
   demoLogin: (role: "landlord" | "tenant") => Promise<void>;
   getUserRole: () => Promise<string | null>;
+  updateProfile: (data: Partial<Profile>) => Promise<void>;
   // Add tenant invitation methods
   verifyInvitation?: (code: string, email: string) => Promise<Invitation | null>;
   acceptInvitation?: (code: string, email: string, password: string) => Promise<void>;
