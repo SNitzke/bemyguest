@@ -142,7 +142,7 @@ const Login = () => {
                   Regístrate aquí
                 </Link>
               </p>
-            </CardContent>
+            </CardFooter>
           </form>
         </Card>
       </div>
