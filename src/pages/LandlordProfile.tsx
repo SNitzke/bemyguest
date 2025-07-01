@@ -36,7 +36,10 @@ const LandlordProfile: React.FC = () => {
           return;
         }
         
-        setLandlordDetails(data as LandlordDetails);
+        // Convert the Json response to LandlordDetails type safely
+        if (data && typeof data === 'object' && !Array.isArray(data)) {
+          setLandlordDetails(data as unknown as LandlordDetails);
+        }
       } catch (err) {
         console.error("Error in landlord details fetch:", err);
       } finally {

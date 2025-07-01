@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '../contexts/AuthContext';
 import ProfileSettings from '../components/settings/ProfileSettings';
 import NotificationSettings from '../components/settings/NotificationSettings';
@@ -11,26 +10,9 @@ import PropertyDefaults from '../components/settings/PropertyDefaults';
 import CommunicationSettings from '../components/settings/CommunicationSettings';
 import SupportSettings from '../components/settings/SupportSettings';
 import { useLanguage } from '../contexts/LanguageContext';
-import { User } from '@supabase/supabase-js';
-
-// Helper function to adapt Supabase User to our expected User type
-const adaptUser = (supabaseUser: User | null) => {
-  if (!supabaseUser) return null;
-  
-  const userMetadata = supabaseUser.user_metadata as { full_name?: string, role?: string, avatar_url?: string } | undefined;
-  
-  return {
-    id: supabaseUser.id,
-    name: userMetadata?.full_name || 'User',
-    email: supabaseUser.email || '',
-    role: (userMetadata?.role as any) || 'tenant',
-    avatarUrl: userMetadata?.avatar_url,
-  };
-};
 
 const Settings = () => {
-  const { user: supabaseUser } = useAuth();
-  const user = adaptUser(supabaseUser);
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("profile");
   const { t } = useLanguage();
 
@@ -53,7 +35,7 @@ const Settings = () => {
         </TabsList>
 
         <TabsContent value="profile">
-          <ProfileSettings user={user} />
+          <ProfileSettings />
         </TabsContent>
 
         <TabsContent value="notifications">
