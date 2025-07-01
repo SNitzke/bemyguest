@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import { ArrowLeft } from "lucide-react";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -28,6 +29,12 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error("Por favor completa todos los campos");
+      return;
+    }
+    
     setIsSubmitting(true);
     try {
       await login(email, password);
@@ -42,9 +49,8 @@ const Login = () => {
     setIsSubmitting(true);
     try {
       await demoLogin(role);
-      toast.success(`Sesión iniciada como usuario de demostración (${role})`);
     } catch (error) {
-      toast.error(`Error en inicio de sesión de demostración: ${role}`);
+      console.error(`Demo login error (${role}):`, error);
     } finally {
       setIsSubmitting(false);
     }
@@ -53,6 +59,14 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-bmg-50 to-bmg-100 p-4">
       <div className="w-full max-w-md">
+        <Link 
+          to="/" 
+          className="flex items-center text-bmg-600 hover:text-bmg-700 mb-6 transition-colors"
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Volver al inicio
+        </Link>
+        
         <Card>
           <CardHeader>
             <CardTitle>Bienvenido</CardTitle>
@@ -110,7 +124,7 @@ const Login = () => {
                   onClick={() => handleDemoLogin('landlord')} 
                   disabled={isSubmitting}
                 >
-                  Demo Landlord
+                  Demo Propietario
                 </Button>
                 <Button 
                   type="button" 
@@ -118,17 +132,17 @@ const Login = () => {
                   onClick={() => handleDemoLogin('tenant')} 
                   disabled={isSubmitting}
                 >
-                  Demo Tenant
+                  Demo Inquilino
                 </Button>
               </div>
               
               <p className="text-sm text-center text-muted-foreground">
                 ¿No tienes una cuenta?{" "}
                 <Link to="/signup" className="text-primary hover:underline">
-                  Regístrate
+                  Regístrate aquí
                 </Link>
               </p>
-            </CardFooter>
+            </CardContent>
           </form>
         </Card>
       </div>

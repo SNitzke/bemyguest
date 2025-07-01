@@ -12,7 +12,7 @@ import { SubscriptionPlan } from '@/types';
 
 const plans: SubscriptionPlan[] = [
   {
-    id: '1',
+    id: 'basic',
     name: 'Basic',
     description: 'Perfecto para propietarios pequeños',
     monthly_price: 1999,
@@ -22,7 +22,7 @@ const plans: SubscriptionPlan[] = [
     }
   },
   {
-    id: '2',
+    id: 'pro',
     name: 'Pro',
     description: 'Ideal para gestión de propiedades en crecimiento',
     monthly_price: 4999,
@@ -32,7 +32,7 @@ const plans: SubscriptionPlan[] = [
     }
   },
   {
-    id: '3',
+    id: 'enterprise',
     name: 'Enterprise',
     description: 'Solución completa para grandes carteras',
     monthly_price: 9999,
@@ -107,6 +107,11 @@ export const EnhancedSignUpForm = () => {
       return;
     }
 
+    if (!formData.fullName || !formData.email || !formData.phoneNumber) {
+      toast.error("Por favor completa todos los campos obligatorios");
+      return;
+    }
+
     try {
       setIsSubmitting(true);
       
@@ -119,9 +124,13 @@ export const EnhancedSignUpForm = () => {
         ...(formData.role === 'landlord' && { subscriptionPlan: formData.subscriptionPlan })
       };
       
+      console.log("Datos de registro:", signupData);
       await signup(signupData);
+      
+      toast.success("¡Cuenta creada exitosamente!");
     } catch (error) {
       console.error("Error durante el registro:", error);
+      toast.error("Error durante el registro. Por favor intenta nuevamente.");
     } finally {
       setIsSubmitting(false);
     }
@@ -130,11 +139,39 @@ export const EnhancedSignUpForm = () => {
   const renderStepContent = () => {
     switch (step) {
       case 1:
-        return <PersonalInfoFields formData={formData} onChange={updateFormData} />;
+        return (
+          <div className="space-y-4">
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-semibold">Información Personal</h3>
+              <p className="text-muted-foreground">Completa tus datos básicos</p>
+            </div>
+            <PersonalInfoFields formData={formData} onChange={updateFormData} />
+          </div>
+        );
       case 2:
-        return <PasswordFields password={formData.password} confirmPassword={formData.confirmPassword} onChange={updateFormData} />;
+        return (
+          <div className="space-y-4">
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-semibold">Crear Contraseña</h3>
+              <p className="text-muted-foreground">Elige una contraseña segura</p>
+            </div>
+            <PasswordFields 
+              password={formData.password} 
+              confirmPassword={formData.confirmPassword} 
+              onChange={updateFormData} 
+            />
+          </div>
+        );
       case 3:
-        return <RoleSelector role={formData.role} onChange={updateRole} />;
+        return (
+          <div className="space-y-4">
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-semibold">Selecciona tu Rol</h3>
+              <p className="text-muted-foreground">¿Eres inquilino o propietario?</p>
+            </div>
+            <RoleSelector role={formData.role} onChange={updateRole} />
+          </div>
+        );
       case 4:
         if (formData.role === 'landlord') {
           return (
@@ -160,39 +197,59 @@ export const EnhancedSignUpForm = () => {
   const isLastStep = formData.role === 'tenant' ? step === 3 : step === 4;
 
   return (
-    <form onSubmit={isLastStep ? handleSubmit : (e) => e.preventDefault()}>
-      {renderStepContent()}
-      
-      <div className="flex justify-between mt-8">
-        {step > 1 && (
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={handleBack}
-            disabled={isSubmitting}
-          >
-            Atrás
-          </Button>
-        )}
-        
-        {isLastStep ? (
-          <Button 
-            type="submit" 
-            className="ml-auto"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Registrando..." : "Registrarse"}
-          </Button>
-        ) : (
-          <Button 
-            type="button" 
-            className="ml-auto"
-            onClick={handleNext}
-          >
-            Siguiente
-          </Button>
-        )}
+    <div className="w-full max-w-2xl mx-auto">
+      {/* Progress indicator */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm text-muted-foreground">
+            Paso {step} de {formData.role === 'tenant' ? 3 : 4}
+          </span>
+          <span className="text-sm text-muted-foreground">
+            {Math.round((step / (formData.role === 'tenant' ? 3 : 4)) * 100)}%
+          </span>
+        </div>
+        <div className="w-full bg-gray-200 rounded-full h-2">
+          <div 
+            className="bg-primary h-2 rounded-full transition-all duration-300" 
+            style={{ width: `${(step / (formData.role === 'tenant' ? 3 : 4)) * 100}%` }}
+          ></div>
+        </div>
       </div>
-    </form>
+
+      <form onSubmit={isLastStep ? handleSubmit : (e) => e.preventDefault()}>
+        {renderStepContent()}
+        
+        <div className="flex justify-between mt-8">
+          {step > 1 && (
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={handleBack}
+              disabled={isSubmitting}
+            >
+              Atrás
+            </Button>
+          )}
+          
+          {isLastStep ? (
+            <Button 
+              type="submit" 
+              className="ml-auto"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Creando cuenta..." : "Crear Cuenta"}
+            </Button>
+          ) : (
+            <Button 
+              type="button" 
+              className="ml-auto"
+              onClick={handleNext}
+            >
+              Siguiente
+            </Button>
+          )}
+        </div>
+      </form>
+    </div>
   );
 };

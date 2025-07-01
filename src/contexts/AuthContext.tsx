@@ -17,22 +17,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const authService = useAuthService();
   const invitationService = useInvitations();
 
+  // Función para cargar el perfil
+  const loadProfile = async (userId: string) => {
+    try {
+      console.log("Cargando perfil para usuario:", userId);
+      const profileData = await authService.getProfile(userId);
+      console.log("Perfil cargado:", profileData);
+      setProfile(profileData);
+    } catch (error) {
+      console.error("Error loading profile:", error);
+      setProfile(null);
+    }
+  };
+
   useEffect(() => {
-    // Set up auth state listener FIRST
+    let mounted = true;
+
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log("Auth state changed:", event, session?.user?.id);
+      
+      if (!mounted) return;
+      
       setSession(session);
       setUser(session?.user ?? null);
       
       // Load profile when user logs in
       if (session?.user) {
         setTimeout(async () => {
-          try {
-            const profileData = await authService.getProfile(session.user.id);
-            setProfile(profileData);
-          } catch (error) {
-            console.error("Error loading profile:", error);
+          if (mounted) {
+            await loadProfile(session.user.id);
           }
-        }, 0);
+        }, 100);
       } else {
         setProfile(null);
       }
@@ -40,19 +56,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setIsLoading(false);
     });
 
-    // THEN check for existing session
+    // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      
+      console.log("Sesión existente:", session?.user?.id);
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        authService.getProfile(session.user.id).then(setProfile).catch(console.error);
+        loadProfile(session.user.id);
       }
       
       setIsLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const getUserRole = async (): Promise<string | null> => {
@@ -66,8 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await authService.updateProfile(user.id, data);
     
     // Refresh profile after update
-    const updatedProfile = await authService.getProfile(user.id);
-    setProfile(updatedProfile);
+    await loadProfile(user.id);
   };
 
   return (

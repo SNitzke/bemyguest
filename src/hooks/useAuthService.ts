@@ -96,10 +96,14 @@ export function useAuthService() {
     try {
       setIsLoading(true);
       
-      const { error, data: authData } = await supabase.auth.signUp({
+      console.log("Iniciando registro con datos:", data);
+      
+      // Registrar usuario en Supabase Auth
+      const { error: authError, data: authData } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: data.fullName,
             role: data.role,
@@ -109,22 +113,54 @@ export function useAuthService() {
         },
       });
       
-      if (error) throw error;
+      if (authError) {
+        console.error("Error en auth.signUp:", authError);
+        throw authError;
+      }
+      
+      console.log("Usuario creado en auth:", authData);
       
       const userId = authData?.user?.id;
       
-      if (data.role === 'landlord' && data.subscriptionPlan && userId) {
-        const params = { 
-          user_id: userId, 
-          plan: data.subscriptionPlan 
-        };
+      if (!userId) {
+        throw new Error("No se pudo obtener el ID del usuario");
+      }
+
+      // Crear perfil manualmente para asegurar que se cree
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: userId,
+          email: data.email,
+          full_name: data.fullName,
+          phone_number: data.phoneNumber,
+          role: data.role
+        });
+
+      if (profileError) {
+        console.error("Error creando perfil:", profileError);
+        // No lanzar error aquí, el trigger debería manejarlo
+      }
+
+      // Si es landlord, crear detalles de landlord
+      if (data.role === 'landlord' && data.subscriptionPlan) {
+        const { error: landlordError } = await supabase.rpc('create_landlord_details', {
+          user_id: userId,
+          plan: data.subscriptionPlan
+        });
         
-        await supabase.rpc('create_landlord_details', params);
+        if (landlordError) {
+          console.error("Error creando detalles de landlord:", landlordError);
+        }
       }
       
-      toast.success("Cuenta creada exitosamente. Por favor verifica tu email.");
+      toast.success("¡Cuenta creada exitosamente! Puedes iniciar sesión ahora.");
+      
+      // Redirigir al login
       navigate("/login");
+      
     } catch (error) {
+      console.error("Error completo en signup:", error);
       toast.error(error instanceof Error ? error.message : "Error al crear la cuenta");
       throw error;
     } finally {
@@ -155,18 +191,18 @@ export function useAuthService() {
     }
   };
 
-  // Demo login for testing
+  // Demo login actualizado con usuarios reales
   const demoLogin = async (role: "landlord" | "tenant") => {
     const demoCredentials = {
-      landlord: { email: "landlord@demo.com", password: "password123" },
-      tenant: { email: "tenant@demo.com", password: "password123" }
+      landlord: { email: "demo.landlord@example.com", password: "demo123456" },
+      tenant: { email: "demo.tenant@example.com", password: "demo123456" }
     };
     
     try {
       await login(demoCredentials[role].email, demoCredentials[role].password);
     } catch (error) {
       console.error(`Error in demo login (${role}):`, error);
-      toast.error(`Error en el login de demostración: ${role}`);
+      toast.error(`Los usuarios demo no existen aún. Por favor registra una cuenta nueva.`);
     }
   };
 
