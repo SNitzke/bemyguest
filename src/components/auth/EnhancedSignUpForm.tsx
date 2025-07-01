@@ -52,82 +52,117 @@ export const EnhancedSignUpForm = () => {
     role: 'tenant' as 'tenant' | 'landlord',
     password: '',
     confirmPassword: '',
-    subscriptionPlan: 'Basic'
+    subscriptionPlan: 'basic'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { signup } = useAuth();
 
   const updateFormData = (field: string, value: string) => {
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       [field]: value
-    });
+    }));
   };
 
   const updateRole = (role: 'tenant' | 'landlord') => {
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       role
-    });
+    }));
+  };
+
+  const validateStep = (currentStep: number): boolean => {
+    switch (currentStep) {
+      case 1:
+        if (!formData.fullName.trim()) {
+          toast.error("Por favor ingresa tu nombre completo");
+          return false;
+        }
+        if (!formData.email.trim()) {
+          toast.error("Por favor ingresa tu email");
+          return false;
+        }
+        if (!formData.email.includes('@')) {
+          toast.error("Por favor ingresa un email válido");
+          return false;
+        }
+        if (!formData.phoneNumber.trim()) {
+          toast.error("Por favor ingresa tu número de teléfono");
+          return false;
+        }
+        return true;
+        
+      case 2:
+        if (!formData.password) {
+          toast.error("Por favor ingresa una contraseña");
+          return false;
+        }
+        if (formData.password.length < 6) {
+          toast.error("La contraseña debe tener al menos 6 caracteres");
+          return false;
+        }
+        if (!formData.confirmPassword) {
+          toast.error("Por favor confirma tu contraseña");
+          return false;
+        }
+        if (formData.password !== formData.confirmPassword) {
+          toast.error("Las contraseñas no coinciden");
+          return false;
+        }
+        return true;
+        
+      case 3:
+        // Role selection is always valid since we have a default
+        return true;
+        
+      case 4:
+        // Subscription plan selection is always valid for landlords
+        return true;
+        
+      default:
+        return false;
+    }
   };
 
   const handleNext = () => {
-    if (step === 1) {
-      if (!formData.fullName || !formData.email || !formData.phoneNumber) {
-        toast.error("Por favor completa todos los campos");
-        return;
-      }
-      if (!formData.email.includes('@')) {
-        toast.error("Por favor ingresa un email válido");
-        return;
-      }
-    } else if (step === 2) {
-      if (!formData.password || formData.password.length < 6) {
-        toast.error("La contraseña debe tener al menos 6 caracteres");
-        return;
-      }
-      if (formData.password !== formData.confirmPassword) {
-        toast.error("Las contraseñas no coinciden");
-        return;
-      }
+    if (!validateStep(step)) {
+      return;
     }
-    
-    setStep(step + 1);
+    setStep(prev => prev + 1);
   };
 
   const handleBack = () => {
-    setStep(step - 1);
+    setStep(prev => prev - 1);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Las contraseñas no coinciden");
-      return;
+    // Validate all steps before submitting
+    for (let i = 1; i <= (formData.role === 'tenant' ? 3 : 4); i++) {
+      if (!validateStep(i)) {
+        setStep(i);
+        return;
+      }
     }
 
-    if (!formData.fullName || !formData.email || !formData.phoneNumber) {
-      toast.error("Por favor completa todos los campos obligatorios");
-      return;
-    }
+    if (isSubmitting) return;
 
     try {
       setIsSubmitting(true);
       
       const signupData: SignupData = {
-        email: formData.email,
+        email: formData.email.trim(),
         password: formData.password,
-        fullName: formData.fullName,
+        fullName: formData.fullName.trim(),
         role: formData.role,
-        phoneNumber: formData.phoneNumber,
+        phoneNumber: formData.phoneNumber.trim(),
         ...(formData.role === 'landlord' && { subscriptionPlan: formData.subscriptionPlan })
       };
       
-      console.log("Datos de registro:", signupData);
+      console.log("Enviando datos de registro:", signupData);
       await signup(signupData);
       
-      toast.success("¡Cuenta creada exitosamente!");
     } catch (error) {
       console.error("Error durante el registro:", error);
       toast.error("Error durante el registro. Por favor intenta nuevamente.");
@@ -136,24 +171,31 @@ export const EnhancedSignUpForm = () => {
     }
   };
 
+  const getTotalSteps = () => {
+    return formData.role === 'tenant' ? 3 : 4;
+  };
+
+  const isLastStep = step === getTotalSteps();
+
   const renderStepContent = () => {
     switch (step) {
       case 1:
         return (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="text-center mb-6">
-              <h3 className="text-lg font-semibold">Información Personal</h3>
-              <p className="text-muted-foreground">Completa tus datos básicos</p>
+              <h3 className="text-xl font-semibold text-gray-900">Información Personal</h3>
+              <p className="text-gray-600 mt-2">Completa tus datos básicos para comenzar</p>
             </div>
             <PersonalInfoFields formData={formData} onChange={updateFormData} />
           </div>
         );
+        
       case 2:
         return (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="text-center mb-6">
-              <h3 className="text-lg font-semibold">Crear Contraseña</h3>
-              <p className="text-muted-foreground">Elige una contraseña segura</p>
+              <h3 className="text-xl font-semibold text-gray-900">Crear Contraseña</h3>
+              <p className="text-gray-600 mt-2">Elige una contraseña segura para tu cuenta</p>
             </div>
             <PasswordFields 
               password={formData.password} 
@@ -162,23 +204,28 @@ export const EnhancedSignUpForm = () => {
             />
           </div>
         );
+        
       case 3:
         return (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div className="text-center mb-6">
-              <h3 className="text-lg font-semibold">Selecciona tu Rol</h3>
-              <p className="text-muted-foreground">¿Eres inquilino o propietario?</p>
+              <h3 className="text-xl font-semibold text-gray-900">Selecciona tu Rol</h3>
+              <p className="text-gray-600 mt-2">¿Eres inquilino o propietario de inmuebles?</p>
             </div>
             <RoleSelector role={formData.role} onChange={updateRole} />
           </div>
         );
+        
       case 4:
         if (formData.role === 'landlord') {
           return (
             <div className="space-y-6">
-              <div className="text-center">
-                <h3 className="text-lg font-semibold">Selecciona tu Plan</h3>
-                <p className="text-muted-foreground">Después del registro necesitarás realizar una transferencia bancaria para activar tu plan</p>
+              <div className="text-center mb-6">
+                <h3 className="text-xl font-semibold text-gray-900">Selecciona tu Plan</h3>
+                <p className="text-gray-600 mt-2">Elige el plan que mejor se adapte a tus necesidades</p>
+                <p className="text-sm text-amber-600 mt-2">
+                  Después del registro podrás activar tu plan mediante transferencia bancaria
+                </p>
               </div>
               <SubscriptionPlans 
                 plans={plans} 
@@ -189,67 +236,79 @@ export const EnhancedSignUpForm = () => {
           );
         }
         return null;
+        
       default:
         return null;
     }
   };
 
-  const isLastStep = formData.role === 'tenant' ? step === 3 : step === 4;
-
   return (
     <div className="w-full max-w-2xl mx-auto">
       {/* Progress indicator */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-muted-foreground">
-            Paso {step} de {formData.role === 'tenant' ? 3 : 4}
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-sm font-medium text-gray-700">
+            Paso {step} de {getTotalSteps()}
           </span>
-          <span className="text-sm text-muted-foreground">
-            {Math.round((step / (formData.role === 'tenant' ? 3 : 4)) * 100)}%
+          <span className="text-sm font-medium text-gray-700">
+            {Math.round((step / getTotalSteps()) * 100)}% completado
           </span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2">
+        <div className="w-full bg-gray-200 rounded-full h-3">
           <div 
-            className="bg-primary h-2 rounded-full transition-all duration-300" 
-            style={{ width: `${(step / (formData.role === 'tenant' ? 3 : 4)) * 100}%` }}
-          ></div>
+            className="bg-bmg-500 h-3 rounded-full transition-all duration-500 ease-out" 
+            style={{ width: `${(step / getTotalSteps()) * 100}%` }}
+          />
         </div>
       </div>
 
-      <form onSubmit={isLastStep ? handleSubmit : (e) => e.preventDefault()}>
+      {/* Form content */}
+      <div className="bg-white rounded-lg p-6 shadow-sm border">
         {renderStepContent()}
         
-        <div className="flex justify-between mt-8">
-          {step > 1 && (
+        {/* Navigation buttons */}
+        <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
+          {step > 1 ? (
             <Button 
               type="button" 
               variant="outline" 
               onClick={handleBack}
               disabled={isSubmitting}
+              className="px-6 py-2"
             >
-              Atrás
+              ← Atrás
             </Button>
+          ) : (
+            <div /> // Empty div to maintain flex layout
           )}
           
           {isLastStep ? (
             <Button 
-              type="submit" 
-              className="ml-auto"
+              type="button" 
+              onClick={handleSubmit}
               disabled={isSubmitting}
+              className="px-8 py-2 bg-bmg-500 hover:bg-bmg-600 text-white font-medium"
             >
-              {isSubmitting ? "Creando cuenta..." : "Crear Cuenta"}
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Creando cuenta...
+                </div>
+              ) : (
+                "Crear Cuenta"
+              )}
             </Button>
           ) : (
             <Button 
               type="button" 
-              className="ml-auto"
               onClick={handleNext}
+              className="px-6 py-2 bg-bmg-500 hover:bg-bmg-600 text-white font-medium"
             >
-              Siguiente
+              Siguiente →
             </Button>
           )}
         </div>
-      </form>
+      </div>
     </div>
   );
 };

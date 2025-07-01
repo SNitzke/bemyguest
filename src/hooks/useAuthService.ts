@@ -75,13 +75,15 @@ export function useAuthService() {
       if (error) throw error;
       if (!data || !data.user) throw new Error('No se recibieron datos del usuario');
 
-      const role = await getUserRole(data.user.id);
-
-      if (role === 'landlord') {
-        navigate("/landlord-profile");
-      } else {
-        navigate("/dashboard");
-      }
+      // Wait a bit for the profile to be loaded by the auth context
+      setTimeout(async () => {
+        const role = await getUserRole(data.user.id);
+        if (role === 'landlord') {
+          navigate("/landlord-profile");
+        } else {
+          navigate("/dashboard");
+        }
+      }, 500);
       
       toast.success("¡Inicio de sesión exitoso!");
     } catch (error) {
@@ -98,7 +100,7 @@ export function useAuthService() {
       
       console.log("Iniciando registro con datos:", data);
       
-      // Registrar usuario en Supabase Auth
+      // Registrar usuario en Supabase Auth con autoConfirm
       const { error: authError, data: authData } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
@@ -126,23 +128,33 @@ export function useAuthService() {
         throw new Error("No se pudo obtener el ID del usuario");
       }
 
-      // Crear perfil manualmente para asegurar que se cree
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          id: userId,
-          email: data.email,
-          full_name: data.fullName,
-          phone_number: data.phoneNumber,
-          role: data.role
-        });
+      // Esperar un poco para que el trigger cree el perfil
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      if (profileError) {
-        console.error("Error creando perfil:", profileError);
-        // No lanzar error aquí, el trigger debería manejarlo
+      // Crear perfil manualmente si no existe
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('id', userId)
+        .single();
+
+      if (!existingProfile) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: userId,
+            email: data.email,
+            full_name: data.fullName,
+            phone_number: data.phoneNumber,
+            role: data.role
+          });
+
+        if (profileError) {
+          console.error("Error creando perfil:", profileError);
+        }
       }
 
-      // Si es landlord, crear detalles de landlord
+      // Si es landlord, crear/actualizar detalles de landlord
       if (data.role === 'landlord' && data.subscriptionPlan) {
         const { error: landlordError } = await supabase.rpc('create_landlord_details', {
           user_id: userId,
@@ -154,14 +166,36 @@ export function useAuthService() {
         }
       }
       
-      toast.success("¡Cuenta creada exitosamente! Puedes iniciar sesión ahora.");
-      
-      // Redirigir al login
-      navigate("/login");
+      // Auto-login después del registro exitoso
+      if (authData.user && !authError) {
+        toast.success("¡Cuenta creada exitosamente! Iniciando sesión...");
+        
+        // Redirigir según el rol
+        setTimeout(async () => {
+          if (data.role === 'landlord') {
+            navigate("/landlord-profile");
+          } else {
+            navigate("/dashboard");
+          }
+        }, 1000);
+      } else {
+        toast.success("¡Cuenta creada exitosamente! Puedes iniciar sesión ahora.");
+        navigate("/login");
+      }
       
     } catch (error) {
       console.error("Error completo en signup:", error);
-      toast.error(error instanceof Error ? error.message : "Error al crear la cuenta");
+      if (error instanceof Error) {
+        if (error.message.includes('User already registered')) {
+          toast.error("Este email ya está registrado. Intenta iniciar sesión.");
+        } else if (error.message.includes('Password should be at least 6 characters')) {
+          toast.error("La contraseña debe tener al menos 6 caracteres.");
+        } else {
+          toast.error(error.message || "Error al crear la cuenta");
+        }
+      } else {
+        toast.error("Error al crear la cuenta");
+      }
       throw error;
     } finally {
       setIsLoading(false);
@@ -191,7 +225,7 @@ export function useAuthService() {
     }
   };
 
-  // Demo login actualizado con usuarios reales
+  // Demo login con usuarios reales
   const demoLogin = async (role: "landlord" | "tenant") => {
     const demoCredentials = {
       landlord: { email: "demo.landlord@example.com", password: "demo123456" },
@@ -202,7 +236,7 @@ export function useAuthService() {
       await login(demoCredentials[role].email, demoCredentials[role].password);
     } catch (error) {
       console.error(`Error in demo login (${role}):`, error);
-      toast.error(`Los usuarios demo no existen aún. Por favor registra una cuenta nueva.`);
+      toast.error(`Los usuarios demo no existen. Puedes crear una cuenta nueva o usar tus credenciales.`);
     }
   };
 
