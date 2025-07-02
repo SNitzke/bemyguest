@@ -100,17 +100,17 @@ export function useAuthService() {
       
       console.log("Iniciando registro con datos:", data);
       
-      // Registrar usuario en Supabase Auth con autoConfirm
+      // Registrar usuario en Supabase Auth
       const { error: authError, data: authData } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}/dashboard`,
           data: {
             full_name: data.fullName,
             role: data.role,
             phone_number: data.phoneNumber,
-            subscription_plan: data.subscriptionPlan
+            subscription_plan: data.subscriptionPlan || 'basic'
           },
         },
       });
@@ -122,62 +122,20 @@ export function useAuthService() {
       
       console.log("Usuario creado en auth:", authData);
       
-      const userId = authData?.user?.id;
-      
-      if (!userId) {
-        throw new Error("No se pudo obtener el ID del usuario");
-      }
-
-      // Esperar un poco para que el trigger cree el perfil
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Crear perfil manualmente si no existe
-      const { data: existingProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', userId)
-        .single();
-
-      if (!existingProfile) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: userId,
-            email: data.email,
-            full_name: data.fullName,
-            phone_number: data.phoneNumber,
-            role: data.role
-          });
-
-        if (profileError) {
-          console.error("Error creando perfil:", profileError);
-        }
-      }
-
-      // Si es landlord, crear/actualizar detalles de landlord
-      if (data.role === 'landlord' && data.subscriptionPlan) {
-        const { error: landlordError } = await supabase.rpc('create_landlord_details', {
-          user_id: userId,
-          plan: data.subscriptionPlan
-        });
-        
-        if (landlordError) {
-          console.error("Error creando detalles de landlord:", landlordError);
-        }
-      }
-      
-      // Auto-login después del registro exitoso
-      if (authData.user && !authError) {
+      if (authData.user) {
         toast.success("¡Cuenta creada exitosamente! Iniciando sesión...");
         
-        // Redirigir según el rol
-        setTimeout(async () => {
+        // Esperar un poco para que el trigger cree el perfil
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // Auto-login y redirigir según el rol
+        setTimeout(() => {
           if (data.role === 'landlord') {
             navigate("/landlord-profile");
           } else {
             navigate("/dashboard");
           }
-        }, 1000);
+        }, 500);
       } else {
         toast.success("¡Cuenta creada exitosamente! Puedes iniciar sesión ahora.");
         navigate("/login");
