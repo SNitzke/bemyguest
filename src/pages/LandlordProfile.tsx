@@ -15,11 +15,13 @@ import FinancialChart from '../components/dashboard/FinancialChart';
 import { Button } from '../components/ui/button';
 import { CreditCard } from 'lucide-react';
 import { toast } from 'sonner';
+import { PaymentVerificationModal } from '../components/landlord/PaymentVerificationModal';
 
 const LandlordProfile: React.FC = () => {
   const { user, profile } = useAuth();
   const [landlordDetails, setLandlordDetails] = useState<LandlordDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   
   useEffect(() => {
     const fetchLandlordDetails = async () => {
@@ -51,7 +53,7 @@ const LandlordProfile: React.FC = () => {
   }, [user]);
 
   const handlePaymentVerification = () => {
-    toast.info("Para activar tu plan, realiza una transferencia bancaria. Nos pondremos en contacto contigo para confirmar el pago.");
+    setPaymentModalOpen(true);
   };
   
   return (
@@ -115,6 +117,12 @@ const LandlordProfile: React.FC = () => {
           </div>
         </>
       )}
+
+      <PaymentVerificationModal
+        open={paymentModalOpen}
+        onOpenChange={setPaymentModalOpen}
+        subscriptionPlan={landlordDetails?.subscription_plan || 'Basic'}
+      />
     </div>
   );
 };

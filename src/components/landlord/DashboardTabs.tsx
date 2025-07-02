@@ -38,13 +38,13 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ properties, issues, payme
         
         <TabsContent value="properties" className="space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="text-lg font-medium">Your Properties</h2>
+            <h2 className="text-lg font-medium">Tus Propiedades</h2>
             <Button 
               onClick={() => navigate('/properties')}
               className="flex items-center gap-2"
             >
               <PlusCircle size={16} />
-              Add Property
+              Gestionar Propiedades
             </Button>
           </div>
           <div className="grid grid-cols-1 gap-4">
@@ -58,7 +58,7 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ properties, issues, payme
               className="w-full mt-2"
               onClick={() => navigate('/properties')}
             >
-              View All ({properties.length}) Properties
+              Ver Todas ({properties.length}) Propiedades
             </Button>
           )}
         </TabsContent>

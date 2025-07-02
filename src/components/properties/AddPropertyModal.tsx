@@ -1,40 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { Property } from '../../types';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Building2, MapPin, Hash } from 'lucide-react';
+import { PlusCircle, Building2, MapPin, Hash } from 'lucide-react';
 import { toast } from 'sonner';
 
-interface EditPropertyModalProps {
-  property: Property;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onEdit: (property: Property) => void;
+interface AddPropertyModalProps {
+  onAddProperty: (property: {
+    name: string;
+    address: string;
+    units: number;
+  }) => void;
 }
 
-export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
-  property,
-  open,
-  onOpenChange,
-  onEdit,
-}) => {
+export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onAddProperty }) => {
+  const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: property.name,
-    address: property.address,
-    units: property.units
+    name: '',
+    address: '',
+    units: 1
   });
-
-  useEffect(() => {
-    if (open) {
-      setFormData({
-        name: property.name,
-        address: property.address,
-        units: property.units
-      });
-    }
-  }, [property, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,29 +30,31 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
       return;
     }
 
-    const updatedProperty: Property = {
-      ...property,
-      ...formData
-    };
-
-    onEdit(updatedProperty);
-    onOpenChange(false);
-    toast.success('Propiedad actualizada exitosamente');
+    onAddProperty(formData);
+    setFormData({ name: '', address: '', units: 1 });
+    setOpen(false);
+    toast.success('Propiedad agregada exitosamente');
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="gap-2">
+          <PlusCircle size={16} />
+          Agregar Propiedad
+        </Button>
+      </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Editar Propiedad</DialogTitle>
+          <DialogTitle>Agregar Nueva Propiedad</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="edit-name">Nombre de la Propiedad</Label>
+            <Label htmlFor="name">Nombre de la Propiedad</Label>
             <div className="relative">
               <Building2 className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                id="edit-name"
+                id="name"
                 placeholder="Ej: Residencial Los Pinos"
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
@@ -77,11 +65,11 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="edit-address">Dirección</Label>
+            <Label htmlFor="address">Dirección</Label>
             <div className="relative">
               <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                id="edit-address"
+                id="address"
                 placeholder="Calle, Ciudad, Estado, CP"
                 value={formData.address}
                 onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
@@ -92,11 +80,11 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="edit-units">Número de Unidades</Label>
+            <Label htmlFor="units">Número de Unidades</Label>
             <div className="relative">
               <Hash className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                id="edit-units"
+                id="units"
                 type="number"
                 min="1"
                 placeholder="1"
@@ -109,11 +97,11 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
           </div>
           
           <div className="flex gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="flex-1">
               Cancelar
             </Button>
             <Button type="submit" className="flex-1">
-              Guardar Cambios
+              Agregar Propiedad
             </Button>
           </div>
         </form>
@@ -121,5 +109,3 @@ export const EditPropertyModal: React.FC<EditPropertyModalProps> = ({
     </Dialog>
   );
 };
-
-export default EditPropertyModal;

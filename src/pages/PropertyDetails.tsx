@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "react-router-dom";
 import { Property } from "../types";
 import { properties } from "../utils/mockData";
@@ -10,15 +10,23 @@ import PropertyRentHistory from "../components/properties/PropertyRentHistory";
 import TenantInfo from "../components/properties/TenantInfo";
 import EditPropertyModal from "../components/properties/EditPropertyModal";
 import { Button } from "../components/ui/button";
-import { AlertTriangle } from "lucide-react";
+import { Edit } from "lucide-react";
+import { toast } from "sonner";
 
 const PropertyDetails = () => {
   const { id } = useParams();
-  const property = properties.find((p) => p.id === id);
+  const [property, setProperty] = useState<Property | undefined>(
+    properties.find((p) => p.id === id)
+  );
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   if (!property) {
     return <div>Property not found</div>;
   }
+
+  const handleEditProperty = (updatedProperty: Property) => {
+    setProperty(updatedProperty);
+  };
 
   return (
     <div className="space-y-6">
@@ -32,9 +40,22 @@ const PropertyDetails = () => {
         </div>
         <div className="space-y-6">
           <TenantInfo propertyId={property.id} />
-          <EditPropertyModal property={property} />
+          <div className="bg-background border rounded-lg p-4">
+            <h3 className="font-semibold mb-2">Acciones de Propiedad</h3>
+            <Button onClick={() => setEditModalOpen(true)} className="gap-2 w-full">
+              <Edit size={16} />
+              Editar Propiedad
+            </Button>
+          </div>
         </div>
       </div>
+
+      <EditPropertyModal
+        property={property}
+        open={editModalOpen}
+        onOpenChange={setEditModalOpen}
+        onEdit={handleEditProperty}
+      />
     </div>
   );
 };
