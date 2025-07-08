@@ -1,12 +1,13 @@
 
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
-import { Building2, Check, Calendar, PlusCircle } from 'lucide-react';
+import { Building2, Check, Calendar, PlusCircle, DollarSign } from 'lucide-react';
 import { Button } from '../ui/button';
 import { useNavigate } from 'react-router-dom';
 import PropertyCard from '../dashboard/PropertyCard';
 import IssuesOverview from '../dashboard/IssuesOverview';
 import PaymentsOverview from '../dashboard/PaymentsOverview';
+import { ManualPaymentsList } from '../payments/ManualPaymentsList';
 
 interface DashboardTabsProps {
   properties: any[];
@@ -33,6 +34,10 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ properties, issues, payme
           <TabsTrigger value="payments" className="flex items-center gap-2">
             <Calendar size={16} />
             Payments
+          </TabsTrigger>
+          <TabsTrigger value="manual-payments" className="flex items-center gap-2">
+            <DollarSign size={16} />
+            Pagos Manuales
           </TabsTrigger>
         </TabsList>
         
@@ -69,6 +74,10 @@ const DashboardTabs: React.FC<DashboardTabsProps> = ({ properties, issues, payme
         
         <TabsContent value="payments">
           <PaymentsOverview payments={payments} />
+        </TabsContent>
+        
+        <TabsContent value="manual-payments">
+          <ManualPaymentsList />
         </TabsContent>
       </Tabs>
     </div>

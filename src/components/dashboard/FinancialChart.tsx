@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import {
   ResponsiveContainer,
@@ -14,13 +14,84 @@ import {
   Legend
 } from "recharts";
 import { FinancialData } from "../../types";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface FinancialChartProps {
-  data: FinancialData[];
+  data?: FinancialData[];
 }
 
-const FinancialChart: React.FC<FinancialChartProps> = ({ data }) => {
+const FinancialChart: React.FC<FinancialChartProps> = ({ data: propData }) => {
+  const { user } = useAuth();
   const [chartType, setChartType] = useState<"bar" | "line">("bar");
+  const [enhancedData, setEnhancedData] = useState<FinancialData[]>([]);
+
+  useEffect(() => {
+    if (user) {
+      fetchManualPaymentsData();
+    }
+  }, [user, propData]);
+
+  const fetchManualPaymentsData = async () => {
+    if (!user) return;
+
+    try {
+      const { data: manualPayments, error } = await supabase
+        .from('manual_payments')
+        .select('amount, payment_date, payment_type')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      // Use provided data or create default data structure
+      const baseData = propData || [
+        { month: "Ene", income: 0, expenses: 0, netProfit: 0 },
+        { month: "Feb", income: 0, expenses: 0, netProfit: 0 },
+        { month: "Mar", income: 0, expenses: 0, netProfit: 0 },
+        { month: "Abr", income: 0, expenses: 0, netProfit: 0 },
+        { month: "May", income: 0, expenses: 0, netProfit: 0 },
+        { month: "Jun", income: 0, expenses: 0, netProfit: 0 }
+      ];
+
+      // Process manual payments by month
+      const manualPaymentsByMonth: Record<string, { income: number; expenses: number }> = {};
+
+      manualPayments?.forEach(payment => {
+        const paymentDate = new Date(payment.payment_date);
+        const month = paymentDate.toLocaleDateString('es', { month: 'short' });
+        
+        if (!manualPaymentsByMonth[month]) {
+          manualPaymentsByMonth[month] = { income: 0, expenses: 0 };
+        }
+
+        // Categorize payments as income or expenses
+        if (['rent', 'utilities'].includes(payment.payment_type)) {
+          manualPaymentsByMonth[month].income += payment.amount;
+        } else {
+          manualPaymentsByMonth[month].expenses += payment.amount;
+        }
+      });
+
+      // Merge manual payments with base data
+      const enhancedFinancialData = baseData.map(monthData => {
+        const manualData = manualPaymentsByMonth[monthData.month] || { income: 0, expenses: 0 };
+        const totalIncome = monthData.income + manualData.income;
+        const totalExpenses = monthData.expenses + manualData.expenses;
+        
+        return {
+          ...monthData,
+          income: totalIncome,
+          expenses: totalExpenses,
+          netProfit: totalIncome - totalExpenses
+        };
+      });
+
+      setEnhancedData(enhancedFinancialData);
+    } catch (error) {
+      console.error('Error fetching manual payments for chart:', error);
+      setEnhancedData(propData || []);
+    }
+  };
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -65,8 +136,8 @@ const FinancialChart: React.FC<FinancialChartProps> = ({ data }) => {
       <CardContent className="flex-1 pl-0">
         <div className="h-[300px] w-full">
           <ResponsiveContainer width="100%" height="100%">
-            {chartType === "bar" ? (
-              <BarChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+             {chartType === "bar" ? (
+              <BarChart data={enhancedData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis tickFormatter={formatCurrency} />
@@ -77,7 +148,7 @@ const FinancialChart: React.FC<FinancialChartProps> = ({ data }) => {
                 <Bar dataKey="netProfit" name="Net Profit" fill="#60a5fa" />
               </BarChart>
             ) : (
-              <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+              <LineChart data={enhancedData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis tickFormatter={formatCurrency} />
