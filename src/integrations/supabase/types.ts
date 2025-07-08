@@ -190,6 +190,7 @@ export type Database = {
           id: string
           image_url: string | null
           name: string
+          rent_amount: number | null
           status: string
           units: number
           updated_at: string
@@ -201,6 +202,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           name: string
+          rent_amount?: number | null
           status?: string
           units?: number
           updated_at?: string
@@ -212,12 +214,73 @@ export type Database = {
           id?: string
           image_url?: string | null
           name?: string
+          rent_amount?: number | null
           status?: string
           units?: number
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      tenant_invitations: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          invitation_code: string
+          landlord_id: string
+          property_id: string
+          rent_amount: number
+          status: string
+          tenant_email: string
+          tenant_name: string
+          unit_number: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invitation_code: string
+          landlord_id: string
+          property_id: string
+          rent_amount: number
+          status?: string
+          tenant_email: string
+          tenant_name: string
+          unit_number: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          invitation_code?: string
+          landlord_id?: string
+          property_id?: string
+          rent_amount?: number
+          status?: string
+          tenant_email?: string
+          tenant_name?: string
+          unit_number?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_tenant_invitations_landlord"
+            columns: ["landlord_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_tenant_invitations_property"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -227,6 +290,10 @@ export type Database = {
       create_landlord_details: {
         Args: { user_id: string; plan?: string }
         Returns: Json
+      }
+      generate_invitation_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_landlord_details: {
         Args: { user_id: string }

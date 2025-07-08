@@ -81,7 +81,7 @@ const AppRoutes = () => {
       <Route path="/" element={<Index />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
-      <Route path="/invitation" element={<TenantInvitation />} />
+      <Route path="/tenant-invitation" element={<TenantInvitation />} />
       
       {/* Protected Routes within AppLayout */}
       <Route

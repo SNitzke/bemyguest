@@ -9,8 +9,8 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 
 const formSchema = z.object({
+  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
-  invitationCode: z.string().min(6, 'Invitation code must be at least 6 characters'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -23,21 +23,15 @@ type FormValues = z.infer<typeof formSchema>;
 interface AcceptInvitationFormProps {
   onSubmit: (values: FormValues) => void;
   isSubmitting: boolean;
+  invitationData?: any;
 }
 
-const AcceptInvitationForm: React.FC<AcceptInvitationFormProps> = ({ onSubmit, isSubmitting }) => {
-  const auth = useAuth();
-  
-  // Note: These functions are stubbed to prevent TypeScript errors
-  // The actual implementation would be handled in your tenant invitation acceptance logic
-  auth.verifyInvitation = auth.verifyInvitation || (async () => Promise.resolve(null));
-  auth.acceptInvitation = auth.acceptInvitation || (async () => Promise.resolve());
-  
+const AcceptInvitationForm: React.FC<AcceptInvitationFormProps> = ({ onSubmit, isSubmitting, invitationData }) => {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: '',
-      invitationCode: '',
+      fullName: invitationData?.tenant_name || '',
+      email: invitationData?.tenant_email || '',
       password: '',
       confirmPassword: '',
     },
@@ -48,12 +42,12 @@ const AcceptInvitationForm: React.FC<AcceptInvitationFormProps> = ({ onSubmit, i
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
-          name="email"
+          name="fullName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Nombre Completo</FormLabel>
               <FormControl>
-                <Input placeholder="name@example.com" {...field} />
+                <Input placeholder="Tu nombre completo" {...field} disabled={!!invitationData?.tenant_name} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -61,12 +55,12 @@ const AcceptInvitationForm: React.FC<AcceptInvitationFormProps> = ({ onSubmit, i
         />
         <FormField
           control={form.control}
-          name="invitationCode"
+          name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Invitation Code</FormLabel>
+              <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="Enter your invitation code" {...field} />
+                <Input placeholder="name@example.com" {...field} disabled={!!invitationData?.tenant_email} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -99,7 +93,7 @@ const AcceptInvitationForm: React.FC<AcceptInvitationFormProps> = ({ onSubmit, i
           )}
         />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
-          {isSubmitting ? 'Creating account...' : 'Accept Invitation'}
+          {isSubmitting ? 'Aceptando invitación...' : 'Aceptar Invitación'}
         </Button>
       </form>
     </Form>

@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { PlusCircle, Building2, MapPin, Hash } from 'lucide-react';
+import { PlusCircle, Building2, MapPin, Hash, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AddPropertyModalProps {
@@ -11,6 +11,7 @@ interface AddPropertyModalProps {
     name: string;
     address: string;
     units: number;
+    rentAmount: number;
   }) => void;
 }
 
@@ -19,19 +20,23 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onAddPropert
   const [formData, setFormData] = useState({
     name: '',
     address: '',
-    units: 1
+    units: 1,
+    rentAmount: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.address || formData.units < 1) {
+    if (!formData.name || !formData.address || formData.units < 1 || !formData.rentAmount) {
       toast.error('Por favor completa todos los campos');
       return;
     }
 
-    onAddProperty(formData);
-    setFormData({ name: '', address: '', units: 1 });
+    onAddProperty({
+      ...formData,
+      rentAmount: parseFloat(formData.rentAmount)
+    });
+    setFormData({ name: '', address: '', units: 1, rentAmount: '' });
     setOpen(false);
     toast.success('Propiedad agregada exitosamente');
   };
@@ -90,6 +95,24 @@ export const AddPropertyModal: React.FC<AddPropertyModalProps> = ({ onAddPropert
                 placeholder="1"
                 value={formData.units}
                 onChange={(e) => setFormData(prev => ({ ...prev, units: parseInt(e.target.value) || 1 }))}
+                className="pl-10"
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="rentAmount">Monto de Renta Mensual</Label>
+            <div className="relative">
+              <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                id="rentAmount"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="1500.00"
+                value={formData.rentAmount}
+                onChange={(e) => setFormData(prev => ({ ...prev, rentAmount: e.target.value }))}
                 className="pl-10"
                 required
               />

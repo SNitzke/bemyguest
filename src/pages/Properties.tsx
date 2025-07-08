@@ -3,6 +3,7 @@ import PropertySearch from '../components/properties/PropertySearch';
 import PropertyCard from '../components/dashboard/PropertyCard';
 import { AddPropertyModal } from '../components/properties/AddPropertyModal';
 import { PropertyActions } from '../components/properties/PropertyActions';
+import { InviteTenantModal } from '../components/tenant/InviteTenantModal';
 import { properties as initialProperties } from '../utils/mockData';
 import { Property } from '../types';
 
@@ -19,13 +20,16 @@ const Properties = () => {
     console.log('Filter clicked');
   };
 
-  const handleAddProperty = (newProperty: { name: string; address: string; units: number }) => {
+  const handleAddProperty = (newProperty: { name: string; address: string; units: number; rentAmount: number }) => {
     const property: Property = {
       id: Date.now().toString(),
-      ...newProperty,
+      name: newProperty.name,
+      address: newProperty.address,
+      units: newProperty.units,
       imageUrl: '/placeholder.svg',
       landlordId: '1', // Current user
-      status: 'vacant'
+      status: 'vacant',
+      rent_amount: newProperty.rentAmount
     };
     setProperties(prev => [...prev, property]);
   };
@@ -58,7 +62,14 @@ const Properties = () => {
           onSearch={handleSearch}
           onFilterClick={handleFilterClick}
         />
-        <AddPropertyModal onAddProperty={handleAddProperty} />
+        <div className="flex gap-2">
+          <AddPropertyModal onAddProperty={handleAddProperty} />
+          <InviteTenantModal properties={properties.map(p => ({ 
+            id: p.id, 
+            name: p.name, 
+            rent_amount: p.rent_amount 
+          }))} />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

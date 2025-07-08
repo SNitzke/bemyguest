@@ -19,6 +19,7 @@ export interface Property {
   units: number;
   landlordId: string;
   status: 'vacant' | 'occupied' | 'maintenance'; // Add status property
+  rent_amount?: number;
 }
 
 export interface Tenant {
