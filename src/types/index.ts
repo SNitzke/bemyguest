@@ -34,12 +34,13 @@ export interface Tenant {
 
 export interface Invitation {
   id: string;
+  code: string;
   email: string;
-  propertyId: string;
+  tenantName: string;
+  propertyName: string;
+  propertyAddress: string;
   unitNumber: string;
-  landlordId: string;
-  status: "pending" | "accepted" | "expired";
-  createdAt: string;
+  rentAmount: number;
   expiresAt: string;
 }
 
