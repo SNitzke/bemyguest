@@ -75,19 +75,40 @@ export function useAuthService() {
       if (error) throw error;
       if (!data || !data.user) throw new Error('No se recibieron datos del usuario');
 
+      console.log("Login exitoso, usuario:", data.user.id);
+      
       // Wait a bit for the profile to be loaded by the auth context
       setTimeout(async () => {
-        const role = await getUserRole(data.user.id);
-        if (role === 'landlord') {
-          navigate("/landlord-profile");
-        } else {
+        try {
+          const role = await getUserRole(data.user.id);
+          console.log("Rol del usuario:", role);
+          
+          if (role === 'landlord') {
+            navigate("/landlord-profile");
+          } else {
+            navigate("/dashboard");
+          }
+        } catch (roleError) {
+          console.error("Error al obtener rol del usuario:", roleError);
+          // Si no podemos obtener el rol, redirigimos al dashboard por defecto
           navigate("/dashboard");
         }
-      }, 500);
+      }, 1000);
       
       toast.success("¡Inicio de sesión exitoso!");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Error al iniciar sesión");
+      console.error("Error en login:", error);
+      if (error instanceof Error) {
+        if (error.message.includes('Invalid login credentials')) {
+          toast.error("Credenciales inválidas. Verifica tu email y contraseña.");
+        } else if (error.message.includes('Email not confirmed')) {
+          toast.error("Tu email aún no ha sido confirmado. Por favor verifica tu bandeja de entrada.");
+        } else {
+          toast.error(error.message || "Error al iniciar sesión");
+        }
+      } else {
+        toast.error("Error al iniciar sesión. Intenta nuevamente.");
+      }
       throw error;
     } finally {
       setIsLoading(false);
@@ -126,16 +147,35 @@ export function useAuthService() {
         toast.success("¡Cuenta creada exitosamente! Iniciando sesión...");
         
         // Esperar un poco para que el trigger cree el perfil
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
-        // Auto-login y redirigir según el rol
-        setTimeout(() => {
-          if (data.role === 'landlord') {
-            navigate("/landlord-profile");
+        try {
+          // Verificar que el perfil se haya creado correctamente
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', authData.user.id)
+            .single();
+            
+          if (profileError) {
+            console.warn("No se pudo verificar el perfil:", profileError);
           } else {
-            navigate("/dashboard");
+            console.log("Perfil creado correctamente:", profileData);
           }
-        }, 500);
+          
+          // Auto-login y redirigir según el rol
+          setTimeout(() => {
+            if (data.role === 'landlord') {
+              navigate("/landlord-profile");
+            } else {
+              navigate("/dashboard");
+            }
+          }, 500);
+        } catch (profileCheckError) {
+          console.error("Error al verificar perfil:", profileCheckError);
+          // Continuamos con la navegación aunque no podamos verificar el perfil
+          setTimeout(() => navigate("/dashboard"), 500);
+        }
       } else {
         toast.success("¡Cuenta creada exitosamente! Puedes iniciar sesión ahora.");
         navigate("/login");
@@ -148,11 +188,13 @@ export function useAuthService() {
           toast.error("Este email ya está registrado. Intenta iniciar sesión.");
         } else if (error.message.includes('Password should be at least 6 characters')) {
           toast.error("La contraseña debe tener al menos 6 caracteres.");
+        } else if (error.message.includes('rate limit')) {
+          toast.error("Demasiados intentos. Por favor, espera unos minutos e inténtalo de nuevo.");
         } else {
-          toast.error(error.message || "Error al crear la cuenta");
+          toast.error(error.message || "Error al crear la cuenta. Intenta nuevamente.");
         }
       } else {
-        toast.error("Error al crear la cuenta");
+        toast.error("Error al crear la cuenta. Por favor, verifica tus datos e intenta nuevamente.");
       }
       throw error;
     } finally {

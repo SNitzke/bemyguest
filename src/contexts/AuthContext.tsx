@@ -23,6 +23,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("Cargando perfil para usuario:", userId);
       const profileData = await authService.getProfile(userId);
       console.log("Perfil cargado:", profileData);
+      
+      if (!profileData) {
+        console.warn("No se encontró perfil para el usuario:", userId);
+        // Esperar un poco más e intentar de nuevo
+        setTimeout(async () => {
+          const retryProfile = await authService.getProfile(userId);
+          setProfile(retryProfile);
+        }, 1500);
+        return;
+      }
+      
       setProfile(profileData);
     } catch (error) {
       console.error("Error loading profile:", error);
