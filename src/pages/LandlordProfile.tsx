@@ -2,8 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { properties, issues, payments, financialData } from '../utils/mockData';
+import { financialData } from '../utils/mockData';
 import { LandlordDetails } from '@/types/auth';
+import { useProperties } from '@/hooks/useProperties';
+import { useIssues } from '@/hooks/useIssues';
+import { usePayments } from '@/hooks/usePayments';
 
 // Import components
 import SubscriptionCard from '../components/landlord/SubscriptionCard';
@@ -22,6 +25,11 @@ const LandlordProfile: React.FC = () => {
   const [landlordDetails, setLandlordDetails] = useState<LandlordDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  
+  // Use real data hooks
+  const { properties, isLoading: propertiesLoading } = useProperties();
+  const { issues, isLoading: issuesLoading } = useIssues();
+  const { payments, isLoading: paymentsLoading } = usePayments();
   
   useEffect(() => {
     const fetchLandlordDetails = async () => {
@@ -65,7 +73,7 @@ const LandlordProfile: React.FC = () => {
         </p>
       </div>
       
-      {isLoading ? (
+      {isLoading || propertiesLoading || issuesLoading || paymentsLoading ? (
         <LoadingState />
       ) : (
         <>

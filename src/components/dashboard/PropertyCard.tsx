@@ -12,8 +12,23 @@ interface PropertyCardProps {
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
   const navigate = useNavigate();
-  const rentRate = "$1,200/month"; // This should come from the property object
-  const status = "available" as const; // This should come from the property object
+  const rentRate = property.rent_amount ? `$${property.rent_amount.toLocaleString()}/month` : "No definido";
+  
+  // Map property status to badge status
+  const getBadgeStatus = (status: string): "available" | "maintenance" | "alert" => {
+    switch (status) {
+      case 'vacant':
+        return 'available';
+      case 'maintenance':
+        return 'maintenance';
+      case 'occupied':
+        return 'available';
+      default:
+        return 'available';
+    }
+  };
+  
+  const badgeStatus = getBadgeStatus(property.status);
 
   return (
     <Card className="dash-card flex flex-col overflow-hidden hover:shadow-lg transition-shadow">
@@ -27,7 +42,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
       <CardContent className="flex-1 p-4">
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-lg font-semibold">{property.name}</h3>
-          <PropertyStatusBadge status={status} />
+          <PropertyStatusBadge status={badgeStatus} />
         </div>
         <div className="space-y-2">
           <div className="flex items-center text-sm text-muted-foreground">
