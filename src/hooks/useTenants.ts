@@ -2,30 +2,29 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-export interface Issue {
+export interface Tenant {
   id: string;
-  title: string;
-  description: string;
-  status: 'new' | 'in_progress' | 'resolved' | 'closed';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  user_id: string | null;
   property_id: string;
-  tenant_id?: string;
   landlord_id: string;
-  images?: string[];
+  unit_number: string;
+  move_in_date: string | null;
+  lease_end_date: string | null;
+  rent_amount: number | null;
+  status: 'active' | 'inactive' | 'pending';
   created_at: string;
   updated_at: string;
-  resolved_at?: string;
 }
 
-export function useIssues() {
-  const [issues, setIssues] = useState<Issue[]>([]);
+export function useTenants() {
+  const [tenants, setTenants] = useState<Tenant[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  const fetchIssues = async () => {
+  const fetchTenants = async () => {
     if (!user) {
-      setIssues([]);
+      setTenants([]);
       setIsLoading(false);
       return;
     }
@@ -34,39 +33,38 @@ export function useIssues() {
       setIsLoading(true);
       
       const { data, error } = await supabase
-        .from('issues')
+        .from('tenants')
         .select('*')
         .eq('landlord_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching issues:', error);
+        console.error('Error fetching tenants:', error);
         setError(error.message);
         return;
       }
 
-      setIssues((data || []).map(issue => ({
-        ...issue,
-        status: issue.status as 'new' | 'in_progress' | 'resolved' | 'closed',
-        priority: issue.priority as 'low' | 'medium' | 'high' | 'urgent'
+      setTenants((data || []).map(tenant => ({
+        ...tenant,
+        status: tenant.status as 'active' | 'inactive' | 'pending'
       })));
       setError(null);
     } catch (err) {
-      console.error('Error in fetchIssues:', err);
-      setError('Error al cargar los problemas');
+      console.error('Error in fetchTenants:', err);
+      setError('Error al cargar los inquilinos');
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchIssues();
+    fetchTenants();
   }, [user]);
 
   return {
-    issues,
+    tenants,
     isLoading,
     error,
-    refetch: fetchIssues
+    refetch: fetchTenants
   };
 }

@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      issues: {
+        Row: {
+          assigned_to: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          images: string[] | null
+          landlord_id: string | null
+          priority: string | null
+          property_id: string | null
+          resolved_at: string | null
+          status: string | null
+          tenant_id: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          landlord_id?: string | null
+          priority?: string | null
+          property_id?: string | null
+          resolved_at?: string | null
+          status?: string | null
+          tenant_id?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          images?: string[] | null
+          landlord_id?: string | null
+          priority?: string | null
+          property_id?: string | null
+          resolved_at?: string | null
+          status?: string | null
+          tenant_id?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "issues_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "issues_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       landlord_details: {
         Row: {
           address: string | null
@@ -150,6 +213,72 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          description: string | null
+          due_date: string
+          id: string
+          landlord_id: string | null
+          payment_date: string | null
+          payment_method: string | null
+          payment_type: string | null
+          property_id: string | null
+          reference_number: string | null
+          status: string | null
+          tenant_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          description?: string | null
+          due_date: string
+          id?: string
+          landlord_id?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          payment_type?: string | null
+          property_id?: string | null
+          reference_number?: string | null
+          status?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          description?: string | null
+          due_date?: string
+          id?: string
+          landlord_id?: string | null
+          payment_date?: string | null
+          payment_method?: string | null
+          payment_type?: string | null
+          property_id?: string | null
+          reference_number?: string | null
+          status?: string | null
+          tenant_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -275,6 +404,56 @@ export type Database = {
           },
           {
             foreignKeyName: "fk_tenant_invitations_property"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tenants: {
+        Row: {
+          created_at: string | null
+          id: string
+          landlord_id: string | null
+          lease_end_date: string | null
+          move_in_date: string | null
+          property_id: string | null
+          rent_amount: number | null
+          status: string | null
+          unit_number: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          landlord_id?: string | null
+          lease_end_date?: string | null
+          move_in_date?: string | null
+          property_id?: string | null
+          rent_amount?: number | null
+          status?: string | null
+          unit_number: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          landlord_id?: string | null
+          lease_end_date?: string | null
+          move_in_date?: string | null
+          property_id?: string | null
+          rent_amount?: number | null
+          status?: string | null
+          unit_number?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tenants_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"

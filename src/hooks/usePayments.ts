@@ -5,12 +5,18 @@ import { useAuth } from '@/contexts/AuthContext';
 export interface Payment {
   id: string;
   amount: number;
-  status: 'pending' | 'completed' | 'failed';
-  payment_date: string | null;
+  status: 'pending' | 'completed' | 'failed' | 'refunded';
+  payment_type: 'rent' | 'deposit' | 'utilities' | 'late_fee' | 'other';
   due_date: string;
-  type: 'rent' | 'utilities' | 'deposit' | 'other';
+  payment_date: string | null;
+  payment_method?: string;
+  description?: string;
+  reference_number?: string;
   property_id?: string;
   tenant_id?: string;
+  landlord_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export function usePayments() {
@@ -29,9 +35,23 @@ export function usePayments() {
     try {
       setIsLoading(true);
       
-      // For now, return empty array since payments table structure needs to be defined
-      // This will be implemented when payment functionality is fully added
-      setPayments([]);
+      const { data, error } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('landlord_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching payments:', error);
+        setError(error.message);
+        return;
+      }
+
+      setPayments((data || []).map(payment => ({
+        ...payment,
+        status: payment.status as 'pending' | 'completed' | 'failed' | 'refunded',
+        payment_type: payment.payment_type as 'rent' | 'deposit' | 'utilities' | 'late_fee' | 'other'
+      })));
       setError(null);
     } catch (err) {
       console.error('Error in fetchPayments:', err);
