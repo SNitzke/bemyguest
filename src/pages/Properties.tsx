@@ -1,161 +1,99 @@
-import React, { useState, useEffect } from 'react';
-import PropertySearch from '../components/properties/PropertySearch';
-import PropertyCard from '../components/dashboard/PropertyCard';
+import React, { useState } from 'react';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Plus, Building } from 'lucide-react';
 import { AddPropertyModal } from '../components/properties/AddPropertyModal';
-import { PropertyActions } from '../components/properties/PropertyActions';
-import { InviteTenantModal } from '../components/tenant/InviteTenantModal';
-import { properties as initialProperties } from '../utils/mockData';
-import { Property } from '../types';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import { useAuth } from '@/contexts/AuthContext';
+import PropertyCard from '../components/dashboard/PropertyCard';
+import { useProperties } from '../hooks/useProperties';
 
-const Properties = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [properties, setProperties] = useState<Property[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
+const Properties: React.FC = () => {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const { properties, isLoading } = useProperties();
 
-  // Load properties from Supabase
-  useEffect(() => {
-    const loadProperties = async () => {
-      if (!user) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('properties')
-          .select('*')
-          .eq('user_id', user.id);
-
-        if (error) throw error;
-
-        const mappedProperties: Property[] = (data || []).map(prop => ({
-          id: prop.id,
-          name: prop.name,
-          address: prop.address,
-          units: prop.units,
-          imageUrl: prop.image_url || '/placeholder.svg',
-          landlordId: prop.user_id,
-          status: (prop.status as 'vacant' | 'occupied' | 'maintenance') || 'vacant',
-          rent_amount: prop.rent_amount
-        }));
-
-        setProperties(mappedProperties);
-      } catch (error) {
-        console.error('Error loading properties:', error);
-        toast.error('Error al cargar las propiedades');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadProperties();
-  }, [user]);
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-  };
-
-  const handleFilterClick = () => {
-    // Implement filter modal/dropdown logic
-    console.log('Filter clicked');
-  };
-
-  const handleAddProperty = async (newProperty: { name: string; address: string; units: number; rentAmount: number }) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error('Debes estar autenticado para agregar propiedades');
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('properties')
-        .insert({
-          name: newProperty.name,
-          address: newProperty.address,
-          units: newProperty.units,
-          rent_amount: newProperty.rentAmount,
-          user_id: user.id,
-          status: 'vacant'
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Update local state with the new property from database
-      const property: Property = {
-        id: data.id,
-        name: data.name,
-        address: data.address,
-        units: data.units,
-        imageUrl: data.image_url || '/placeholder.svg',
-        landlordId: data.user_id,
-        status: (data.status as 'vacant' | 'occupied' | 'maintenance') || 'vacant',
-        rent_amount: data.rent_amount
-      };
-      
-      setProperties(prev => [...prev, property]);
-      toast.success('Propiedad agregada exitosamente');
-    } catch (error) {
-      console.error('Error adding property:', error);
-      toast.error('Error al agregar la propiedad');
-    }
-  };
-
-  const handleEditProperty = (updatedProperty: Property) => {
-    setProperties(prev => prev.map(p => p.id === updatedProperty.id ? updatedProperty : p));
-  };
-
-  const handleDeleteProperty = (propertyId: string) => {
-    setProperties(prev => prev.filter(p => p.id !== propertyId));
-  };
-
-  const filteredProperties = properties.filter(
-    (property) =>
-      property.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      property.address.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProperties = properties.filter(property =>
+    property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    property.address.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-heading font-semibold">Mis Propiedades</h1>
+        <div className="animate-pulse grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-64 bg-muted rounded-lg" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-heading font-semibold">Properties</h1>
-        <p className="text-muted-foreground">
-          Manage and monitor your property portfolio
-        </p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-heading font-semibold">Mis Propiedades</h1>
+          <p className="text-muted-foreground">
+            Gestiona tu cartera de propiedades inmobiliarias
+          </p>
+        </div>
+        <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
+          Agregar Propiedad
+        </Button>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <PropertySearch
-          onSearch={handleSearch}
-          onFilterClick={handleFilterClick}
-        />
-        <div className="flex gap-2">
-          <AddPropertyModal onAddProperty={handleAddProperty} />
-          <InviteTenantModal properties={properties.map(p => ({ 
-            id: p.id, 
-            name: p.name, 
-            rent_amount: p.rent_amount 
-          }))} />
+      <div className="flex gap-4 items-center">
+        <div className="relative flex-1">
+          <input
+            type="text"
+            placeholder="Buscar propiedades..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+          />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProperties.map((property) => (
-          <div key={property.id} className="relative">
-            <PropertyCard property={property} />
-            <div className="absolute top-2 right-2">
-              <PropertyActions
-                property={property}
-                onEdit={handleEditProperty}
-                onDelete={handleDeleteProperty}
-              />
-            </div>
-          </div>
-        ))}
-      </div>
+      {filteredProperties.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Building className="h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-semibold mb-2">
+              {searchTerm ? "No se encontraron propiedades" : "No tienes propiedades registradas"}
+            </h3>
+            <p className="text-muted-foreground text-center mb-4">
+              {searchTerm 
+                ? "Intenta con otros términos de búsqueda."
+                : "Comienza agregando tu primera propiedad para empezar a gestionar tus rentas."
+              }
+            </p>
+            {!searchTerm && (
+              <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Agregar Primera Propiedad
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProperties.map((property) => (
+            <PropertyCard key={property.id} property={property} />
+          ))}
+        </div>
+      )}
+
+      {isAddModalOpen && (
+        <AddPropertyModal 
+          onAddProperty={(property) => {
+            // TODO: Implement property addition
+            console.log('Adding property:', property);
+            setIsAddModalOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 };

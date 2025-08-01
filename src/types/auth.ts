@@ -50,7 +50,6 @@ export interface AuthContextType {
   signup: (data: SignupData) => Promise<void>;
   logout: () => Promise<void>;
   switchRole: () => Promise<void>;
-  demoLogin: (role: "landlord" | "tenant") => Promise<void>;
   getUserRole: () => Promise<string | null>;
   updateProfile: (data: Partial<Profile>) => Promise<void>;
   // Add tenant invitation methods

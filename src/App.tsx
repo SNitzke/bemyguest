@@ -18,11 +18,9 @@ import Payments from './pages/Payments';
 import Messages from './pages/Messages';
 import Index from './pages/Index';
 import SignUp from './pages/SignUp';
-import InviteTenant from './pages/InviteTenant';
 import TenantInvitation from './pages/TenantInvitation';
 import Properties from './pages/Properties';
 import PropertyDetails from './pages/PropertyDetails';
-import Tenants from './pages/Tenants';
 import Settings from './pages/Settings';
 import LandlordProfile from './pages/LandlordProfile';
 
@@ -124,16 +122,6 @@ const AppRoutes = () => {
         <Route path="properties/:id" element={
           <ProtectedRoute requiredRole="landlord">
             <PropertyDetails />
-          </ProtectedRoute>
-        } />
-        <Route path="tenants" element={
-          <ProtectedRoute requiredRole="landlord">
-            <Tenants />
-          </ProtectedRoute>
-        } />
-        <Route path="invite-tenant" element={
-          <ProtectedRoute requiredRole="landlord">
-            <InviteTenant />
           </ProtectedRoute>
         } />
       </Route>

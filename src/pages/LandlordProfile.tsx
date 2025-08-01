@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { financialData } from '../utils/mockData';
+import { FinancialData } from '../types';
 import { LandlordDetails } from '@/types/auth';
 import { useProperties } from '@/hooks/useProperties';
 import { useIssues } from '@/hooks/useIssues';
@@ -119,10 +119,12 @@ const LandlordProfile: React.FC = () => {
             />
           </div>
           
-          {/* Financial Chart */}
-          <div className="mt-6">
-            <FinancialChart data={financialData} />
-          </div>
+          {/* Financial Chart - Only show if has data */}
+          {properties.length > 0 && (
+            <div className="mt-6">
+              <FinancialChart data={[]} />
+            </div>
+          )}
         </>
       )}
 

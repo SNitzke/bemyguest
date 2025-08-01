@@ -13,7 +13,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { login, demoLogin, isAuthenticated, isLoading } = useAuth();
+  const { login, isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -45,16 +45,6 @@ const Login = () => {
     }
   };
 
-  const handleDemoLogin = async (role: "landlord" | "tenant") => {
-    setIsSubmitting(true);
-    try {
-      await demoLogin(role);
-    } catch (error) {
-      console.error(`Demo login error (${role}):`, error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-bmg-50 to-bmg-100 p-4">
@@ -117,24 +107,6 @@ const Login = () => {
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-4 w-full">
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => handleDemoLogin('landlord')} 
-                  disabled={isSubmitting}
-                >
-                  Demo Propietario
-                </Button>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={() => handleDemoLogin('tenant')} 
-                  disabled={isSubmitting}
-                >
-                  Demo Inquilino
-                </Button>
-              </div>
               
               <p className="text-sm text-center text-muted-foreground">
                 ¿No tienes una cuenta?{" "}

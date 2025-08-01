@@ -225,20 +225,7 @@ export function useAuthService() {
     }
   };
 
-  // Demo login con usuarios reales
-  const demoLogin = async (role: "landlord" | "tenant") => {
-    const demoCredentials = {
-      landlord: { email: "demo.landlord@example.com", password: "demo123456" },
-      tenant: { email: "demo.tenant@example.com", password: "demo123456" }
-    };
-    
-    try {
-      await login(demoCredentials[role].email, demoCredentials[role].password);
-    } catch (error) {
-      console.error(`Error in demo login (${role}):`, error);
-      toast.error(`Los usuarios demo no existen. Puedes crear una cuenta nueva o usar tus credenciales.`);
-    }
-  };
+  // Removed demo login - users must create real accounts
 
   return {
     isLoading,
@@ -248,7 +235,6 @@ export function useAuthService() {
     login,
     signup,
     logout,
-    switchRole,
-    demoLogin
+    switchRole
   };
 }

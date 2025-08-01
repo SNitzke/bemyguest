@@ -1,21 +1,22 @@
-
 import React from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardHeader, CardTitle, CardContent } from '../ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 import { Button } from '../ui/button';
-import { User, Settings, Home, CreditCard } from 'lucide-react';
+import { User, Home, CreditCard, Settings, MessageSquare, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const TenantProfile: React.FC = () => {
-  const { profile, user } = useAuth();
   const navigate = useNavigate();
+  const { user, profile } = useAuth();
 
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-heading font-semibold">Panel de Inquilino</h1>
+        <h1 className="text-2xl font-heading font-semibold">
+          Bienvenido, {profile?.full_name || 'Inquilino'}
+        </h1>
         <p className="text-muted-foreground">
-          Bienvenido de vuelta, {profile?.full_name || 'Inquilino'}. Gestiona tu información de alquiler
+          Gestiona tu información personal y reporta problemas desde tu dashboard
         </p>
       </div>
 
@@ -24,13 +25,13 @@ const TenantProfile: React.FC = () => {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <User size={20} />
+              <User className="h-5 w-5" />
               Mi Perfil
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <p className="text-sm text-muted-foreground">Nombre Completo</p>
+              <p className="text-sm text-muted-foreground">Nombre completo</p>
               <p className="font-medium">{profile?.full_name || 'No proporcionado'}</p>
             </div>
             <div>
@@ -52,46 +53,92 @@ const TenantProfile: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Property Info Card */}
+        {/* Property Card */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Home size={20} />
+              <Home className="h-5 w-5" />
               Mi Propiedad
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="text-center py-8">
-              <p className="text-muted-foreground">No tienes una propiedad asignada</p>
+              <Home className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">
+                No tienes una propiedad asignada
+              </p>
               <p className="text-sm text-muted-foreground mt-2">
-                Contacta a tu propietario para obtener una invitación
+                Espera a que tu propietario te envíe una invitación
               </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Payment Info Card */}
+        {/* Quick Actions Card */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CreditCard size={20} />
-              Pagos
+              <AlertCircle className="h-5 w-5" />
+              Acciones Rápidas
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">No hay pagos pendientes</p>
-              <Button 
-                variant="outline" 
-                className="mt-4"
-                onClick={() => navigate('/payments')}
-              >
-                Ver Historial de Pagos
-              </Button>
-            </div>
+          <CardContent className="space-y-3">
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => navigate('/report-issue')}
+            >
+              <AlertCircle className="mr-2 h-4 w-4" />
+              Reportar Problema
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => navigate('/messages')}
+            >
+              <MessageSquare className="mr-2 h-4 w-4" />
+              Enviar Mensaje
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full justify-start"
+              onClick={() => navigate('/payments')}
+            >
+              <CreditCard className="mr-2 h-4 w-4" />
+              Ver Pagos
+            </Button>
           </CardContent>
         </Card>
       </div>
+
+      {/* Welcome Information */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Información Importante</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <h4 className="font-semibold mb-2">¿Cómo empezar?</h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Completa tu información personal en Configuración</li>
+                <li>• Espera la invitación de tu propietario</li>
+                <li>• Reporta cualquier problema que tengas</li>
+                <li>• Mantente en contacto mediante mensajes</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-2">Funcionalidades disponibles</h4>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Reportar problemas con fotos</li>
+                <li>• Comunicación directa con tu propietario</li>
+                <li>• Seguimiento de pagos y estado de cuenta</li>
+                <li>• Gestión de tu información personal</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
