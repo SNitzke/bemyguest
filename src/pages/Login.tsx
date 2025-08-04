@@ -1,6 +1,6 @@
 
-import React, { useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,15 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchParams] = useSearchParams();
   const { login, isAuthenticated, isLoading } = useAuth();
+
+  useEffect(() => {
+    const message = searchParams.get('message');
+    if (message === 'registration_complete') {
+      toast.success('¡Registro completado! Ahora puedes iniciar sesión con tu nueva cuenta.');
+    }
+  }, [searchParams]);
 
   if (isLoading) {
     return (

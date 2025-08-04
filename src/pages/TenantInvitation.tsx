@@ -7,6 +7,8 @@ import { toast } from "sonner";
 
 interface InvitationData {
   id: string;
+  property_id: string;
+  landlord_id: string;
   tenant_name: string;
   tenant_email: string;
   unit_number: string;
@@ -96,22 +98,59 @@ const TenantInvitation: React.FC = () => {
   const handleSubmit = async (values: any) => {
     setIsSubmitting(true);
     try {
-      // In a real implementation, this would create a tenant account
-      // and mark the invitation as accepted
-      toast.success("Invitación aceptada exitosamente");
-      
-      // Update invitation status
-      await supabase
-        .from('tenant_invitations')
-        .update({ status: 'accepted' })
-        .eq('invitation_code', inviteCode);
+      if (!invitationData) throw new Error("Datos de invitación no encontrados");
 
-      // Redirect to tenant dashboard or login
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
-    } catch (error) {
-      toast.error("Error al aceptar la invitación");
+      // Create tenant account
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: email,
+        password: values.password,
+        options: {
+          data: {
+            full_name: values.fullName,
+            role: 'tenant'
+          }
+        }
+      });
+
+      if (authError) throw authError;
+
+      if (authData.user) {
+        // Create tenant record linking to property and landlord
+        const { error: tenantError } = await supabase
+          .from('tenants')
+          .insert({
+            user_id: authData.user.id,
+            property_id: invitationData.property_id,
+            landlord_id: invitationData.landlord_id,
+            unit_number: invitationData.unit_number,
+            rent_amount: invitationData.rent_amount,
+            status: 'active'
+          });
+
+        if (tenantError) throw tenantError;
+
+        // Update invitation status
+        const { error: updateError } = await supabase
+          .from('tenant_invitations')
+          .update({ status: 'accepted' })
+          .eq('invitation_code', inviteCode);
+
+        if (updateError) throw updateError;
+
+        toast.success("¡Registro completado! Tu cuenta ha sido vinculada exitosamente.");
+        
+        // Redirect to login after successful registration
+        setTimeout(() => {
+          navigate('/login?message=registration_complete');
+        }, 2000);
+      }
+    } catch (error: any) {
+      console.error('Error completing registration:', error);
+      if (error.message?.includes('already registered')) {
+        toast.error("Este email ya está registrado. Intenta iniciar sesión.");
+      } else {
+        toast.error("Error al completar el registro. Intenta nuevamente.");
+      }
     } finally {
       setIsSubmitting(false);
     }
