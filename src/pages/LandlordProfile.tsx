@@ -16,9 +16,13 @@ import DashboardTabs from '../components/landlord/DashboardTabs';
 import LoadingState from '../components/landlord/LoadingState';
 import FinancialChart from '../components/dashboard/FinancialChart';
 import { Button } from '../components/ui/button';
-import { CreditCard } from 'lucide-react';
+import { CreditCard, Users, MessageSquare } from 'lucide-react';
 import { toast } from 'sonner';
 import { PaymentVerificationModal } from '../components/landlord/PaymentVerificationModal';
+import { InviteTenantModal } from '../components/tenant/InviteTenantModal';
+import TenantsList from '../components/tenants/TenantsList';
+import { useTenants } from '../hooks/useTenants';
+import { Card, CardHeader, CardTitle, CardContent } from '../components/ui/card';
 
 const LandlordProfile: React.FC = () => {
   const { user, profile } = useAuth();
@@ -30,6 +34,7 @@ const LandlordProfile: React.FC = () => {
   const { properties, isLoading: propertiesLoading } = useProperties();
   const { issues, isLoading: issuesLoading } = useIssues();
   const { payments, isLoading: paymentsLoading } = usePayments();
+  const { tenants, isLoading: tenantsLoading } = useTenants();
   
   useEffect(() => {
     const fetchLandlordDetails = async () => {
@@ -73,7 +78,7 @@ const LandlordProfile: React.FC = () => {
         </p>
       </div>
       
-      {isLoading || propertiesLoading || issuesLoading || paymentsLoading ? (
+      {isLoading || propertiesLoading || issuesLoading || paymentsLoading || tenantsLoading ? (
         <LoadingState />
       ) : (
         <>
@@ -106,6 +111,50 @@ const LandlordProfile: React.FC = () => {
             issues={issues} 
             payments={payments} 
           />
+
+          {/* Tenants Management Section */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  <CardTitle>Gestión de Inquilinos</CardTitle>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Mensajes ({0})
+                  </Button>
+                  <InviteTenantModal properties={properties} />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {tenants.length > 0 ? (
+                <div className="space-y-4">
+                  <div className="grid gap-4">
+                    <TenantsList showAll={false} />
+                  </div>
+                  {tenants.length > 3 && (
+                    <div className="text-center pt-4 border-t">
+                      <Button variant="outline">
+                        Ver todos los inquilinos ({tenants.length})
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="font-medium mb-2">No tienes inquilinos registrados</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Comienza invitando inquilinos a tus propiedades para gestionar sus datos y comunicarte con ellos.
+                  </p>
+                  <InviteTenantModal properties={properties} />
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Profile Card */}
