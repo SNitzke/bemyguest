@@ -23,6 +23,7 @@ import Properties from './pages/Properties';
 import PropertyDetails from './pages/PropertyDetails';
 import Settings from './pages/Settings';
 import LandlordProfile from './pages/LandlordProfile';
+import Tenants from './pages/Tenants';
 
 const queryClient = new QueryClient();
 
@@ -122,6 +123,11 @@ const AppRoutes = () => {
         <Route path="properties/:id" element={
           <ProtectedRoute requiredRole="landlord">
             <PropertyDetails />
+          </ProtectedRoute>
+        } />
+        <Route path="tenants" element={
+          <ProtectedRoute requiredRole="landlord">
+            <Tenants />
           </ProtectedRoute>
         } />
       </Route>

@@ -105,9 +105,11 @@ const TenantInvitation: React.FC = () => {
         email: email,
         password: values.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/`,
           data: {
             full_name: values.fullName,
-            role: 'tenant'
+            role: 'tenant',
+            phone_number: values.phoneNumber || ''
           }
         }
       });
