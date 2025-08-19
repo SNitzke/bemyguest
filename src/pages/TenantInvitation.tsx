@@ -104,14 +104,14 @@ const TenantInvitation: React.FC = () => {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: email,
         password: values.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            full_name: values.fullName,
-            role: 'tenant',
-            phone_number: values.phoneNumber || ''
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: {
+              full_name: values.fullName,
+              role: 'tenant',
+              phone_number: values.phoneNumber || ''
+            }
           }
-        }
       });
 
       if (authError) throw authError;
@@ -139,11 +139,11 @@ const TenantInvitation: React.FC = () => {
 
         if (updateError) throw updateError;
 
-        toast.success("¡Registro completado! Tu cuenta ha sido vinculada exitosamente.");
+        toast.success("¡Registro completado! Iniciando onboarding...");
         
-        // Redirect to login after successful registration
+        // Redirect to onboarding after successful registration
         setTimeout(() => {
-          navigate('/login?message=registration_complete');
+          navigate('/tenant-onboarding');
         }, 2000);
       }
     } catch (error: any) {

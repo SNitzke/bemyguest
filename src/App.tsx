@@ -19,6 +19,7 @@ import Messages from './pages/Messages';
 import Index from './pages/Index';
 import SignUp from './pages/SignUp';
 import TenantInvitation from './pages/TenantInvitation';
+import TenantOnboarding from './components/tenant/TenantOnboarding';
 import Properties from './pages/Properties';
 import PropertyDetails from './pages/PropertyDetails';
 import Settings from './pages/Settings';
@@ -80,7 +81,8 @@ const AppRoutes = () => {
       <Route path="/" element={<Index />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
-      <Route path="/tenant-invitation" element={<TenantInvitation />} />
+        <Route path="/tenant-invitation" element={<TenantInvitation />} />
+        <Route path="/tenant-onboarding" element={<TenantOnboarding />} />
       
       {/* Protected Routes within AppLayout */}
       <Route

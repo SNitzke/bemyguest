@@ -9,12 +9,13 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/contexts/AuthContext';
 
 const formSchema = z.object({
-  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-  email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
+  fullName: z.string().min(2, 'Nombre debe tener al menos 2 caracteres'),
+  email: z.string().email('Por favor ingresa un email válido'),
+  phoneNumber: z.string().min(10, 'Teléfono debe tener al menos 10 dígitos').optional(),
+  password: z.string().min(8, 'Contraseña debe tener al menos 8 caracteres'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
+  message: "Las contraseñas no coinciden",
   path: ['confirmPassword'],
 });
 
@@ -32,6 +33,7 @@ const AcceptInvitationForm: React.FC<AcceptInvitationFormProps> = ({ onSubmit, i
     defaultValues: {
       fullName: invitationData?.tenant_name || '',
       email: invitationData?.tenant_email || '',
+      phoneNumber: '',
       password: '',
       confirmPassword: '',
     },
@@ -68,12 +70,25 @@ const AcceptInvitationForm: React.FC<AcceptInvitationFormProps> = ({ onSubmit, i
         />
         <FormField
           control={form.control}
+          name="phoneNumber"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Teléfono (Opcional)</FormLabel>
+              <FormControl>
+                <Input placeholder="Tu número de teléfono" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>Contraseña</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Create a password" {...field} />
+                <Input type="password" placeholder="Crea una contraseña" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -84,9 +99,9 @@ const AcceptInvitationForm: React.FC<AcceptInvitationFormProps> = ({ onSubmit, i
           name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirm Password</FormLabel>
+              <FormLabel>Confirmar Contraseña</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Confirm your password" {...field} />
+                <Input type="password" placeholder="Confirma tu contraseña" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
