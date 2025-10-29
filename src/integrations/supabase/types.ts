@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.12 (cd3cf9e)"
@@ -467,17 +467,11 @@ export type Database = {
     }
     Functions: {
       create_landlord_details: {
-        Args: { user_id: string; plan?: string }
+        Args: { plan?: string; user_id: string }
         Returns: Json
       }
-      generate_invitation_code: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      get_landlord_details: {
-        Args: { user_id: string }
-        Returns: Json
-      }
+      generate_invitation_code: { Args: never; Returns: string }
+      get_landlord_details: { Args: { user_id: string }; Returns: Json }
     }
     Enums: {
       user_role: "tenant" | "landlord" | "admin"
