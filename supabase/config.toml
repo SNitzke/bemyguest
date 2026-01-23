@@ -1,10 +1,7 @@
-
 project_id = "wwakwpvaszfrwunybuou"
 
 [auth]
-# Set OTP expiration to 30 minutes (1800 seconds) for improved security
 otp_exp = 1800
-# Enable HaveIBeenPwned.org password check
 enable_hibp = true
 
 [api]
@@ -22,5 +19,14 @@ enabled = true
 enabled = true
 port = 54323
 
-[functions.get-subscription-plans]
-verify_jwt = true
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.check-subscription]
+verify_jwt = false
+
+[functions.customer-portal]
+verify_jwt = false
+
+[functions.sync-stripe-customer]
+verify_jwt = false

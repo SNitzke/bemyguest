@@ -1,49 +1,28 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { PersonalInfoFields } from './signup/PersonalInfoFields';
 import { PasswordFields } from './signup/PasswordFields';
 import { RoleSelector } from './signup/RoleSelector';
-import { SubscriptionPlans } from './signup/SubscriptionPlans';
 import { Button } from '../ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { SignupData } from '@/types/auth';
-import { SubscriptionPlan } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
+import { STRIPE_PLANS, PlanId } from '@/config/stripe';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
+import { Check, Building2, Sparkles, Crown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Badge } from '../ui/badge';
 
-const plans: SubscriptionPlan[] = [
-  {
-    id: 'basic',
-    name: 'Basic',
-    description: 'Perfecto para propietarios pequeños',
-    monthly_price: 1999,
-    features: {
-      max_properties: 5,
-      support: 'email'
-    }
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    description: 'Ideal para gestión de propiedades en crecimiento',
-    monthly_price: 4999,
-    features: {
-      max_properties: 20,
-      support: 'priority'
-    }
-  },
-  {
-    id: 'enterprise',
-    name: 'Enterprise',
-    description: 'Solución completa para grandes carteras',
-    monthly_price: 9999,
-    features: {
-      max_properties: 'unlimited',
-      support: '24/7'
-    }
-  }
-];
+const planIcons: Record<PlanId, React.ReactNode> = {
+  basic: <Building2 className="h-6 w-6" />,
+  pro: <Sparkles className="h-6 w-6" />,
+  premium: <Crown className="h-6 w-6" />,
+};
 
 export const EnhancedSignUpForm = () => {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     fullName: '',
@@ -52,7 +31,7 @@ export const EnhancedSignUpForm = () => {
     role: 'tenant' as 'tenant' | 'landlord',
     password: '',
     confirmPassword: '',
-    subscriptionPlan: 'basic'
+    subscriptionPlan: 'basic' as PlanId
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { signup } = useAuth();
@@ -112,11 +91,9 @@ export const EnhancedSignUpForm = () => {
         return true;
         
       case 3:
-        // Role selection is always valid since we have a default
         return true;
         
       case 4:
-        // Subscription plan selection is always valid for landlords
         return true;
         
       default:
@@ -135,10 +112,28 @@ export const EnhancedSignUpForm = () => {
     setStep(prev => prev - 1);
   };
 
+  const syncStripeCustomer = async (accessToken: string, role: string, fullName: string) => {
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-stripe-customer', {
+        body: { role, fullName },
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (error) {
+        console.error('Error syncing Stripe customer:', error);
+      } else {
+        console.log('Stripe customer synced:', data);
+      }
+    } catch (error) {
+      console.error('Error syncing Stripe customer:', error);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate all steps before submitting
     for (let i = 1; i <= (formData.role === 'tenant' ? 3 : 4); i++) {
       if (!validateStep(i)) {
         setStep(i);
@@ -163,9 +158,33 @@ export const EnhancedSignUpForm = () => {
       console.log("Enviando datos de registro:", signupData);
       await signup(signupData);
       
+      // Sync with Stripe after successful signup
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        await syncStripeCustomer(session.access_token, formData.role, formData.fullName);
+        
+        // If landlord, redirect to checkout
+        if (formData.role === 'landlord') {
+          const plan = STRIPE_PLANS[formData.subscriptionPlan];
+          
+          const { data, error } = await supabase.functions.invoke('create-checkout', {
+            body: { priceId: plan.price_id, planName: plan.name },
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          });
+
+          if (error) throw error;
+          if (data.error) throw new Error(data.error);
+          
+          toast.success('¡Cuenta creada! Redirigiendo al pago...');
+          window.open(data.url, '_blank');
+          navigate('/landlord-profile');
+        }
+      }
+      
     } catch (error) {
       console.error("Error durante el registro:", error);
-      // Los errores específicos ya son manejados por el hook useAuthService
     } finally {
       setIsSubmitting(false);
     }
@@ -177,14 +196,13 @@ export const EnhancedSignUpForm = () => {
 
   const isLastStep = step === getTotalSteps();
 
-  const renderErrorMessage = (message: string) => (
-    <div className="flex items-center text-red-600 mt-1 text-sm">
-      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-      </svg>
-      {message}
-    </div>
-  );
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
 
   const renderStepContent = () => {
     switch (step) {
@@ -192,8 +210,8 @@ export const EnhancedSignUpForm = () => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h3 className="text-xl font-semibold text-gray-900">Información Personal</h3>
-              <p className="text-gray-600 mt-2">Completa tus datos básicos para comenzar</p>
+              <h3 className="text-xl font-semibold">Información Personal</h3>
+              <p className="text-muted-foreground mt-2">Completa tus datos básicos para comenzar</p>
             </div>
             <PersonalInfoFields formData={formData} onChange={updateFormData} />
           </div>
@@ -203,8 +221,8 @@ export const EnhancedSignUpForm = () => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h3 className="text-xl font-semibold text-gray-900">Crear Contraseña</h3>
-              <p className="text-gray-600 mt-2">Elige una contraseña segura para tu cuenta</p>
+              <h3 className="text-xl font-semibold">Crear Contraseña</h3>
+              <p className="text-muted-foreground mt-2">Elige una contraseña segura para tu cuenta</p>
             </div>
             <PasswordFields 
               password={formData.password} 
@@ -218,8 +236,8 @@ export const EnhancedSignUpForm = () => {
         return (
           <div className="space-y-6">
             <div className="text-center mb-6">
-              <h3 className="text-xl font-semibold text-gray-900">Selecciona tu Rol</h3>
-              <p className="text-gray-600 mt-2">¿Eres inquilino o propietario de inmuebles?</p>
+              <h3 className="text-xl font-semibold">Selecciona tu Rol</h3>
+              <p className="text-muted-foreground mt-2">¿Eres inquilino o propietario de inmuebles?</p>
             </div>
             <RoleSelector role={formData.role} onChange={updateRole} />
           </div>
@@ -230,17 +248,72 @@ export const EnhancedSignUpForm = () => {
           return (
             <div className="space-y-6">
               <div className="text-center mb-6">
-                <h3 className="text-xl font-semibold text-gray-900">Selecciona tu Plan</h3>
-                <p className="text-gray-600 mt-2">Elige el plan que mejor se adapte a tus necesidades</p>
-                <p className="text-sm text-amber-600 mt-2">
-                  Después del registro podrás activar tu plan mediante transferencia bancaria
-                </p>
+                <h3 className="text-xl font-semibold">Selecciona tu Plan</h3>
+                <p className="text-muted-foreground mt-2">Elige el plan que mejor se adapte a tus necesidades</p>
+                <Badge variant="outline" className="mt-2">
+                  Serás redirigido a Stripe para el pago seguro
+                </Badge>
               </div>
-              <SubscriptionPlans 
-                plans={plans} 
-                selectedPlan={formData.subscriptionPlan} 
-                onSelectPlan={(plan) => updateFormData('subscriptionPlan', plan)} 
-              />
+              
+              <div className="grid gap-4 md:grid-cols-3">
+                {(Object.keys(STRIPE_PLANS) as PlanId[]).map((planId) => {
+                  const plan = STRIPE_PLANS[planId];
+                  const isSelected = formData.subscriptionPlan === planId;
+                  const isPopular = planId === 'pro';
+
+                  return (
+                    <Card 
+                      key={planId}
+                      className={cn(
+                        "cursor-pointer transition-all hover:shadow-lg relative",
+                        isSelected && "border-primary ring-2 ring-primary",
+                        isPopular && !isSelected && "border-primary/50"
+                      )}
+                      onClick={() => updateFormData('subscriptionPlan', planId)}
+                    >
+                      {isPopular && (
+                        <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary">
+                          Más Popular
+                        </Badge>
+                      )}
+                      
+                      <CardHeader className="text-center pb-2">
+                        <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
+                          {planIcons[planId]}
+                        </div>
+                        <CardTitle className="text-lg">{plan.name}</CardTitle>
+                        <CardDescription>
+                          <span className="text-2xl font-bold text-foreground">
+                            {formatPrice(plan.price)}
+                          </span>
+                          <span className="text-muted-foreground">/{plan.interval}</span>
+                        </CardDescription>
+                      </CardHeader>
+                      
+                      <CardContent className="space-y-2">
+                        <ul className="space-y-2 text-sm">
+                          {plan.features.slice(0, 4).map((feature, index) => (
+                            <li key={index} className="flex items-start gap-2">
+                              <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                      
+                      <CardFooter>
+                        <Button
+                          type="button"
+                          className="w-full"
+                          variant={isSelected ? "default" : "outline"}
+                        >
+                          {isSelected ? "Seleccionado" : "Seleccionar"}
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  );
+                })}
+              </div>
             </div>
           );
         }
@@ -256,27 +329,27 @@ export const EnhancedSignUpForm = () => {
       {/* Progress indicator */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-sm font-medium">
             Paso {step} de {getTotalSteps()}
           </span>
-          <span className="text-sm font-medium text-gray-700">
+          <span className="text-sm font-medium">
             {Math.round((step / getTotalSteps()) * 100)}% completado
           </span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-3">
+        <div className="w-full bg-muted rounded-full h-3">
           <div 
-            className="bg-bmg-500 h-3 rounded-full transition-all duration-500 ease-out" 
+            className="bg-primary h-3 rounded-full transition-all duration-500 ease-out" 
             style={{ width: `${(step / getTotalSteps()) * 100}%` }}
           />
         </div>
       </div>
 
       {/* Form content */}
-      <div className="bg-white rounded-lg p-6 shadow-sm border">
+      <div className="bg-card rounded-lg p-6 shadow-sm border">
         {renderStepContent()}
         
         {/* Navigation buttons */}
-        <div className="flex justify-between mt-8 pt-6 border-t border-gray-200">
+        <div className="flex justify-between mt-8 pt-6 border-t">
           {step > 1 ? (
             <Button 
               type="button" 
@@ -288,7 +361,7 @@ export const EnhancedSignUpForm = () => {
               ← Atrás
             </Button>
           ) : (
-            <div /> // Empty div to maintain flex layout
+            <div />
           )}
           
           {isLastStep ? (
@@ -296,13 +369,15 @@ export const EnhancedSignUpForm = () => {
               type="button" 
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="px-8 py-2 bg-bmg-500 hover:bg-bmg-600 text-white font-medium"
+              className="px-8 py-2"
             >
               {isSubmitting ? (
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <div className="w-4 h-4 border-2 border-background border-t-transparent rounded-full animate-spin" />
                   Creando cuenta...
                 </div>
+              ) : formData.role === 'landlord' ? (
+                "Crear Cuenta y Pagar"
               ) : (
                 "Crear Cuenta"
               )}
@@ -311,7 +386,7 @@ export const EnhancedSignUpForm = () => {
             <Button 
               type="button" 
               onClick={handleNext}
-              className="px-6 py-2 bg-bmg-500 hover:bg-bmg-600 text-white font-medium"
+              className="px-6 py-2"
             >
               Siguiente →
             </Button>
