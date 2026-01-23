@@ -25,6 +25,8 @@ import PropertyDetails from './pages/PropertyDetails';
 import Settings from './pages/Settings';
 import LandlordProfile from './pages/LandlordProfile';
 import Tenants from './pages/Tenants';
+import Pricing from './pages/Pricing';
+import DemoPage from './pages/Demo';
 
 const queryClient = new QueryClient();
 
@@ -81,8 +83,10 @@ const AppRoutes = () => {
       <Route path="/" element={<Index />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
-        <Route path="/tenant-invitation" element={<TenantInvitation />} />
-        <Route path="/tenant-onboarding" element={<TenantOnboarding />} />
+      <Route path="/pricing" element={<Pricing />} />
+      <Route path="/demo" element={<DemoPage />} />
+      <Route path="/tenant-invitation" element={<TenantInvitation />} />
+      <Route path="/tenant-onboarding" element={<TenantOnboarding />} />
       
       {/* Protected Routes within AppLayout */}
       <Route
