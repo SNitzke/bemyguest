@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { homePathFor, useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import TrialBanner from "./TrialBanner";
+import { useIssues } from "@/hooks/useData";
 
 const landlordLinks = [
   { name: "Inicio", path: "/landlord-profile", icon: Home },
@@ -34,6 +35,12 @@ export const FullPageSpinner = () => (
 const AppLayout: React.FC = () => {
   const { user, role, profile, isLoading, signOut } = useAuth();
   const navigate = useNavigate();
+  const { data: issues = [] } = useIssues();
+  const openIssues = role === "landlord" ? issues.filter((i) => i.status !== "resolved" && i.status !== "closed").length : 0;
+  const badge = (path: string) =>
+    path === "/issues" && openIssues > 0 ? (
+      <span className="ml-auto rounded-full bg-destructive px-1.5 text-[10px] font-bold leading-4 text-destructive-foreground" aria-label={`${openIssues} reparaciones abiertas`}>{openIssues}</span>
+    ) : null;
 
   if (isLoading) return <FullPageSpinner />;
   if (!user) return <Navigate to="/login" replace />;
@@ -67,6 +74,7 @@ const AppLayout: React.FC = () => {
             >
               <Icon className="h-4 w-4" />
               {name}
+              {badge(path)}
             </NavLink>
           ))}
         </nav>
@@ -101,7 +109,10 @@ const AppLayout: React.FC = () => {
               cn("flex flex-col items-center gap-0.5 px-2 text-[11px]", isActive ? "text-primary" : "text-muted-foreground")
             }
           >
-            <Icon className="h-5 w-5" />
+            <span className="relative">
+              <Icon className="h-5 w-5" />
+              {badge(path) && <span className="absolute -right-2 -top-1">{badge(path)}</span>}
+            </span>
             {name}
           </NavLink>
         ))}
