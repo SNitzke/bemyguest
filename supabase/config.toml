@@ -28,5 +28,3 @@ verify_jwt = false
 [functions.customer-portal]
 verify_jwt = false
 
-[functions.sync-stripe-customer]
-verify_jwt = false
