@@ -17,6 +17,7 @@ import LandlordHome from "./pages/landlord/LandlordHome";
 import Properties from "./pages/landlord/Properties";
 import PropertyDetail from "./pages/landlord/PropertyDetail";
 import Tenants from "./pages/landlord/Tenants";
+import Maintenance from "./pages/landlord/Maintenance";
 import TenantHome from "./pages/tenant/TenantHome";
 import Payments from "./pages/Payments";
 import Issues from "./pages/Issues";
@@ -55,6 +56,7 @@ const App = () => (
               <Route path="/properties" element={<RoleRoute role="landlord"><Properties /></RoleRoute>} />
               <Route path="/properties/:id" element={<RoleRoute role="landlord"><PropertyDetail /></RoleRoute>} />
               <Route path="/tenants" element={<RoleRoute role="landlord"><Tenants /></RoleRoute>} />
+              <Route path="/maintenance" element={<RoleRoute role="landlord"><Maintenance /></RoleRoute>} />
               <Route path="/dashboard" element={<RoleRoute role="tenant"><TenantHome /></RoleRoute>} />
               <Route path="/payments" element={<Payments />} />
               <Route path="/issues" element={<Issues />} />
