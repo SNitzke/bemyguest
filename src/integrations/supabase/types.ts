@@ -70,8 +70,10 @@ export type Database = {
           description: string | null
           id: string
           landlord_id: string
+          payment_note: string | null
           priority: string
           property_id: string
+          receipt_path: string | null
           reimbursement_mode: string | null
           reimbursement_months: number | null
           status: string
@@ -85,8 +87,10 @@ export type Database = {
           description?: string | null
           id?: string
           landlord_id: string
+          payment_note?: string | null
           priority?: string
           property_id: string
+          receipt_path?: string | null
           reimbursement_mode?: string | null
           reimbursement_months?: number | null
           status?: string
@@ -100,8 +104,10 @@ export type Database = {
           description?: string | null
           id?: string
           landlord_id?: string
+          payment_note?: string | null
           priority?: string
           property_id?: string
+          receipt_path?: string | null
           reimbursement_mode?: string | null
           reimbursement_months?: number | null
           status?: string
