@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, NavLink, Navigate, Outlet, useNavigate } from "react-router-dom";
-import { Building2, CreditCard, Home, LogOut, MessageSquare, Settings, Users, Wrench } from "lucide-react";
+import { Building2, CalendarClock, CreditCard, Home, LogOut, MessageSquare, Settings, Users, Wrench } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { homePathFor, useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ const landlordLinks = [
   { name: "Inquilinos", path: "/tenants", icon: Users },
   { name: "Pagos", path: "/payments", icon: CreditCard },
   { name: "Reparaciones", path: "/issues", icon: Wrench },
+  { name: "Calendario", path: "/maintenance", icon: CalendarClock },
   { name: "Mensajes", path: "/messages", icon: MessageSquare },
   { name: "Configuración", path: "/settings", icon: Settings },
 ];
