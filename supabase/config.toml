@@ -1,4 +1,4 @@
-project_id = "wwakwpvaszfrwunybuou"
+project_id = "lvsnumrnujvwbzttdhnd"
 
 [auth]
 otp_exp = 1800
@@ -28,5 +28,3 @@ verify_jwt = false
 [functions.customer-portal]
 verify_jwt = false
 
-[functions.sync-stripe-customer]
-verify_jwt = false

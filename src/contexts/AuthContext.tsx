@@ -1,133 +1,108 @@
-
-import React, { createContext, useContext, useState, useEffect } from "react";
-import { User, Session } from "@supabase/supabase-js";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
-import { AuthContextType, Profile } from "@/types/auth";
-import { useAuthService } from "@/hooks/useAuthService";
-import { useInvitations } from "@/hooks/useInvitations";
+import type { Tables } from "@/integrations/supabase/types";
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export type Role = "landlord" | "tenant";
+export type Profile = Tables<"profiles">;
+export type Subscription = Tables<"subscriptions">;
+
+interface AuthState {
+  user: User | null;
+  session: Session | null;
+  profile: Profile | null;
+  role: Role | null;
+  subscription: Subscription | null;
+  isLoading: boolean;
+  refresh: () => Promise<void>;
+  signOut: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthState | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  
-  const authService = useAuthService();
-  const invitationService = useInvitations();
+  const [role, setRole] = useState<Role | null>(null);
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
+  const [sessionReady, setSessionReady] = useState(false);
+  const [dataLoading, setDataLoading] = useState(false);
 
-  // Función para cargar el perfil
-  const loadProfile = async (userId: string) => {
-    try {
-      console.log("Cargando perfil para usuario:", userId);
-      const profileData = await authService.getProfile(userId);
-      console.log("Perfil cargado:", profileData);
-      
-      if (!profileData) {
-        console.warn("No se encontró perfil para el usuario:", userId);
-        // Esperar un poco más e intentar de nuevo
-        setTimeout(async () => {
-          const retryProfile = await authService.getProfile(userId);
-          setProfile(retryProfile);
-        }, 1500);
-        return;
-      }
-      
-      setProfile(profileData);
-    } catch (error) {
-      console.error("Error loading profile:", error);
-      setProfile(null);
-    }
-  };
-
-  useEffect(() => {
-    let mounted = true;
-
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log("Auth state changed:", event, session?.user?.id);
-      
-      if (!mounted) return;
-      
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      // Load profile when user logs in
-      if (session?.user) {
-        setTimeout(async () => {
-          if (mounted) {
-            await loadProfile(session.user.id);
-          }
-        }, 100);
-      } else {
-        setProfile(null);
-      }
-      
-      setIsLoading(false);
-    });
-
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      
-      console.log("Sesión existente:", session?.user?.id);
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        loadProfile(session.user.id);
-      }
-      
-      setIsLoading(false);
-    });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
+  const loadUserData = useCallback(async (userId: string) => {
+    setDataLoading(true);
+    const [p, r, s] = await Promise.all([
+      supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
+      supabase.from("user_roles").select("role").eq("user_id", userId),
+      supabase.from("subscriptions").select("*").eq("user_id", userId).maybeSingle(),
+    ]);
+    setProfile(p.data ?? null);
+    const roles = (r.data ?? []).map((x) => x.role as Role);
+    setRole(roles.includes("landlord") ? "landlord" : roles.includes("tenant") ? "tenant" : null);
+    setSubscription(s.data ?? null);
+    setDataLoading(false);
   }, []);
 
-  const getUserRole = async (): Promise<string | null> => {
-    if (!user) return null;
-    return authService.getUserRole(user.id);
-  };
+  useEffect(() => {
+    const { data } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession);
+      if (newSession?.user) {
+        // defer to avoid running queries inside the auth callback
+        setTimeout(() => loadUserData(newSession.user.id), 0);
+      } else {
+        setProfile(null);
+        setRole(null);
+        setSubscription(null);
+      }
+    });
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      setSession(s);
+      if (s?.user) loadUserData(s.user.id).finally(() => setSessionReady(true));
+      else setSessionReady(true);
+    });
+    return () => data.subscription.unsubscribe();
+  }, [loadUserData]);
 
-  const updateProfile = async (data: Partial<Profile>): Promise<void> => {
-    if (!user) throw new Error("No user logged in");
-    
-    await authService.updateProfile(user.id, data);
-    
-    // Refresh profile after update
-    await loadProfile(user.id);
-  };
+  const refresh = useCallback(async () => {
+    if (session?.user) await loadUserData(session.user.id);
+  }, [session?.user, loadUserData]);
+
+  const signOut = useCallback(async () => {
+    await supabase.auth.signOut();
+  }, []);
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      session,
-      profile,
-      isLoading: isLoading || authService.isLoading,
-      isAuthenticated: !!user,
-      login: authService.login,
-      signup: authService.signup,
-      logout: authService.logout,
-      switchRole: authService.switchRole,
-      getUserRole,
-      updateProfile,
-      ...invitationService
-    }}>
+    <AuthContext.Provider
+      value={{
+        user: session?.user ?? null,
+        session,
+        profile,
+        role,
+        subscription,
+        isLoading: !sessionReady || dataLoading,
+        refresh,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
 };
 
-export type { Profile, LandlordDetails } from "@/types/auth";
+export const homePathFor = (role: Role | null) => (role === "landlord" ? "/landlord-profile" : "/dashboard");
+
+export function trialDaysLeft(sub: Subscription | null): number {
+  if (!sub) return 0;
+  const ms = new Date(sub.trial_ends_at).getTime() - Date.now();
+  return Math.max(0, Math.ceil(ms / 86400000));
+}
+
+export function hasLandlordAccess(sub: Subscription | null): boolean {
+  if (!sub) return false;
+  return sub.status === "active" || (sub.status === "trialing" && trialDaysLeft(sub) > 0);
+}

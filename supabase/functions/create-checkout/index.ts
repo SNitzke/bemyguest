@@ -79,7 +79,7 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
-      success_url: `${origin}/landlord-profile?success=true&plan=${planName}`,
+      success_url: `${origin}/pricing?success=true`,
       cancel_url: `${origin}/pricing?canceled=true`,
       metadata: {
         user_id: user.id,

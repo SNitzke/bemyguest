@@ -1,132 +1,76 @@
-
-import React, { useState, useEffect } from "react";
-import { Link, Navigate, useSearchParams } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import React, { useState } from "react";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { homePathFor, useAuth } from "@/contexts/AuthContext";
+import AuthShell from "@/components/auth/AuthShell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { ArrowLeft } from "lucide-react";
+
+const translate = (msg: string) => {
+  if (/invalid login credentials/i.test(msg)) return "Correo o contraseña incorrectos.";
+  if (/email not confirmed/i.test(msg)) return "Primero confirma tu correo: revisa tu bandeja de entrada (y spam).";
+  return msg;
+};
 
 const Login = () => {
+  const { user, role, isLoading } = useAuth();
+  const [params] = useSearchParams();
+  const next = params.get("next");
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [searchParams] = useSearchParams();
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    const message = searchParams.get('message');
-    if (message === 'registration_complete') {
-      toast.success('¡Registro completado! Ahora puedes iniciar sesión con tu nueva cuenta.');
-    }
-  }, [searchParams]);
+  if (!isLoading && user) return <Navigate to={next?.startsWith("/") ? next : homePathFor(role)} replace />;
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-bmg-50 to-bmg-100 p-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!email || !password) {
-      toast.error("Por favor completa todos los campos");
-      return;
-    }
-    
-    setIsSubmitting(true);
-    try {
-      await login(email, password);
-    } catch (error) {
-      console.error("Login error:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    setBusy(true);
+    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+    setBusy(false);
+    if (error) return toast.error(translate(error.message));
+    toast.success("¡Bienvenido de nuevo!");
+    if (next?.startsWith("/")) navigate(next);
   };
 
+  const forgot = async () => {
+    if (!email) return toast.error("Escribe tu correo primero");
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) return toast.error(error.message);
+    toast.success("Te enviamos un correo para restablecer tu contraseña");
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-bmg-50 to-bmg-100 p-4">
-      <div className="w-full max-w-md">
-        <Link 
-          to="/" 
-          className="flex items-center text-bmg-600 hover:text-bmg-700 mb-6 transition-colors"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Volver al inicio
+    <AuthShell title="Iniciar sesión" subtitle="Entra con tu correo y contraseña">
+      <form onSubmit={submit} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Correo electrónico</Label>
+          <Input id="email" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Contraseña</Label>
+            <button type="button" onClick={forgot} className="text-xs text-primary hover:underline">
+              ¿Olvidaste tu contraseña?
+            </button>
+          </div>
+          <Input id="password" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
+        </div>
+        <Button type="submit" className="w-full" disabled={busy}>
+          {busy ? "Entrando..." : "Entrar"}
+        </Button>
+      </form>
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        ¿No tienes cuenta?{" "}
+        <Link to="/signup" className="font-medium text-primary hover:underline">
+          Regístrate
         </Link>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Bienvenido</CardTitle>
-            <CardDescription>Inicia sesión en tu cuenta</CardDescription>
-          </CardHeader>
-          <form onSubmit={handleSubmit}>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="nombre@ejemplo.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Contraseña</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="text-sm text-right">
-                <Link to="/forgot-password" className="text-primary hover:underline">
-                  ¿Olvidaste tu contraseña?
-                </Link>
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-4">
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
-                {isSubmitting ? "Iniciando sesión..." : "Iniciar sesión"}
-              </Button>
-              
-              <div className="relative w-full">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t"></span>
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="px-2 bg-card text-muted-foreground text-xs">O PRUEBA UNA DEMO</span>
-                </div>
-              </div>
-              
-              
-              <p className="text-sm text-center text-muted-foreground">
-                ¿No tienes una cuenta?{" "}
-                <Link to="/signup" className="text-primary hover:underline">
-                  Regístrate aquí
-                </Link>
-              </p>
-            </CardFooter>
-          </form>
-        </Card>
-      </div>
-    </div>
+      </p>
+    </AuthShell>
   );
 };
 

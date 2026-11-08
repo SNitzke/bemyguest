@@ -10,175 +10,100 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.12"
+    PostgrestVersion: "14.18"
   }
   public: {
     Tables: {
-      issues: {
+      invitations: {
         Row: {
-          assigned_to: string | null
-          created_at: string | null
-          description: string | null
+          accepted_at: string | null
+          accepted_by: string | null
+          code: string
+          created_at: string
           id: string
-          images: string[] | null
-          landlord_id: string | null
-          priority: string | null
-          property_id: string | null
-          resolved_at: string | null
-          status: string | null
-          tenant_id: string | null
-          title: string
-          updated_at: string | null
+          landlord_id: string
+          property_id: string
+          rent_amount: number
+          status: string
+          tenant_email: string
+          tenant_name: string
         }
         Insert: {
-          assigned_to?: string | null
-          created_at?: string | null
-          description?: string | null
+          accepted_at?: string | null
+          accepted_by?: string | null
+          code?: string
+          created_at?: string
           id?: string
-          images?: string[] | null
-          landlord_id?: string | null
-          priority?: string | null
-          property_id?: string | null
-          resolved_at?: string | null
-          status?: string | null
-          tenant_id?: string | null
-          title: string
-          updated_at?: string | null
+          landlord_id: string
+          property_id: string
+          rent_amount?: number
+          status?: string
+          tenant_email: string
+          tenant_name: string
         }
         Update: {
-          assigned_to?: string | null
-          created_at?: string | null
-          description?: string | null
+          accepted_at?: string | null
+          accepted_by?: string | null
+          code?: string
+          created_at?: string
           id?: string
-          images?: string[] | null
-          landlord_id?: string | null
-          priority?: string | null
-          property_id?: string | null
-          resolved_at?: string | null
-          status?: string | null
-          tenant_id?: string | null
-          title?: string
-          updated_at?: string | null
+          landlord_id?: string
+          property_id?: string
+          rent_amount?: number
+          status?: string
+          tenant_email?: string
+          tenant_name?: string
         }
         Relationships: [
           {
-            foreignKeyName: "issues_property_id_fkey"
+            foreignKeyName: "invitations_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "issues_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
         ]
       }
-      landlord_details: {
+      issues: {
         Row: {
-          address: string | null
-          business_name: string | null
-          company_name: string | null
-          created_at: string
-          id: string
-          max_properties: number
-          payment_verified: boolean
-          properties_count: number
-          subscription_end_date: string | null
-          subscription_plan: string
-          subscription_start_date: string | null
-          subscription_status: string
-          updated_at: string
-          user_id: string
-          verified: boolean
-        }
-        Insert: {
-          address?: string | null
-          business_name?: string | null
-          company_name?: string | null
-          created_at?: string
-          id?: string
-          max_properties?: number
-          payment_verified?: boolean
-          properties_count?: number
-          subscription_end_date?: string | null
-          subscription_plan?: string
-          subscription_start_date?: string | null
-          subscription_status?: string
-          updated_at?: string
-          user_id: string
-          verified?: boolean
-        }
-        Update: {
-          address?: string | null
-          business_name?: string | null
-          company_name?: string | null
-          created_at?: string
-          id?: string
-          max_properties?: number
-          payment_verified?: boolean
-          properties_count?: number
-          subscription_end_date?: string | null
-          subscription_plan?: string
-          subscription_start_date?: string | null
-          subscription_status?: string
-          updated_at?: string
-          user_id?: string
-          verified?: boolean
-        }
-        Relationships: [
-          {
-            foreignKeyName: "landlord_details_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      manual_payments: {
-        Row: {
-          amount: number
           created_at: string
           description: string | null
           id: string
-          payment_date: string
-          payment_method: string
-          payment_type: string
-          property_id: string | null
+          landlord_id: string
+          priority: string
+          property_id: string
+          status: string
+          tenant_id: string
+          title: string
           updated_at: string
-          user_id: string
         }
         Insert: {
-          amount: number
           created_at?: string
           description?: string | null
           id?: string
-          payment_date: string
-          payment_method: string
-          payment_type: string
-          property_id?: string | null
+          landlord_id: string
+          priority?: string
+          property_id: string
+          status?: string
+          tenant_id: string
+          title: string
           updated_at?: string
-          user_id: string
         }
         Update: {
-          amount?: number
           created_at?: string
           description?: string | null
           id?: string
-          payment_date?: string
-          payment_method?: string
-          payment_type?: string
-          property_id?: string | null
+          landlord_id?: string
+          priority?: string
+          property_id?: string
+          status?: string
+          tenant_id?: string
+          title?: string
           updated_at?: string
-          user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "fk_manual_payments_property"
+            foreignKeyName: "issues_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
@@ -191,24 +116,24 @@ export type Database = {
           content: string
           created_at: string
           id: string
-          read: boolean
-          receiver_id: string
+          read_at: string | null
+          recipient_id: string
           sender_id: string
         }
         Insert: {
           content: string
           created_at?: string
           id?: string
-          read?: boolean
-          receiver_id: string
+          read_at?: string | null
+          recipient_id: string
           sender_id: string
         }
         Update: {
           content?: string
           created_at?: string
           id?: string
-          read?: boolean
-          receiver_id?: string
+          read_at?: string | null
+          recipient_id?: string
           sender_id?: string
         }
         Relationships: []
@@ -216,51 +141,42 @@ export type Database = {
       payments: {
         Row: {
           amount: number
-          created_at: string | null
-          description: string | null
-          due_date: string
+          category: string
+          created_at: string
           id: string
-          landlord_id: string | null
-          payment_date: string | null
-          payment_method: string | null
-          payment_type: string | null
+          kind: string
+          landlord_id: string
+          method: string
+          notes: string | null
+          paid_on: string
           property_id: string | null
-          reference_number: string | null
-          status: string | null
           tenant_id: string | null
-          updated_at: string | null
         }
         Insert: {
           amount: number
-          created_at?: string | null
-          description?: string | null
-          due_date: string
+          category?: string
+          created_at?: string
           id?: string
-          landlord_id?: string | null
-          payment_date?: string | null
-          payment_method?: string | null
-          payment_type?: string | null
+          kind?: string
+          landlord_id: string
+          method?: string
+          notes?: string | null
+          paid_on?: string
           property_id?: string | null
-          reference_number?: string | null
-          status?: string | null
           tenant_id?: string | null
-          updated_at?: string | null
         }
         Update: {
           amount?: number
-          created_at?: string | null
-          description?: string | null
-          due_date?: string
+          category?: string
+          created_at?: string
           id?: string
-          landlord_id?: string | null
-          payment_date?: string | null
-          payment_method?: string | null
-          payment_type?: string | null
+          kind?: string
+          landlord_id?: string
+          method?: string
+          notes?: string | null
+          paid_on?: string
           property_id?: string | null
-          reference_number?: string | null
-          status?: string | null
           tenant_id?: string | null
-          updated_at?: string | null
         }
         Relationships: [
           {
@@ -270,140 +186,153 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "payments_tenant_id_fkey"
-            columns: ["tenant_id"]
-            isOneToOne: false
-            referencedRelation: "tenants"
-            referencedColumns: ["id"]
-          },
         ]
       }
       profiles: {
         Row: {
-          avatar_url: string | null
-          created_at: string | null
-          email: string | null
-          full_name: string | null
+          bio: string | null
+          created_at: string
+          email: string
+          emergency_contact: string | null
+          full_name: string
           id: string
-          phone_number: string | null
-          role: Database["public"]["Enums"]["user_role"] | null
-          updated_at: string | null
+          phone: string | null
+          updated_at: string
         }
         Insert: {
-          avatar_url?: string | null
-          created_at?: string | null
-          email?: string | null
-          full_name?: string | null
+          bio?: string | null
+          created_at?: string
+          email?: string
+          emergency_contact?: string | null
+          full_name?: string
           id: string
-          phone_number?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          updated_at?: string | null
+          phone?: string | null
+          updated_at?: string
         }
         Update: {
-          avatar_url?: string | null
-          created_at?: string | null
-          email?: string | null
-          full_name?: string | null
+          bio?: string | null
+          created_at?: string
+          email?: string
+          emergency_contact?: string | null
+          full_name?: string
           id?: string
-          phone_number?: string | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          updated_at?: string | null
+          phone?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
       properties: {
         Row: {
           address: string
+          bathrooms: number | null
+          bedrooms: number | null
+          city: string | null
           created_at: string
+          description: string | null
           id: string
-          image_url: string | null
+          landlord_id: string
           name: string
-          rent_amount: number | null
+          rent_amount: number
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          bathrooms?: number | null
+          bedrooms?: number | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          landlord_id: string
+          name: string
+          rent_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          bathrooms?: number | null
+          bedrooms?: number | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          landlord_id?: string
+          name?: string
+          rent_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          current_period_end: string | null
+          plan: string
           status: string
-          units: number
+          stripe_customer_id: string | null
+          trial_ends_at: string
           updated_at: string
           user_id: string
         }
         Insert: {
-          address: string
           created_at?: string
-          id?: string
-          image_url?: string | null
-          name: string
-          rent_amount?: number | null
+          current_period_end?: string | null
+          plan?: string
           status?: string
-          units?: number
+          stripe_customer_id?: string | null
+          trial_ends_at?: string
           updated_at?: string
           user_id: string
         }
         Update: {
-          address?: string
           created_at?: string
-          id?: string
-          image_url?: string | null
-          name?: string
-          rent_amount?: number | null
+          current_period_end?: string | null
+          plan?: string
           status?: string
-          units?: number
+          stripe_customer_id?: string | null
+          trial_ends_at?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: []
       }
-      tenant_invitations: {
+      tenancies: {
         Row: {
           created_at: string
-          expires_at: string
           id: string
-          invitation_code: string
           landlord_id: string
           property_id: string
           rent_amount: number
+          start_date: string
           status: string
-          tenant_email: string
-          tenant_name: string
-          unit_number: string
+          tenant_id: string
           updated_at: string
         }
         Insert: {
           created_at?: string
-          expires_at?: string
           id?: string
-          invitation_code: string
           landlord_id: string
           property_id: string
-          rent_amount: number
+          rent_amount?: number
+          start_date?: string
           status?: string
-          tenant_email: string
-          tenant_name: string
-          unit_number: string
+          tenant_id: string
           updated_at?: string
         }
         Update: {
           created_at?: string
-          expires_at?: string
           id?: string
-          invitation_code?: string
           landlord_id?: string
           property_id?: string
           rent_amount?: number
+          start_date?: string
           status?: string
-          tenant_email?: string
-          tenant_name?: string
-          unit_number?: string
+          tenant_id?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "fk_tenant_invitations_landlord"
-            columns: ["landlord_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_tenant_invitations_property"
+            foreignKeyName: "tenancies_property_id_fkey"
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
@@ -411,70 +340,60 @@ export type Database = {
           },
         ]
       }
-      tenants: {
+      user_roles: {
         Row: {
-          created_at: string | null
           id: string
-          landlord_id: string | null
-          lease_end_date: string | null
-          move_in_date: string | null
-          property_id: string | null
-          rent_amount: number | null
-          status: string | null
-          unit_number: string
-          updated_at: string | null
-          user_id: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
         }
         Insert: {
-          created_at?: string | null
           id?: string
-          landlord_id?: string | null
-          lease_end_date?: string | null
-          move_in_date?: string | null
-          property_id?: string | null
-          rent_amount?: number | null
-          status?: string | null
-          unit_number: string
-          updated_at?: string | null
-          user_id?: string | null
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
         }
         Update: {
-          created_at?: string | null
           id?: string
-          landlord_id?: string | null
-          lease_end_date?: string | null
-          move_in_date?: string | null
-          property_id?: string | null
-          rent_amount?: number | null
-          status?: string | null
-          unit_number?: string
-          updated_at?: string | null
-          user_id?: string | null
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "tenants_property_id_fkey"
-            columns: ["property_id"]
-            isOneToOne: false
-            referencedRelation: "properties"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      create_landlord_details: {
-        Args: { plan?: string; user_id: string }
-        Returns: Json
+      accept_invitation: { Args: { _code: string }; Returns: string }
+      get_invitation: {
+        Args: { _code: string }
+        Returns: {
+          landlord_name: string
+          property_address: string
+          property_city: string
+          property_name: string
+          rent_amount: number
+          status: string
+          tenant_email: string
+          tenant_name: string
+        }[]
       }
-      generate_invitation_code: { Args: never; Returns: string }
-      get_landlord_details: { Args: { user_id: string }; Returns: Json }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_tenant_of: {
+        Args: { _property_id: string; _user_id: string }
+        Returns: boolean
+      }
+      landlord_has_access: { Args: { _user_id: string }; Returns: boolean }
+      plan_property_limit: { Args: { _plan: string }; Returns: number }
+      shares_tenancy: { Args: { _a: string; _b: string }; Returns: boolean }
     }
     Enums: {
-      user_role: "tenant" | "landlord" | "admin"
+      app_role: "landlord" | "tenant"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -602,7 +521,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      user_role: ["tenant", "landlord", "admin"],
+      app_role: ["landlord", "tenant"],
     },
   },
 } as const

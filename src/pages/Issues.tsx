@@ -1,151 +1,147 @@
-import React from "react";
-import { useIssues } from "../hooks/useIssues";
-import { useAuth } from "../contexts/AuthContext";
-import { Badge } from "../components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { AlertCircle, CheckCircle, Clock, Wrench } from "lucide-react";
+import React, { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Plus, Wrench } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useIssues, useTenancies } from "@/hooks/useData";
+import { errorMessage, formatDate, ISSUE_PRIORITY, ISSUE_STATUS } from "@/lib/format";
+import PageHeader, { EmptyState } from "@/components/PageHeader";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
-const Issues: React.FC = () => {
-  const { issues, isLoading } = useIssues();
-  const { profile } = useAuth();
-  const isLandlord = profile?.role === "landlord";
+export const ReportIssueDialog: React.FC<{ open: boolean; onOpenChange: (o: boolean) => void }> = ({ open, onOpenChange }) => {
+  const { user } = useAuth();
+  const qc = useQueryClient();
+  const { data: tenancies = [] } = useTenancies();
+  const mine = tenancies.filter((t) => t.tenant_id === user?.id && t.status === "active");
+  const [f, setF] = useState({ title: "", description: "", priority: "medium", tenancy: "" });
+  const [busy, setBusy] = useState(false);
+  const tenancyId = f.tenancy || mine[0]?.id || "";
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "new":
-        return <AlertCircle className="h-4 w-4" />;
-      case "in_progress":
-        return <Wrench className="h-4 w-4" />;
-      case "resolved":
-        return <CheckCircle className="h-4 w-4" />;
-      default:
-        return <Clock className="h-4 w-4" />;
-    }
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const t = mine.find((x) => x.id === tenancyId);
+    if (!user || !t) return toast.error("No tienes una vivienda conectada");
+    setBusy(true);
+    const { error } = await supabase.from("issues").insert({
+      property_id: t.property_id,
+      landlord_id: t.landlord_id,
+      tenant_id: user.id,
+      title: f.title.trim(),
+      description: f.description.trim() || null,
+      priority: f.priority,
+    });
+    setBusy(false);
+    if (error) return toast.error(errorMessage(error));
+    toast.success("Reporte enviado a tu arrendador");
+    qc.invalidateQueries({ queryKey: ["issues"] });
+    setF({ title: "", description: "", priority: "medium", tenancy: "" });
+    onOpenChange(false);
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "new":
-        return "destructive";
-      case "in_progress":
-        return "default";
-      case "resolved":
-        return "secondary";
-      default:
-        return "outline";
-    }
-  };
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader><DialogTitle>Solicitar reparación</DialogTitle></DialogHeader>
+        {mine.length === 0 ? (
+          <p className="text-sm text-muted-foreground">Aún no estás conectado a una vivienda. Abre el enlace de invitación de tu arrendador.</p>
+        ) : (
+          <form onSubmit={submit} className="space-y-4">
+            {mine.length > 1 && (
+              <div className="space-y-2">
+                <Label>Vivienda</Label>
+                <Select value={tenancyId} onValueChange={(v) => setF({ ...f, tenancy: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>{mine.map((t) => <SelectItem key={t.id} value={t.id}>{t.property?.name}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="i-title">¿Qué pasa?</Label>
+              <Input id="i-title" required placeholder="Ej. Fuga en el baño" value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="i-desc">Detalles</Label>
+              <Textarea id="i-desc" rows={4} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label>Urgencia</Label>
+              <Select value={f.priority} onValueChange={(v) => setF({ ...f, priority: v })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{Object.entries(ISSUE_PRIORITY).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
+              <Button type="submit" disabled={busy}>{busy ? "Enviando..." : "Enviar reporte"}</Button>
+            </DialogFooter>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "urgent":
-        return "destructive";
-      case "high":
-        return "destructive";
-      case "medium":
-        return "default";
-      case "low":
-        return "secondary";
-      default:
-        return "outline";
-    }
-  };
+const Issues = () => {
+  const { role } = useAuth();
+  const isLandlord = role === "landlord";
+  const qc = useQueryClient();
+  const { data: issues = [], isLoading } = useIssues();
+  const { data: tenancies = [] } = useTenancies();
+  const [open, setOpen] = useState(false);
 
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <h1 className="text-2xl font-heading font-semibold">
-          {isLandlord ? "Problemas Reportados" : "Mis Problemas"}
-        </h1>
-        <div className="animate-pulse space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-32 bg-muted rounded-lg" />
-          ))}
-        </div>
-      </div>
-    );
-  }
+  const propName = (id: string) => tenancies.find((t) => t.property_id === id)?.property?.name ?? "";
+  const tenantName = (id: string) => tenancies.find((t) => t.tenant_id === id)?.tenant?.full_name ?? "";
+
+  const setStatus = async (id: string, status: string) => {
+    const { error } = await supabase.from("issues").update({ status }).eq("id", id);
+    if (error) return toast.error(errorMessage(error));
+    qc.invalidateQueries({ queryKey: ["issues"] });
+  };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-heading font-semibold">
-          {isLandlord ? "Problemas Reportados" : "Mis Problemas"}
-        </h1>
-        <p className="text-muted-foreground">
-          {isLandlord 
-            ? "Gestiona los problemas reportados por tus inquilinos"
-            : "Revisa el estado de los problemas que has reportado"
-          }
-        </p>
-      </div>
-
-      {issues.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <CheckCircle className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">
-              {isLandlord ? "No hay problemas reportados" : "No tienes problemas reportados"}
-            </h3>
-            <p className="text-muted-foreground text-center">
-              {isLandlord 
-                ? "Cuando tus inquilinos reporten problemas, aparecerán aquí."
-                : "Si tienes algún problema en tu vivienda, puedes reportarlo desde el dashboard."
-              }
-            </p>
-          </CardContent>
-        </Card>
+      <PageHeader
+        title="Reparaciones"
+        description={isLandlord ? "Reportes de tus inquilinos" : "Tus solicitudes de reparación"}
+        action={!isLandlord && <Button onClick={() => setOpen(true)}><Plus className="mr-2 h-4 w-4" /> Solicitar reparación</Button>}
+      />
+      {!isLoading && issues.length === 0 ? (
+        <EmptyState icon={Wrench} title="No hay reportes" text={isLandlord ? "Cuando un inquilino reporte un problema aparecerá aquí." : "Si algo falla en tu vivienda, repórtalo aquí."} />
       ) : (
-        <div className="grid gap-4">
-          {issues.map((issue) => (
-            <Card key={issue.id}>
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <CardTitle className="text-lg">{issue.title}</CardTitle>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(issue.created_at).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Badge variant={getPriorityColor(issue.priority) as any}>
-                      {issue.priority}
-                    </Badge>
-                    <Badge variant={getStatusColor(issue.status) as any} className="gap-1">
-                      {getStatusIcon(issue.status)}
-                      {issue.status === "new" && "Nuevo"}
-                      {issue.status === "in_progress" && "En Progreso"}
-                      {issue.status === "resolved" && "Resuelto"}
-                      {issue.status === "closed" && "Cerrado"}
-                    </Badge>
-                  </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {issues.map((i) => (
+            <Card key={i.id}>
+              <CardContent className="space-y-2 p-5">
+                <div className="flex items-start justify-between gap-2">
+                  <p className="font-semibold">{i.title}</p>
+                  <Badge variant={i.priority === "urgent" || i.priority === "high" ? "destructive" : "secondary"}>{ISSUE_PRIORITY[i.priority] ?? i.priority}</Badge>
                 </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {issue.description}
+                {i.description && <p className="text-sm text-muted-foreground">{i.description}</p>}
+                <p className="text-xs text-muted-foreground">
+                  {formatDate(i.created_at)} · {propName(i.property_id)}{isLandlord && tenantName(i.tenant_id) ? ` · ${tenantName(i.tenant_id)}` : ""}
                 </p>
-                {issue.images && issue.images.length > 0 && (
-                  <div className="flex gap-2 flex-wrap">
-                    {issue.images.map((image, index) => (
-                      <img
-                        key={index}
-                        src={image}
-                        alt={`Problema ${index + 1}`}
-                        className="w-20 h-20 object-cover rounded-lg border"
-                      />
-                    ))}
-                  </div>
+                {isLandlord ? (
+                  <Select value={i.status} onValueChange={(v) => setStatus(i.id, v)}>
+                    <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
+                    <SelectContent>{Object.entries(ISSUE_STATUS).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}</SelectContent>
+                  </Select>
+                ) : (
+                  <Badge variant={i.status === "resolved" ? "secondary" : "default"}>{ISSUE_STATUS[i.status] ?? i.status}</Badge>
                 )}
               </CardContent>
             </Card>
           ))}
         </div>
       )}
+      {!isLandlord && <ReportIssueDialog open={open} onOpenChange={setOpen} />}
     </div>
   );
 };
