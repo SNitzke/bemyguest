@@ -18,7 +18,10 @@ const Pricing = () => {
 
   useEffect(() => {
     if (params.get("canceled")) toast.message("Pago cancelado");
-  }, [params]);
+    if (params.get("success") && user) {
+      supabase.functions.invoke("check-subscription").then(() => refresh().then(() => toast.success("¡Gracias! Tu plan está activo")));
+    }
+  }, [params, user]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const choose = async (id: PlanId) => {
     if (!user) return navigate(`/signup?role=landlord&plan=${id}`);
