@@ -5,7 +5,7 @@ import { Plus, Wrench } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIssues, useTenancies } from "@/hooks/useData";
-import { errorMessage, formatDate, ISSUE_PRIORITY, ISSUE_STATUS } from "@/lib/format";
+import { errorMessage, formatDate, formatMoney, ISSUE_PRIORITY, ISSUE_STATUS } from "@/lib/format";
 import PageHeader, { EmptyState } from "@/components/PageHeader";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +21,7 @@ export const ReportIssueDialog: React.FC<{ open: boolean; onOpenChange: (o: bool
   const qc = useQueryClient();
   const { data: tenancies = [] } = useTenancies();
   const mine = tenancies.filter((t) => t.tenant_id === user?.id && t.status === "active");
-  const [f, setF] = useState({ title: "", description: "", priority: "medium", tenancy: "" });
+  const [f, setF] = useState({ title: "", description: "", priority: "medium", tenancy: "", paid: false, amount: "", mode: "single", months: "3" });
   const [busy, setBusy] = useState(false);
   const tenancyId = f.tenancy || mine[0]?.id || "";
 
@@ -37,12 +37,15 @@ export const ReportIssueDialog: React.FC<{ open: boolean; onOpenChange: (o: bool
       title: f.title.trim(),
       description: f.description.trim() || null,
       priority: f.priority,
+      tenant_paid_amount: f.paid && f.amount ? Number(f.amount) : null,
+      reimbursement_mode: f.paid && f.amount ? f.mode : null,
+      reimbursement_months: f.paid && f.amount && f.mode === "installments" ? Number(f.months) : null,
     });
     setBusy(false);
     if (error) return toast.error(errorMessage(error));
     toast.success("Reporte enviado a tu arrendador");
     qc.invalidateQueries({ queryKey: ["issues"] });
-    setF({ title: "", description: "", priority: "medium", tenancy: "" });
+    setF({ title: "", description: "", priority: "medium", tenancy: "", paid: false, amount: "", mode: "single", months: "3" });
     onOpenChange(false);
   };
 
@@ -78,6 +81,34 @@ export const ReportIssueDialog: React.FC<{ open: boolean; onOpenChange: (o: bool
                 <SelectContent>{Object.entries(ISSUE_PRIORITY).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}</SelectContent>
               </Select>
             </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={f.paid} onChange={(e) => setF({ ...f, paid: e.target.checked })} />
+              Yo ya pagué esta reparación
+            </label>
+            {f.paid && (
+              <div className="space-y-4 rounded-md border p-3">
+                <div className="space-y-2">
+                  <Label htmlFor="i-amount">¿Cuánto pagaste? (MXN)</Label>
+                  <Input id="i-amount" type="number" min="1" required value={f.amount} onChange={(e) => setF({ ...f, amount: e.target.value })} />
+                </div>
+                <div className="space-y-2">
+                  <Label>¿Cómo se descontará de la renta?</Label>
+                  <Select value={f.mode} onValueChange={(v) => setF({ ...f, mode: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="single">En una sola exhibición</SelectItem>
+                      <SelectItem value="installments">Diferido en meses</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {f.mode === "installments" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="i-months">Número de meses</Label>
+                    <Input id="i-months" type="number" min="2" max="24" required value={f.months} onChange={(e) => setF({ ...f, months: e.target.value })} />
+                  </div>
+                )}
+              </div>
+            )}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
               <Button type="submit" disabled={busy}>{busy ? "Enviando..." : "Enviar reporte"}</Button>
@@ -106,8 +137,15 @@ const Issues = () => {
     qc.invalidateQueries({ queryKey: ["issues"] });
   };
 
+  const openCount = issues.filter((i) => i.status !== "resolved" && i.status !== "closed").length;
+
   return (
     <div className="space-y-6">
+      {isLandlord && openCount > 0 && (
+        <div role="status" className="rounded-md border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm font-medium">
+          Tienes {openCount} {openCount === 1 ? "reparación abierta" : "reparaciones abiertas"} por atender.
+        </div>
+      )}
       <PageHeader
         title="Reparaciones"
         description={isLandlord ? "Reportes de tus inquilinos" : "Tus solicitudes de reparación"}
@@ -125,6 +163,14 @@ const Issues = () => {
                   <Badge variant={i.priority === "urgent" || i.priority === "high" ? "destructive" : "secondary"}>{ISSUE_PRIORITY[i.priority] ?? i.priority}</Badge>
                 </div>
                 {i.description && <p className="text-sm text-muted-foreground">{i.description}</p>}
+                {i.tenant_paid_amount != null && (
+                  <p className="rounded-md bg-accent px-3 py-2 text-sm text-accent-foreground">
+                    {isLandlord ? "El inquilino pagó" : "Pagaste"} {formatMoney(i.tenant_paid_amount)} · descuento de renta{" "}
+                    {i.reimbursement_mode === "installments"
+                      ? `en ${i.reimbursement_months} meses (${formatMoney(i.tenant_paid_amount / (i.reimbursement_months || 1))}/mes)`
+                      : "en una sola exhibición"}
+                  </p>
+                )}
                 <p className="text-xs text-muted-foreground">
                   {formatDate(i.created_at)} · {propName(i.property_id)}{isLandlord && tenantName(i.tenant_id) ? ` · ${tenantName(i.tenant_id)}` : ""}
                 </p>
