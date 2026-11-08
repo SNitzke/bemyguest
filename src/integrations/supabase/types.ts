@@ -111,6 +111,53 @@ export type Database = {
           },
         ]
       }
+      maintenance_records: {
+        Row: {
+          category: string
+          cost: number | null
+          created_at: string
+          id: string
+          landlord_id: string
+          next_due_on: string | null
+          notes: string | null
+          property_id: string
+          repaired_on: string
+          title: string
+        }
+        Insert: {
+          category?: string
+          cost?: number | null
+          created_at?: string
+          id?: string
+          landlord_id: string
+          next_due_on?: string | null
+          notes?: string | null
+          property_id: string
+          repaired_on?: string
+          title: string
+        }
+        Update: {
+          category?: string
+          cost?: number | null
+          created_at?: string
+          id?: string
+          landlord_id?: string
+          next_due_on?: string | null
+          notes?: string | null
+          property_id?: string
+          repaired_on?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_records_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
