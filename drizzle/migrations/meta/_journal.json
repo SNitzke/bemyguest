@@ -22,6 +22,13 @@
       "when": 1794168010549,
       "tag": "0002_issue_tenant_payment",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794168162486,
+      "tag": "0003_issue_receipts",
+      "breakpoints": true
     }
   ]
 }
