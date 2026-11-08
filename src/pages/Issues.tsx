@@ -21,7 +21,8 @@ export const ReportIssueDialog: React.FC<{ open: boolean; onOpenChange: (o: bool
   const qc = useQueryClient();
   const { data: tenancies = [] } = useTenancies();
   const mine = tenancies.filter((t) => t.tenant_id === user?.id && t.status === "active");
-  const [f, setF] = useState({ title: "", description: "", priority: "medium", tenancy: "", paid: false, amount: "", mode: "single", months: "3" });
+  const [f, setF] = useState({ title: "", description: "", priority: "medium", tenancy: "", paid: false, amount: "", mode: "single", months: "3", note: "" });
+  const [file, setFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const tenancyId = f.tenancy || mine[0]?.id || "";
 
@@ -30,7 +31,16 @@ export const ReportIssueDialog: React.FC<{ open: boolean; onOpenChange: (o: bool
     const t = mine.find((x) => x.id === tenancyId);
     if (!user || !t) return toast.error("No tienes una vivienda conectada");
     setBusy(true);
+    let receipt_path: string | null = null;
+    if (f.paid && file) {
+      const path = `${user.id}/${Date.now()}-${file.name.replace(/[^\w.-]/g, "_")}`;
+      const up = await supabase.storage.from("receipts").upload(path, file);
+      if (up.error) { setBusy(false); return toast.error(errorMessage(up.error)); }
+      receipt_path = path;
+    }
     const { error } = await supabase.from("issues").insert({
+      receipt_path,
+      payment_note: f.paid && f.note.trim() ? f.note.trim() : null,
       property_id: t.property_id,
       landlord_id: t.landlord_id,
       tenant_id: user.id,
@@ -45,7 +55,8 @@ export const ReportIssueDialog: React.FC<{ open: boolean; onOpenChange: (o: bool
     if (error) return toast.error(errorMessage(error));
     toast.success("Reporte enviado a tu arrendador");
     qc.invalidateQueries({ queryKey: ["issues"] });
-    setF({ title: "", description: "", priority: "medium", tenancy: "", paid: false, amount: "", mode: "single", months: "3" });
+    setF({ title: "", description: "", priority: "medium", tenancy: "", paid: false, amount: "", mode: "single", months: "3", note: "" });
+    setFile(null);
     onOpenChange(false);
   };
 
@@ -107,6 +118,14 @@ export const ReportIssueDialog: React.FC<{ open: boolean; onOpenChange: (o: bool
                     <Input id="i-months" type="number" min="2" max="24" required value={f.months} onChange={(e) => setF({ ...f, months: e.target.value })} />
                   </div>
                 )}
+                <div className="space-y-2">
+                  <Label htmlFor="i-receipt">Recibo (opcional)</Label>
+                  <Input id="i-receipt" type="file" accept="image/*,application/pdf" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="i-note">Nota (opcional)</Label>
+                  <Textarea id="i-note" rows={2} placeholder="Ej. Pagué al plomero en efectivo" value={f.note} onChange={(e) => setF({ ...f, note: e.target.value })} />
+                </div>
               </div>
             )}
             <DialogFooter>
@@ -135,6 +154,12 @@ const Issues = () => {
     const { error } = await supabase.from("issues").update({ status }).eq("id", id);
     if (error) return toast.error(errorMessage(error));
     qc.invalidateQueries({ queryKey: ["issues"] });
+  };
+
+  const openReceipt = async (path: string) => {
+    const { data, error } = await supabase.storage.from("receipts").createSignedUrl(path, 300);
+    if (error || !data) return toast.error("No se pudo abrir el recibo");
+    window.open(data.signedUrl, "_blank");
   };
 
   const openCount = issues.filter((i) => i.status !== "resolved" && i.status !== "closed").length;
@@ -169,6 +194,10 @@ const Issues = () => {
                     {i.reimbursement_mode === "installments"
                       ? `en ${i.reimbursement_months} meses (${formatMoney(i.tenant_paid_amount / (i.reimbursement_months || 1))}/mes)`
                       : "en una sola exhibición"}
+                    {i.payment_note && <span className="block pt-1 italic">“{i.payment_note}”</span>}
+                    {i.receipt_path && (
+                      <button type="button" className="block pt-1 font-medium underline" onClick={() => openReceipt(i.receipt_path!)}>Ver recibo</button>
+                    )}
                   </p>
                 )}
                 <p className="text-xs text-muted-foreground">
