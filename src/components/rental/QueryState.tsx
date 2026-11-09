@@ -1,0 +1,2 @@
+import {Button} from '@/components/ui/button';
+export default function QueryState({loading,error,retry}:{loading?:boolean;error?:unknown;retry?:()=>void}){if(loading)return <p role="status" className="py-8 text-muted-foreground">Cargando…</p>;if(error)return <div role="alert" className="py-6 text-destructive">No se pudo cargar la información. {retry&&<Button variant="outline" onClick={retry}>Reintentar</Button>}</div>;return null;}

@@ -14,16 +14,213 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          event: string
+          id: string
+          reference_id: string | null
+          tenancy_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          event: string
+          id?: string
+          reference_id?: string | null
+          tenancy_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          event?: string
+          id?: string
+          reference_id?: string | null
+          tenancy_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_log_tenancy_id_fkey"
+            columns: ["tenancy_id"]
+            isOneToOne: false
+            referencedRelation: "tenancies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contract_documents: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          name: string
+          path: string
+          shared: boolean
+          tenancy_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          id?: string
+          name: string
+          path: string
+          shared?: boolean
+          tenancy_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          name?: string
+          path?: string
+          shared?: boolean
+          tenancy_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_documents_tenancy_id_fkey"
+            columns: ["tenancy_id"]
+            isOneToOne: false
+            referencedRelation: "tenancies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      credit_allocations: {
+        Row: {
+          amount: number
+          charge_id: string
+          created_at: string
+          expense_id: string
+          id: string
+        }
+        Insert: {
+          amount: number
+          charge_id: string
+          created_at?: string
+          expense_id: string
+          id?: string
+        }
+        Update: {
+          amount?: number
+          charge_id?: string
+          created_at?: string
+          expense_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "credit_allocations_charge_id_fkey"
+            columns: ["charge_id"]
+            isOneToOne: false
+            referencedRelation: "rent_charges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "credit_allocations_expense_id_fkey"
+            columns: ["expense_id"]
+            isOneToOne: false
+            referencedRelation: "rental_expenses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      deposit_deductions: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          reason: string
+          tenancy_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          reason: string
+          tenancy_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          reason?: string
+          tenancy_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deposit_deductions_tenancy_id_fkey"
+            columns: ["tenancy_id"]
+            isOneToOne: false
+            referencedRelation: "tenancies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventories: {
+        Row: {
+          agreed_at: string | null
+          agreed_by: string | null
+          area: string
+          condition: string
+          created_at: string
+          id: string
+          note: string | null
+          phase: string
+          photo_path: string | null
+          tenancy_id: string
+        }
+        Insert: {
+          agreed_at?: string | null
+          agreed_by?: string | null
+          area: string
+          condition: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          phase: string
+          photo_path?: string | null
+          tenancy_id: string
+        }
+        Update: {
+          agreed_at?: string | null
+          agreed_by?: string | null
+          area?: string
+          condition?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          phase?: string
+          photo_path?: string | null
+          tenancy_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventories_tenancy_id_fkey"
+            columns: ["tenancy_id"]
+            isOneToOne: false
+            referencedRelation: "tenancies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invitations: {
         Row: {
           accepted_at: string | null
           accepted_by: string | null
+          annual_increase: number | null
           code: string
           created_at: string
+          deposit_amount: number
+          end_date: string | null
+          grace_days: number
           id: string
           landlord_id: string
+          payment_day: number
           property_id: string
           rent_amount: number
+          start_date: string
           status: string
           tenant_email: string
           tenant_name: string
@@ -31,12 +228,18 @@ export type Database = {
         Insert: {
           accepted_at?: string | null
           accepted_by?: string | null
+          annual_increase?: number | null
           code?: string
           created_at?: string
+          deposit_amount?: number
+          end_date?: string | null
+          grace_days?: number
           id?: string
           landlord_id: string
+          payment_day?: number
           property_id: string
           rent_amount?: number
+          start_date?: string
           status?: string
           tenant_email: string
           tenant_name: string
@@ -44,12 +247,18 @@ export type Database = {
         Update: {
           accepted_at?: string | null
           accepted_by?: string | null
+          annual_increase?: number | null
           code?: string
           created_at?: string
+          deposit_amount?: number
+          end_date?: string | null
+          grace_days?: number
           id?: string
           landlord_id?: string
+          payment_day?: number
           property_id?: string
           rent_amount?: number
+          start_date?: string
           status?: string
           tenant_email?: string
           tenant_name?: string
@@ -64,53 +273,106 @@ export type Database = {
           },
         ]
       }
+      issue_comments: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          issue_id: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          id?: string
+          issue_id: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          issue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "issue_comments_issue_id_fkey"
+            columns: ["issue_id"]
+            isOneToOne: false
+            referencedRelation: "issues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       issues: {
         Row: {
+          actual_cost: number | null
           created_at: string
           description: string | null
+          estimated_cost: number | null
           id: string
           landlord_id: string
+          media_paths: string[]
+          payer: string
           payment_note: string | null
           priority: string
           property_id: string
+          provider_name: string | null
+          provider_phone: string | null
           receipt_path: string | null
           reimbursement_mode: string | null
           reimbursement_months: number | null
           status: string
+          tenancy_id: string | null
           tenant_id: string
           tenant_paid_amount: number | null
           title: string
           updated_at: string
         }
         Insert: {
+          actual_cost?: number | null
           created_at?: string
           description?: string | null
+          estimated_cost?: number | null
           id?: string
           landlord_id: string
+          media_paths?: string[]
+          payer?: string
           payment_note?: string | null
           priority?: string
           property_id: string
+          provider_name?: string | null
+          provider_phone?: string | null
           receipt_path?: string | null
           reimbursement_mode?: string | null
           reimbursement_months?: number | null
           status?: string
+          tenancy_id?: string | null
           tenant_id: string
           tenant_paid_amount?: number | null
           title: string
           updated_at?: string
         }
         Update: {
+          actual_cost?: number | null
           created_at?: string
           description?: string | null
+          estimated_cost?: number | null
           id?: string
           landlord_id?: string
+          media_paths?: string[]
+          payer?: string
           payment_note?: string | null
           priority?: string
           property_id?: string
+          provider_name?: string | null
+          provider_phone?: string | null
           receipt_path?: string | null
           reimbursement_mode?: string | null
           reimbursement_months?: number | null
           status?: string
+          tenancy_id?: string | null
           tenant_id?: string
           tenant_paid_amount?: number | null
           title?: string
@@ -124,7 +386,35 @@ export type Database = {
             referencedRelation: "properties"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "issues_tenancy_id_fkey"
+            columns: ["tenancy_id"]
+            isOneToOne: false
+            referencedRelation: "tenancies"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      legal_notices: {
+        Row: {
+          content: string
+          id: string
+          landlord_id: string
+          state: string
+        }
+        Insert: {
+          content: string
+          id?: string
+          landlord_id: string
+          state: string
+        }
+        Update: {
+          content?: string
+          id?: string
+          landlord_id?: string
+          state?: string
+        }
+        Relationships: []
       }
       maintenance_records: {
         Row: {
@@ -181,6 +471,7 @@ export type Database = {
           read_at: string | null
           recipient_id: string
           sender_id: string
+          tenancy_id: string | null
         }
         Insert: {
           content: string
@@ -189,6 +480,7 @@ export type Database = {
           read_at?: string | null
           recipient_id: string
           sender_id: string
+          tenancy_id?: string | null
         }
         Update: {
           content?: string
@@ -197,6 +489,81 @@ export type Database = {
           read_at?: string | null
           recipient_id?: string
           sender_id?: string
+          tenancy_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_tenancy_id_fkey"
+            columns: ["tenancy_id"]
+            isOneToOne: false
+            referencedRelation: "tenancies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_preferences: {
+        Row: {
+          advance_days: number
+          contract_alerts: boolean
+          message_alerts: boolean
+          payment_reminders: boolean
+          proof_alerts: boolean
+          reminder_text: string
+          repair_alerts: boolean
+          user_id: string
+          weekly_summary: boolean
+        }
+        Insert: {
+          advance_days?: number
+          contract_alerts?: boolean
+          message_alerts?: boolean
+          payment_reminders?: boolean
+          proof_alerts?: boolean
+          reminder_text?: string
+          repair_alerts?: boolean
+          user_id: string
+          weekly_summary?: boolean
+        }
+        Update: {
+          advance_days?: number
+          contract_alerts?: boolean
+          message_alerts?: boolean
+          payment_reminders?: boolean
+          proof_alerts?: boolean
+          reminder_text?: string
+          repair_alerts?: boolean
+          user_id?: string
+          weekly_summary?: boolean
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          created_at: string
+          id: string
+          path: string
+          read_at: string | null
+          reference_id: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          path: string
+          read_at?: string | null
+          reference_id?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          path?: string
+          read_at?: string | null
+          reference_id?: string | null
+          title?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -204,6 +571,8 @@ export type Database = {
         Row: {
           amount: number
           category: string
+          charge_id: string | null
+          confirmation_status: string
           created_at: string
           id: string
           kind: string
@@ -211,12 +580,17 @@ export type Database = {
           method: string
           notes: string | null
           paid_on: string
+          proof_path: string | null
           property_id: string | null
+          receipt_number: number
+          review_note: string | null
           tenant_id: string | null
         }
         Insert: {
           amount: number
           category?: string
+          charge_id?: string | null
+          confirmation_status?: string
           created_at?: string
           id?: string
           kind?: string
@@ -224,12 +598,17 @@ export type Database = {
           method?: string
           notes?: string | null
           paid_on?: string
+          proof_path?: string | null
           property_id?: string | null
+          receipt_number?: number
+          review_note?: string | null
           tenant_id?: string | null
         }
         Update: {
           amount?: number
           category?: string
+          charge_id?: string | null
+          confirmation_status?: string
           created_at?: string
           id?: string
           kind?: string
@@ -237,10 +616,20 @@ export type Database = {
           method?: string
           notes?: string | null
           paid_on?: string
+          proof_path?: string | null
           property_id?: string | null
+          receipt_number?: number
+          review_note?: string | null
           tenant_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "payments_charge_id_fkey"
+            columns: ["charge_id"]
+            isOneToOne: false
+            referencedRelation: "rent_charges"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payments_property_id_fkey"
             columns: ["property_id"]
@@ -295,6 +684,7 @@ export type Database = {
           landlord_id: string
           name: string
           rent_amount: number
+          state: string | null
           updated_at: string
         }
         Insert: {
@@ -308,6 +698,7 @@ export type Database = {
           landlord_id: string
           name: string
           rent_amount?: number
+          state?: string | null
           updated_at?: string
         }
         Update: {
@@ -321,9 +712,115 @@ export type Database = {
           landlord_id?: string
           name?: string
           rent_amount?: number
+          state?: string | null
           updated_at?: string
         }
         Relationships: []
+      }
+      rent_charges: {
+        Row: {
+          amount: number
+          created_at: string
+          credit_applied: number
+          due_on: string
+          id: string
+          period: string
+          tenancy_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          credit_applied?: number
+          due_on: string
+          id?: string
+          period: string
+          tenancy_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          credit_applied?: number
+          due_on?: string
+          id?: string
+          period?: string
+          tenancy_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rent_charges_tenancy_id_fkey"
+            columns: ["tenancy_id"]
+            isOneToOne: false
+            referencedRelation: "tenancies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rental_expenses: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          id: string
+          issue_id: string | null
+          note: string | null
+          paid_on: string
+          payer: string
+          property_id: string
+          reimbursement: string
+          tenancy_id: string
+          unapplied_credit: number
+        }
+        Insert: {
+          amount: number
+          category: string
+          created_at?: string
+          id?: string
+          issue_id?: string | null
+          note?: string | null
+          paid_on?: string
+          payer: string
+          property_id: string
+          reimbursement?: string
+          tenancy_id: string
+          unapplied_credit?: number
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          id?: string
+          issue_id?: string | null
+          note?: string | null
+          paid_on?: string
+          payer?: string
+          property_id?: string
+          reimbursement?: string
+          tenancy_id?: string
+          unapplied_credit?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rental_expenses_issue_id_fkey"
+            columns: ["issue_id"]
+            isOneToOne: true
+            referencedRelation: "issues"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rental_expenses_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rental_expenses_tenancy_id_fkey"
+            columns: ["tenancy_id"]
+            isOneToOne: false
+            referencedRelation: "tenancies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subscriptions: {
         Row: {
@@ -360,9 +857,15 @@ export type Database = {
       }
       tenancies: {
         Row: {
+          annual_increase: number | null
           created_at: string
+          deposit_amount: number
+          deposit_status: string
+          end_date: string | null
+          grace_days: number
           id: string
           landlord_id: string
+          payment_day: number
           property_id: string
           rent_amount: number
           start_date: string
@@ -371,9 +874,15 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          annual_increase?: number | null
           created_at?: string
+          deposit_amount?: number
+          deposit_status?: string
+          end_date?: string | null
+          grace_days?: number
           id?: string
           landlord_id: string
+          payment_day?: number
           property_id: string
           rent_amount?: number
           start_date?: string
@@ -382,9 +891,15 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          annual_increase?: number | null
           created_at?: string
+          deposit_amount?: number
+          deposit_status?: string
+          end_date?: string | null
+          grace_days?: number
           id?: string
           landlord_id?: string
+          payment_day?: number
           property_id?: string
           rent_amount?: number
           start_date?: string
@@ -426,6 +941,11 @@ export type Database = {
     }
     Functions: {
       accept_invitation: { Args: { _code: string }; Returns: string }
+      agree_inventory: { Args: { _id: string }; Returns: undefined }
+      apply_rent_credits: { Args: { _tenancy: string }; Returns: undefined }
+      contract_owner: { Args: { _id: string }; Returns: boolean }
+      contract_party: { Args: { _id: string }; Returns: boolean }
+      generate_rent_charges: { Args: { _tenancy: string }; Returns: undefined }
       get_invitation: {
         Args: { _code: string }
         Returns: {
@@ -452,6 +972,25 @@ export type Database = {
       }
       landlord_has_access: { Args: { _user_id: string }; Returns: boolean }
       plan_property_limit: { Args: { _plan: string }; Returns: number }
+      record_charge_payment: {
+        Args: {
+          _amount: number
+          _charge: string
+          _method: string
+          _note?: string
+          _paid_on: string
+          _proof?: string
+        }
+        Returns: string
+      }
+      resolve_repair: {
+        Args: { _cost: number; _issue: string; _months?: number }
+        Returns: undefined
+      }
+      review_payment: {
+        Args: { _approve: boolean; _note?: string; _payment: string }
+        Returns: undefined
+      }
       shares_tenancy: { Args: { _a: string; _b: string }; Returns: boolean }
     }
     Enums: {
