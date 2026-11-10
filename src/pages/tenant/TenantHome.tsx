@@ -9,12 +9,17 @@ import { ReportIssueDialog } from "@/pages/Issues";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRental } from "@/hooks/useRental";
+import { usePayments } from "@/hooks/useData";
+import { chargeBalance } from "@/lib/accounting";
 
 const TenantHome = () => {
   const { user, profile } = useAuth();
   const { data: tenancies = [], isLoading } = useTenancies();
   const { data: issues = [] } = useIssues();
   const [reportOpen, setReportOpen] = useState(false);
+  const { data: rental } = useRental();
+  const { data: payments = [] } = usePayments();
   const mine = tenancies.filter((t) => t.tenant_id === user?.id && t.status === "active");
   const firstName = profile?.full_name?.split(" ")[0];
 
@@ -46,9 +51,11 @@ const TenantHome = () => {
                 <div><p className="text-muted-foreground">Arrendador</p><p className="font-semibold">{t.landlord?.full_name || "—"}</p></div>
                 <div><p className="text-muted-foreground">Desde</p><p className="font-semibold">{formatDate(t.start_date)}</p></div>
               </div>
+              {(() => {const charge=rental?.charges.find(c=>c.tenancy_id===t.id&&chargeBalance(c,payments.filter(p=>p.charge_id===c.id),t.grace_days).balance>0);if(!charge)return <p className="mt-4 text-sm">Sin cargos pendientes.</p>;const b=chargeBalance(charge,payments.filter(p=>p.charge_id===charge.id),t.grace_days);const days=Math.ceil((new Date(charge.due_on+"T12:00:00").getTime()-Date.now())/86400000);return <div className="mt-4 border-t pt-3 text-sm"><p>Próximo vencimiento: <strong>{formatDate(charge.due_on)}</strong> · {days>=0?`En ${days} días`:`Hace ${-days} días`}</p><p>Saldo: <strong>{formatMoney(b.balance)}</strong> · {b.status==="overdue"?"Vencido":b.status==="partial"?"Parcial":"Pendiente"}</p></div>;})()}
               {t.property?.description && <p className="mt-4 text-sm text-muted-foreground">{t.property.description}</p>}
             </div>
             <div className="flex flex-col gap-2">
+              <Button asChild variant="outline"><Link to="/payments">Subir comprobante</Link></Button>
               <Button onClick={() => setReportOpen(true)}><Wrench className="mr-2 h-4 w-4" /> Solicitar reparación</Button>
               <Button asChild variant="outline"><Link to={`/messages?to=${t.landlord_id}`}><MessageSquare className="mr-2 h-4 w-4" /> Escribir al arrendador</Link></Button>
             </div>

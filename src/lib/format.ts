@@ -1,8 +1,8 @@
 export const formatMoney = (n: number | string | null | undefined) =>
-  new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(Number(n ?? 0));
+  new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(n ?? 0));
 
 export const formatDate = (d: string | null | undefined) =>
-  d ? new Date(d).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" }) : "—";
+  d ? new Date(d.length === 10 ? `${d}T12:00:00` : d).toLocaleDateString("es-MX", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "America/Mexico_City" }) : "—";
 
 export const errorMessage = (e: unknown) =>
   e && typeof e === "object" && "message" in e ? String((e as { message: string }).message) : "Ocurrió un error, intenta de nuevo";
@@ -27,7 +27,9 @@ export const PAYMENT_METHODS: Record<string, string> = {
 };
 
 export const ISSUE_STATUS: Record<string, string> = {
-  open: "Abierto",
+  open: "Reportado",
+  reviewing: "En revisión",
+  approved: "Aprobado",
   in_progress: "En proceso",
   resolved: "Resuelto",
 };

@@ -23,6 +23,10 @@ import Payments from "./pages/Payments";
 import Issues from "./pages/Issues";
 import Messages from "./pages/Messages";
 import Settings from "./pages/Settings";
+import Contracts from "./pages/Contracts";
+import Reports from "./pages/Reports";
+import RentalCalendar from "./pages/RentalCalendar";
+import Legal from "./pages/Legal";
 
 const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1 } } });
 
@@ -47,6 +51,8 @@ const App = () => (
             <Route path="/signup" element={<SignUp />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/pricing" element={<Pricing />} />
+            <Route path="/privacy" element={<Legal privacy />} />
+            <Route path="/terms" element={<Legal />} />
             <Route path="/invite/:code" element={<Invite />} />
             <Route path="/tenant-invitation" element={<LegacyInvite />} />
             <Route path="/property/:id" element={<LegacyPropertyRedirect />} />
@@ -56,7 +62,10 @@ const App = () => (
               <Route path="/properties" element={<RoleRoute role="landlord"><Properties /></RoleRoute>} />
               <Route path="/properties/:id" element={<RoleRoute role="landlord"><PropertyDetail /></RoleRoute>} />
               <Route path="/tenants" element={<RoleRoute role="landlord"><Tenants /></RoleRoute>} />
-              <Route path="/maintenance" element={<RoleRoute role="landlord"><Maintenance /></RoleRoute>} />
+              <Route path="/maintenance" element={<RentalCalendar />} />
+              <Route path="/maintenance-history" element={<RoleRoute role="landlord"><Maintenance /></RoleRoute>} />
+              <Route path="/contracts" element={<Contracts />} />
+              <Route path="/reports" element={<RoleRoute role="landlord"><Reports /></RoleRoute>} />
               <Route path="/dashboard" element={<RoleRoute role="tenant"><TenantHome /></RoleRoute>} />
               <Route path="/payments" element={<Payments />} />
               <Route path="/issues" element={<Issues />} />
