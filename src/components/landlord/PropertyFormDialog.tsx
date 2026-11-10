@@ -17,7 +17,7 @@ interface Props {
   property?: Property | null;
 }
 
-const empty = { name: "", address: "", city: "", rent_amount: "", bedrooms: "", bathrooms: "", description: "" };
+const empty = { name: "", address: "", city: "", state: "", rent_amount: "", bedrooms: "", bathrooms: "", description: "" };
 
 const PropertyFormDialog: React.FC<Props> = ({ open, onOpenChange, property }) => {
   const { user } = useAuth();
@@ -33,6 +33,7 @@ const PropertyFormDialog: React.FC<Props> = ({ open, onOpenChange, property }) =
             name: property.name,
             address: property.address,
             city: property.city ?? "",
+            state: property.state ?? "",
             rent_amount: String(property.rent_amount ?? ""),
             bedrooms: property.bedrooms?.toString() ?? "",
             bathrooms: property.bathrooms?.toString() ?? "",
@@ -53,6 +54,7 @@ const PropertyFormDialog: React.FC<Props> = ({ open, onOpenChange, property }) =
       name: form.name.trim(),
       address: form.address.trim(),
       city: form.city.trim() || null,
+      state: form.state.trim() || null,
       rent_amount: Number(form.rent_amount) || 0,
       bedrooms: form.bedrooms ? Number(form.bedrooms) : null,
       bathrooms: form.bathrooms ? Number(form.bathrooms) : null,
@@ -84,6 +86,10 @@ const PropertyFormDialog: React.FC<Props> = ({ open, onOpenChange, property }) =
             <Input id="p-address" required value={form.address} onChange={set("address")} />
           </div>
           <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2 col-span-2">
+              <Label htmlFor="p-state">Estado</Label>
+              <Input id="p-state" maxLength={100} placeholder="Ej. Ciudad de México" value={form.state} onChange={set("state")} />
+            </div>
             <div className="space-y-2">
               <Label htmlFor="p-city">Ciudad</Label>
               <Input id="p-city" value={form.city} onChange={set("city")} />

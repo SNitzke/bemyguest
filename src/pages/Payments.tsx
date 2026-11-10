@@ -14,6 +14,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import ChargesPanel from "@/components/rental/ChargesPanel";
+import ExpensesPanel from "@/components/rental/ExpensesPanel";
+import { useRental } from "@/hooks/useRental";
+import { rentalBalance } from "@/lib/accounting";
 
 const NONE = "none";
 
@@ -118,11 +122,13 @@ const Payments = () => {
   const { data: properties = [] } = useProperties();
   const { data: tenancies = [] } = useTenancies();
   const [open, setOpen] = useState(false);
+  const { data: rental } = useRental();
 
   const propName = (id: string | null) =>
     id ? properties.find((p) => p.id === id)?.name ?? tenancies.find((t) => t.property_id === id)?.property?.name ?? "—" : "General";
-  const income = payments.filter((p) => p.kind === "income").reduce((s, p) => s + Number(p.amount), 0);
-  const expense = payments.filter((p) => p.kind === "expense").reduce((s, p) => s + Number(p.amount), 0);
+  const balance = rentalBalance(payments, rental?.expenses ?? [], (rental?.credits ?? []).reduce((s,c)=>s+c.amount,0));
+  const income = balance.cash;
+  const expense = balance.landlordExpenses + balance.discountedExpenses;
 
   const remove = async (id: string) => {
     if (!confirm("¿Eliminar este registro?")) return;
@@ -143,16 +149,19 @@ const Payments = () => {
         <div className="grid gap-4 sm:grid-cols-3">
           <Card><CardContent className="p-5"><p className="text-sm text-muted-foreground">Ingresos</p><p className="font-heading text-xl font-semibold text-primary">{formatMoney(income)}</p></CardContent></Card>
           <Card><CardContent className="p-5"><p className="text-sm text-muted-foreground">Gastos</p><p className="font-heading text-xl font-semibold text-destructive">{formatMoney(expense)}</p></CardContent></Card>
-          <Card><CardContent className="p-5"><p className="text-sm text-muted-foreground">Balance</p><p className="font-heading text-xl font-semibold">{formatMoney(income - expense)}</p></CardContent></Card>
+          <Card><CardContent className="p-5"><p className="text-sm text-muted-foreground">Balance neto</p><p className="font-heading text-xl font-semibold">{formatMoney(balance.net)}</p></CardContent></Card>
         </div>
       )}
 
-      {!isLoading && payments.length === 0 ? (
+      <ChargesPanel />
+      {isLandlord && <ExpensesPanel />}
+      <h2 className="text-xl">Registros externos</h2>
+      {!isLoading && payments.filter(p=>!p.charge_id).length === 0 ? (
         <EmptyState icon={Wallet} title="Sin pagos registrados" text={isLandlord ? "Registra tu primer pago o gasto; aparecerá en la gráfica de tu panel." : undefined} />
       ) : (
         <Card>
           <CardContent className="divide-y p-0">
-            {payments.map((p) => (
+            {payments.filter(p=>!p.charge_id).map((p) => (
               <div key={p.id} className="flex items-center justify-between gap-3 px-5 py-3">
                 <div className="min-w-0">
                   <p className="font-medium">{PAYMENT_CATEGORIES[p.category]?.label ?? p.category}</p>

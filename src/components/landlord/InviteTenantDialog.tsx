@@ -57,6 +57,7 @@ const InviteTenantDialog: React.FC<Props> = ({ open, onOpenChange, propertyId })
   const qc = useQueryClient();
   const [form, setForm] = useState({ property_id: "", tenant_name: "", tenant_email: "", rent_amount: "" });
   const [busy, setBusy] = useState(false);
+  const [lease, setLease] = useState({ start_date: new Date().toISOString().slice(0,10), end_date: "", payment_day: "1", grace_days: "0", deposit_amount: "0", annual_increase: "" });
   const [created, setCreated] = useState<{ code: string; name: string; email: string } | null>(null);
 
   useEffect(() => {
@@ -71,6 +72,7 @@ const InviteTenantDialog: React.FC<Props> = ({ open, onOpenChange, propertyId })
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !form.property_id) return toast.error("Elige una propiedad");
+    if (!lease.end_date || lease.end_date < lease.start_date) return toast.error("Revisa las fechas del contrato");
     setBusy(true);
     const { data, error } = await supabase
       .from("invitations")
@@ -80,6 +82,12 @@ const InviteTenantDialog: React.FC<Props> = ({ open, onOpenChange, propertyId })
         tenant_name: form.tenant_name.trim(),
         tenant_email: form.tenant_email.trim().toLowerCase(),
         rent_amount: Number(form.rent_amount) || 0,
+        start_date: lease.start_date,
+        end_date: lease.end_date,
+        payment_day: Number(lease.payment_day),
+        grace_days: Number(lease.grace_days),
+        deposit_amount: Number(lease.deposit_amount),
+        annual_increase: lease.annual_increase ? Number(lease.annual_increase) : null,
       })
       .select("code")
       .single();
@@ -91,7 +99,7 @@ const InviteTenantDialog: React.FC<Props> = ({ open, onOpenChange, propertyId })
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{created ? "Invitación lista" : "Invitar inquilino"}</DialogTitle>
           <DialogDescription>
@@ -141,6 +149,9 @@ const InviteTenantDialog: React.FC<Props> = ({ open, onOpenChange, propertyId })
                 <Label htmlFor="t-rent">Renta mensual (MXN)</Label>
                 <Input id="t-rent" type="number" min="0" required value={form.rent_amount} onChange={(e) => setForm((f) => ({ ...f, rent_amount: e.target.value }))} />
               </div>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {([{key:"start_date",label:"Fecha de inicio",type:"date"},{key:"end_date",label:"Fecha de fin",type:"date"},{key:"payment_day",label:"Día de pago (1–28)",type:"number"},{key:"grace_days",label:"Días de gracia",type:"number"},{key:"deposit_amount",label:"Depósito en garantía (MXN)",type:"number"},{key:"annual_increase",label:"Aumento anual % (opcional)",type:"number"}] as const).map(x=><div key={x.key}><Label htmlFor={`invite-${x.key}`}>{x.label}</Label><Input id={`invite-${x.key}`} type={x.type} required={x.key!=="annual_increase"} min={x.key==="payment_day"?1:0} max={x.key==="payment_day"?28:x.key==="grace_days"?30:x.key==="annual_increase"?100:undefined} value={lease[x.key]} onChange={e=>setLease({...lease,[x.key]:e.target.value})}/></div>)}
             </div>
             <Button type="submit" className="w-full" disabled={busy}>{busy ? "Generando..." : "Generar enlace de invitación"}</Button>
           </form>
