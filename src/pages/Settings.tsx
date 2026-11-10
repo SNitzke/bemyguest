@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import ReminderSettings from "@/components/rental/ReminderSettings";
 
 const Settings = () => {
   const { user, profile, role, subscription, refresh } = useAuth();
@@ -116,6 +117,7 @@ const Settings = () => {
         </Card>
       )}
 
+      {role === "landlord" && <ReminderSettings />}
       <Card>
         <CardHeader><CardTitle className="text-base">Contraseña</CardTitle></CardHeader>
         <CardContent>

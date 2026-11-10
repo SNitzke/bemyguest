@@ -1,5 +1,4 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -34,6 +33,10 @@
     --border: 195 20% 90%;
     --input: 195 20% 90%;
     --ring: 195 65% 40%;
+    --calendar-rent: 195 65% 90%;
+    --calendar-maintenance: 145 40% 88%;
+    --calendar-end: 0 70% 92%;
+    --calendar-increase: 45 85% 87%;
 
     --radius: 0.5rem;
 
@@ -47,6 +50,10 @@
     --sidebar-ring: 195 65% 55%;
   }
 }
+.calendar-rent { background: hsl(var(--calendar-rent)); color: hsl(var(--foreground)); }
+.calendar-maintenance { background: hsl(var(--calendar-maintenance)); color: hsl(var(--foreground)); }
+.calendar-end { background: hsl(var(--calendar-end)); color: hsl(var(--foreground)); }
+.calendar-increase { background: hsl(var(--calendar-increase)); color: hsl(var(--foreground)); }
 
 @layer base {
   * {

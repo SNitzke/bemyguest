@@ -1,17 +1,22 @@
 import React from "react";
 import { Link, NavLink, Navigate, Outlet, useNavigate } from "react-router-dom";
-import { Building2, CalendarClock, CreditCard, Home, LogOut, MessageSquare, Settings, Users, Wrench } from "lucide-react";
+import { Building2, CalendarClock, CreditCard, Home, LogOut, MessageSquare, Settings, Users, Wrench, FileText, ChartNoAxesCombined, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { homePathFor, useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import TrialBanner from "./TrialBanner";
 import { useIssues } from "@/hooks/useData";
+import NotificationsBell from "@/components/rental/NotificationsBell";
+import { useUnreadMessages } from "@/hooks/useRental";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 const landlordLinks = [
   { name: "Inicio", path: "/landlord-profile", icon: Home },
   { name: "Propiedades", path: "/properties", icon: Building2 },
   { name: "Inquilinos", path: "/tenants", icon: Users },
   { name: "Pagos", path: "/payments", icon: CreditCard },
+  { name: "Contratos", path: "/contracts", icon: FileText },
+  { name: "Reportes", path: "/reports", icon: ChartNoAxesCombined },
   { name: "Reparaciones", path: "/issues", icon: Wrench },
   { name: "Calendario", path: "/maintenance", icon: CalendarClock },
   { name: "Mensajes", path: "/messages", icon: MessageSquare },
@@ -19,11 +24,13 @@ const landlordLinks = [
 ];
 
 const tenantLinks = [
-  { name: "Mi vivienda", path: "/dashboard", icon: Home },
+  { name: "Inicio", path: "/dashboard", icon: Home },
+  { name: "Contrato y documentos", path: "/contracts", icon: FileText },
   { name: "Reparaciones", path: "/issues", icon: Wrench },
   { name: "Mensajes", path: "/messages", icon: MessageSquare },
   { name: "Pagos", path: "/payments", icon: CreditCard },
   { name: "Configuración", path: "/settings", icon: Settings },
+  { name: "Calendario", path: "/maintenance", icon: CalendarClock },
 ];
 
 export const FullPageSpinner = () => (
@@ -36,10 +43,11 @@ const AppLayout: React.FC = () => {
   const { user, role, profile, isLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const { data: issues = [] } = useIssues();
+  const { data: unreadMessages = 0 } = useUnreadMessages();
   const openIssues = role === "landlord" ? issues.filter((i) => i.status !== "resolved" && i.status !== "closed").length : 0;
   const badge = (path: string) =>
-    path === "/issues" && openIssues > 0 ? (
-      <span className="ml-auto rounded-full bg-destructive px-1.5 text-[10px] font-bold leading-4 text-destructive-foreground" aria-label={`${openIssues} reparaciones abiertas`}>{openIssues}</span>
+    ((path === "/issues" && openIssues > 0) || (path === "/messages" && unreadMessages > 0)) ? (
+      <span className="ml-auto rounded-full bg-destructive px-1.5 text-[10px] font-bold leading-4 text-destructive-foreground">{path === "/issues" ? openIssues : unreadMessages}</span>
     ) : null;
 
   if (isLoading) return <FullPageSpinner />;
@@ -88,13 +96,13 @@ const AppLayout: React.FC = () => {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col pb-16 md:pb-0">
-        <header className="flex items-center justify-between border-b bg-card px-4 py-3 md:hidden">
-          <span className="font-heading font-semibold">BeMyGuest</span>
+        <header className="flex items-center justify-between border-b bg-card px-4 py-3">
+          <div className="flex items-center gap-2"><Sheet><SheetTrigger asChild><Button size="icon" variant="ghost" className="md:hidden" aria-label="Abrir menú"><Menu className="h-5 w-5" /></Button></SheetTrigger><SheetContent side="left"><nav className="mt-6 space-y-2">{links.map(({name,path,icon:Icon})=><NavLink key={path} to={path} className="flex items-center gap-3 rounded-md p-3 hover:bg-muted"><Icon className="h-4 w-4"/>{name}{badge(path)}</NavLink>)}<Button asChild variant="outline"><Link to="/pricing">Planes</Link></Button></nav></SheetContent></Sheet><span className="font-heading font-semibold">BeMyGuest</span></div>
+          <NotificationsBell />
           <Button variant="ghost" size="sm" onClick={handleSignOut} aria-label="Cerrar sesión">
             <LogOut className="h-4 w-4" />
           </Button>
         </header>
-        {role === "landlord" && <TrialBanner />}
         <main className="flex-1 p-4 md:p-8">
           <Outlet />
         </main>
