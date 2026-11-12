@@ -64,6 +64,13 @@
       "when": 1794503179724,
       "tag": "0008_contract_file_integrity_and_charge_dates",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794503201581,
+      "tag": "0009_private_contract_file_cleanup",
+      "breakpoints": true
     }
   ]
 }
