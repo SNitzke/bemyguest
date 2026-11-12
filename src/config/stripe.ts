@@ -1,5 +1,10 @@
 // Stripe subscription plans configuration
 export const STRIPE_PLANS = {
+  free: {
+    id: 'free', name: 'Gratis', price_id: '', product_id: '', price: 0,
+    currency: 'MXN', interval: 'month', maxProperties: 1,
+    features: ['1 propiedad', 'Contratos y pagos', 'Reparaciones y mensajes', 'Recordatorios por correo'],
+  },
   basic: {
     id: 'basic',
     name: 'Basic',
@@ -24,9 +29,9 @@ export const STRIPE_PLANS = {
     price: 599,
     currency: 'MXN',
     interval: 'month',
-    maxProperties: 20,
+    maxProperties: 1000000,
     features: [
-      'Hasta 20 propiedades',
+      'Propiedades ilimitadas',
       'Gestión de inquilinos',
       'Reportes avanzados',
       'Soporte prioritario',
@@ -53,6 +58,9 @@ export const STRIPE_PLANS = {
     ],
   },
 } as const;
+// New Pro pricing is deliberately unset until commercial terms are confirmed.
+export const PRO_MONTHLY_PRICE: number | null = null;
+export const PUBLIC_PLANS = ['free', 'pro'] as const;
 
 export type PlanId = keyof typeof STRIPE_PLANS;
 export type StripePlan = typeof STRIPE_PLANS[PlanId];

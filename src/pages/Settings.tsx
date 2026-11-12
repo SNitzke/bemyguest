@@ -106,9 +106,7 @@ const Settings = () => {
               {plan?.name ?? subscription.plan} ·{" "}
               {subscription.status === "active"
                 ? `Activo${subscription.current_period_end ? ` hasta ${formatDate(subscription.current_period_end)}` : ""}`
-                : hasLandlordAccess(subscription)
-                  ? `Prueba gratuita: ${trialDaysLeft(subscription)} días restantes`
-                  : "Prueba terminada"}
+                : "Consulta tus opciones de plan"}
             </CardDescription>
           </CardHeader>
           <CardContent>
