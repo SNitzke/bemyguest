@@ -7,6 +7,10 @@ export function validateFile(file:File, video=false) {
 }
 export async function uploadContractFile(contract:string,user:string,file:File,video=false) {
  validateFile(file,video);
+ if(file.type.startsWith('video')) {
+  const duration = await new Promise<number>((resolve,reject)=>{const element=document.createElement('video');const url=URL.createObjectURL(file);element.preload='metadata';element.onloadedmetadata=()=>{URL.revokeObjectURL(url);resolve(element.duration);};element.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('No se pudo validar el video'));};element.src=url;});
+  if(!Number.isFinite(duration)||duration>60)throw new Error('El video debe durar como máximo 60 segundos');
+ }
  const extension=file.type==='application/pdf'?'pdf':file.type.split('/')[1]==='jpeg'?'jpg':file.type.split('/')[1];
  const path=`${contract}/${user}/${crypto.randomUUID()}.${extension}`;
  const {error}=await supabase.storage.from('contract-files').upload(path,file); if(error) throw error; return path;
