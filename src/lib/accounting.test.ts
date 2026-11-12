@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 const expect = (actual: unknown) => ({ toBe: (expected: unknown) => assert.equal(actual, expected), toEqual: (expected: unknown) => assert.deepEqual(actual, expected) });

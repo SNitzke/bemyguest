@@ -10,6 +10,9 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useProperties } from "@/hooks/useData";
+import { propertyLimit } from "@/lib/accounting";
+import { z } from "zod";
 
 interface Props {
   open: boolean;
@@ -20,7 +23,8 @@ interface Props {
 const empty = { name: "", address: "", city: "", state: "", rent_amount: "", bedrooms: "", bathrooms: "", description: "" };
 
 const PropertyFormDialog: React.FC<Props> = ({ open, onOpenChange, property }) => {
-  const { user } = useAuth();
+  const { user, subscription } = useAuth();
+  const { data: properties = [] } = useProperties();
   const qc = useQueryClient();
   const [form, setForm] = useState(empty);
   const [busy, setBusy] = useState(false);
@@ -49,6 +53,9 @@ const PropertyFormDialog: React.FC<Props> = ({ open, onOpenChange, property }) =
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    if (!property && properties.length >= propertyLimit(subscription?.plan ?? 'free')) return toast.error('Llegaste al límite de propiedades de tu plan');
+    const parsed = z.object({name:z.string().trim().min(1).max(200),address:z.string().trim().min(1).max(500),rent_amount:z.coerce.number().min(0)}).safeParse(form);
+    if(!parsed.success) return toast.error('Revisa el nombre, dirección y renta');
     setBusy(true);
     const payload = {
       name: form.name.trim(),
