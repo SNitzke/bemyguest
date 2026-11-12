@@ -22,23 +22,24 @@ const Messages = () => {
 
   // contacts = the other party in each active tenancy
   const contacts = useMemo(() => {
-    const map = new Map<string, { id: string; name: string; subtitle: string }>();
+    const map = new Map<string, { id: string; person: string; name: string; subtitle: string }>();
     tenancies
       .filter((t) => t.status === "active")
       .forEach((t) => {
         const isLandlord = t.landlord_id === user?.id;
         const other = isLandlord ? t.tenant : t.landlord;
         const id = isLandlord ? t.tenant_id : t.landlord_id;
-        if (!map.has(id)) map.set(id, { id, name: other?.full_name || other?.email || "Contacto", subtitle: t.property?.name ?? "" });
+        map.set(t.id, { id: t.id, person: id, name: other?.full_name || other?.email || "Contacto", subtitle: t.property?.name ?? "" });
       });
     return Array.from(map.values());
   }, [tenancies, user?.id]);
 
-  const selected = params.get("to") || contacts[0]?.id || null;
+  const selected = params.get("contract") || contacts.find(c=>c.person===params.get("to"))?.id || contacts[0]?.id || null;
 
   const { data: messages = [] } = useQuery({
     queryKey: ["messages", user?.id],
     enabled: !!user,
+    refetchInterval: 10000,
     queryFn: async () => {
       const { data, error } = await supabase.from("messages").select("*").order("created_at");
       if (error) throw error;
@@ -60,7 +61,7 @@ const Messages = () => {
   }, [user, qc]);
 
   const thread = messages.filter(
-    (m) => (m.sender_id === user?.id && m.recipient_id === selected) || (m.sender_id === selected && m.recipient_id === user?.id),
+    (m) => m.tenancy_id === selected,
   );
 
   useEffect(() => {
@@ -69,14 +70,16 @@ const Messages = () => {
     if (unread.length) supabase.from("messages").update({ read_at: new Date().toISOString() }).in("id", unread).then(() => {});
   }, [thread.length, selected]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const unreadFrom = (id: string) => messages.filter((m) => m.sender_id === id && m.recipient_id === user?.id && !m.read_at).length;
+  const unreadFrom = (id: string) => messages.filter((m) => m.tenancy_id === id && m.recipient_id === user?.id && !m.read_at).length;
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!text.trim() || !user || !selected) return;
+    const contact = contacts.find(c=>c.id===selected);
+    if (!contact || text.trim().length > 4000) return toast.error("Revisa el mensaje");
     const content = text.trim();
     setText("");
-    const { error } = await supabase.from("messages").insert({ sender_id: user.id, recipient_id: selected, content });
+    const { error } = await supabase.from("messages").insert({ sender_id: user.id, recipient_id: contact.person, tenancy_id: selected, content });
     if (error) {
       setText(content);
       return toast.error(errorMessage(error));
@@ -101,17 +104,17 @@ const Messages = () => {
       <div className="grid h-[calc(100vh-14rem)] min-h-[420px] overflow-hidden rounded-xl border bg-card md:grid-cols-[260px_1fr]">
         <div className="hidden border-r md:block">
           {contacts.map((c) => (
-            <button
+            <Button variant="ghost"
               key={c.id}
-              onClick={() => setParams({ to: c.id })}
-              className={cn("flex w-full items-center justify-between border-b px-4 py-3 text-left hover:bg-muted", c.id === selected && "bg-secondary")}
+              onClick={() => setParams({ contract: c.id })}
+              className={cn("flex h-auto w-full items-center justify-between rounded-none border-b px-4 py-3 text-left hover:bg-muted", c.id === selected && "bg-secondary")}
             >
               <div className="min-w-0">
                 <p className="truncate font-medium">{c.name}</p>
                 <p className="truncate text-xs text-muted-foreground">{c.subtitle}</p>
               </div>
               {unreadFrom(c.id) > 0 && <span className="rounded-full bg-primary px-2 text-xs text-primary-foreground">{unreadFrom(c.id)}</span>}
-            </button>
+            </Button>
           ))}
         </div>
         <div className="flex min-h-0 flex-col">
@@ -119,7 +122,7 @@ const Messages = () => {
             <select
               className="w-full bg-transparent font-medium md:hidden"
               value={selected ?? ""}
-              onChange={(e) => setParams({ to: e.target.value })}
+              onChange={(e) => setParams({ contract: e.target.value })}
             >
               {contacts.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
@@ -138,7 +141,7 @@ const Messages = () => {
             <div ref={bottomRef} />
           </div>
           <form onSubmit={send} className="flex gap-2 border-t p-3">
-            <Input placeholder="Escribe un mensaje..." value={text} onChange={(e) => setText(e.target.value)} />
+            <Input aria-label="Mensaje" maxLength={4000} placeholder="Escribe un mensaje..." value={text} onChange={(e) => setText(e.target.value)} />
             <Button type="submit" size="icon" aria-label="Enviar"><Send className="h-4 w-4" /></Button>
           </form>
         </div>

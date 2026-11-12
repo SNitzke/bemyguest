@@ -16,7 +16,7 @@ const SignUp = () => {
   const [params] = useSearchParams();
   const inviteCode = params.get("invite");
   const [role, setRole] = useState<Role>(inviteCode ? "tenant" : (params.get("role") as Role) === "tenant" ? "tenant" : "landlord");
-  const [plan, setPlan] = useState<PlanId>((params.get("plan") as PlanId) in STRIPE_PLANS ? (params.get("plan") as PlanId) : "basic");
+  const [plan] = useState<PlanId>("free");
   const [fullName, setFullName] = useState(params.get("name") ?? "");
   const [email, setEmail] = useState(params.get("email") ?? "");
   const [phone, setPhone] = useState("");
@@ -71,7 +71,7 @@ const SignUp = () => {
   return (
     <AuthShell
       title={inviteCode ? "Paso 1: crea tu cuenta" : "Crea tu cuenta"}
-      subtitle={inviteCode ? "Tu arrendador te invitó a BeMyGuest" : "Prueba gratis 14 días, sin tarjeta"}
+      subtitle={inviteCode ? "Tu arrendador te invitó a BeMyGuest" : "Empieza gratis con una propiedad, sin tarjeta"}
     >
       <form onSubmit={submit} className="space-y-5">
         {!inviteCode && (
@@ -124,15 +124,14 @@ const SignUp = () => {
 
         {role === "landlord" && (
           <div className="space-y-2">
-            <Label>Plan (empiezas con 14 días gratis)</Label>
+            <Label>Plan Gratis · 1 propiedad</Label>
             <div className="grid gap-2 sm:grid-cols-3">
-              {(Object.keys(STRIPE_PLANS) as PlanId[]).map((id) => {
+              {(["free"] as PlanId[]).map((id) => {
                 const p = STRIPE_PLANS[id];
                 return (
                   <button
                     type="button"
                     key={id}
-                    onClick={() => setPlan(id)}
                     className={cn(
                       "rounded-lg border p-3 text-left text-sm transition",
                       plan === id ? "border-primary bg-secondary ring-2 ring-primary" : "hover:bg-muted",
@@ -141,7 +140,7 @@ const SignUp = () => {
                     <div className="flex items-center justify-between font-semibold">
                       {p.name} {plan === id && <Check className="h-4 w-4 text-primary" />}
                     </div>
-                    <div className="text-muted-foreground">${p.price} MXN/mes</div>
+                    <div className="text-muted-foreground">Sin costo</div>
                     <div className="text-xs text-muted-foreground">{p.features[0]}</div>
                   </button>
                 );

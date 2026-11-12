@@ -36,6 +36,13 @@
       "when": 1794189372234,
       "tag": "0004_rental_contract_accounting_portal",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1794502853150,
+      "tag": "0005_preserve_legacy_rent_accounting",
+      "breakpoints": true
     }
   ]
 }

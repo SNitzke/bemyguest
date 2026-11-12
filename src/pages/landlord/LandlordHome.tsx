@@ -10,6 +10,9 @@ import PropertyFormDialog from "@/components/landlord/PropertyFormDialog";
 import InviteTenantDialog from "@/components/landlord/InviteTenantDialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useRental } from "@/hooks/useRental";
+import { rentalBalance, chargeBalance } from "@/lib/accounting";
+import QueryState from "@/components/rental/QueryState";
 
 const Stat = ({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string | number }) => (
   <Card>
@@ -29,13 +32,19 @@ const LandlordHome = () => {
   const { data: tenancies = [] } = useTenancies();
   const { data: issues = [] } = useIssues();
   const { data: payments = [] } = usePayments();
+  const rental = useRental();
   const [addOpen, setAddOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
 
   const myTenancies = tenancies.filter((t) => t.landlord_id === user?.id && t.status === "active");
   const openIssues = issues.filter((i) => i.status !== "resolved").length;
   const month = new Date().toISOString().slice(0, 7);
-  const monthIncome = payments.filter((p) => p.kind === "income" && p.paid_on.startsWith(month)).reduce((s, p) => s + Number(p.amount), 0);
+  const currentCharges = rental.data?.charges.filter(c=>c.period.startsWith(month)) ?? [];
+  const currentCredits = rental.data?.credits.filter(a=>currentCharges.some(c=>c.id===a.charge_id)).reduce((s,a)=>s+a.amount,0) ?? 0;
+  const balance = rentalBalance(payments.filter(p=>p.paid_on.startsWith(month)),rental.data?.expenses.filter(e=>e.paid_on.startsWith(month))??[],currentCredits);
+  const monthIncome = balance.cash;
+  const overdue = (rental.data?.charges??[]).filter(c=>chargeBalance(c,payments.filter(p=>p.charge_id===c.id),tenancies.find(t=>t.id===c.tenancy_id)?.grace_days).status==='overdue');
+  const proofs = payments.filter(p=>p.confirmation_status==='pending');
 
   const chart = useMemo(() => {
     const months: { key: string; label: string; Ingresos: number; Gastos: number }[] = [];
@@ -44,14 +53,9 @@ const LandlordHome = () => {
       const m = new Date(d.getFullYear(), d.getMonth() - i, 1);
       months.push({ key: m.toISOString().slice(0, 7), label: m.toLocaleDateString("es-MX", { month: "short" }), Ingresos: 0, Gastos: 0 });
     }
-    payments.forEach((p) => {
-      const row = months.find((m) => p.paid_on.startsWith(m.key));
-      if (!row) return;
-      if (p.kind === "income") row.Ingresos += Number(p.amount);
-      else row.Gastos += Number(p.amount);
-    });
+    months.forEach(row=>{const charges=rental.data?.charges.filter(c=>c.period.startsWith(row.key))??[];const credit=rental.data?.credits.filter(a=>charges.some(c=>c.id===a.charge_id)).reduce((s,a)=>s+a.amount,0)??0;const b=rentalBalance(payments.filter(p=>p.paid_on.startsWith(row.key)),rental.data?.expenses.filter(e=>e.paid_on.startsWith(row.key))??[],credit);row.Ingresos=b.appliedRent;row.Gastos=b.landlordExpenses+b.discountedExpenses;});
     return months;
-  }, [payments]);
+  }, [payments, rental.data]);
 
   const firstName = profile?.full_name?.split(" ")[0];
 
@@ -88,6 +92,14 @@ const LandlordHome = () => {
         <Stat icon={Wallet} label="Ingresos del mes" value={formatMoney(monthIncome)} />
         <Stat icon={Wrench} label="Reparaciones abiertas" value={openIssues} />
       </div>
+      <QueryState loading={rental.isLoading} error={rental.error} retry={()=>rental.refetch()} />
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Stat icon={Users} label="Ocupación" value={`${properties.length?Math.round(new Set(myTenancies.map(t=>t.property_id)).size/properties.length*100):0}%`} />
+        <Stat icon={Wallet} label="Renta esperada del mes" value={formatMoney(currentCharges.reduce((s,c)=>s+c.amount,0))} />
+        <Stat icon={Wallet} label="Balance neto del mes" value={formatMoney(balance.net)} />
+        <Stat icon={Wallet} label="Cargos vencidos" value={overdue.length} />
+      </div>
+      <section className="mt-6 border-y py-5"><h2 className="mb-3 text-lg">Requiere tu atención</h2><div className="flex flex-wrap gap-5 text-sm"><Link className="text-primary underline" to="/payments">{overdue.length} cargos vencidos</Link><Link className="text-primary underline" to="/payments">{proofs.length} comprobantes por confirmar</Link><Link className="text-primary underline" to="/issues">{openIssues} reparaciones abiertas</Link></div></section>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">

@@ -578,6 +578,7 @@ export type Database = {
           kind: string
           landlord_id: string
           method: string
+          migrated_expense_id: string | null
           notes: string | null
           paid_on: string
           proof_path: string | null
@@ -596,6 +597,7 @@ export type Database = {
           kind?: string
           landlord_id: string
           method?: string
+          migrated_expense_id?: string | null
           notes?: string | null
           paid_on?: string
           proof_path?: string | null
@@ -614,6 +616,7 @@ export type Database = {
           kind?: string
           landlord_id?: string
           method?: string
+          migrated_expense_id?: string | null
           notes?: string | null
           paid_on?: string
           proof_path?: string | null
@@ -628,6 +631,13 @@ export type Database = {
             columns: ["charge_id"]
             isOneToOne: false
             referencedRelation: "rent_charges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_migrated_expense_id_fkey"
+            columns: ["migrated_expense_id"]
+            isOneToOne: false
+            referencedRelation: "rental_expenses"
             referencedColumns: ["id"]
           },
           {
@@ -767,6 +777,7 @@ export type Database = {
           payer: string
           property_id: string
           reimbursement: string
+          source_payment_id: string | null
           tenancy_id: string
           unapplied_credit: number
         }
@@ -781,6 +792,7 @@ export type Database = {
           payer: string
           property_id: string
           reimbursement?: string
+          source_payment_id?: string | null
           tenancy_id: string
           unapplied_credit?: number
         }
@@ -795,6 +807,7 @@ export type Database = {
           payer?: string
           property_id?: string
           reimbursement?: string
+          source_payment_id?: string | null
           tenancy_id?: string
           unapplied_credit?: number
         }
@@ -811,6 +824,13 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rental_expenses_source_payment_id_fkey"
+            columns: ["source_payment_id"]
+            isOneToOne: true
+            referencedRelation: "payments"
             referencedColumns: ["id"]
           },
           {

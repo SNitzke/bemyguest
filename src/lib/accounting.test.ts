@@ -1,4 +1,7 @@
-import {test,expect} from 'bun:test';
+/// <reference types="node" />
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+const expect = (actual: unknown) => ({ toBe: (expected: unknown) => assert.equal(actual, expected), toEqual: (expected: unknown) => assert.deepEqual(actual, expected) });
 import {rentalBalance,chargeBalance,propertyLimit} from './accounting';
 test('30000 renta y 1500 credito no descuentan dos veces',()=>{
  const b=rentalBalance([{amount:28500,kind:'income',confirmation_status:'confirmed',paid_on:'2026-11-01'}],[{amount:1500,payer:'tenant',reimbursement:'rent_credit',paid_on:'2026-11-01'},{amount:1000,payer:'landlord',reimbursement:'none',paid_on:'2026-11-01'},{amount:1500,payer:'landlord',reimbursement:'none',paid_on:'2026-11-01'}],1500);
