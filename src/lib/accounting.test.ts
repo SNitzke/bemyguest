@@ -12,3 +12,4 @@ test('pago confirmado parcial mantiene saldo',()=>expect(chargeBalance({amount:3
 test('gracia retrasa vencimiento',()=>expect(chargeBalance({amount:100,credit_applied:0,due_on:'2026-11-01'},[],3,new Date('2026-11-03')).status).toBe('pending'));
 test('gratis una propiedad',()=>expect(propertyLimit('free')).toBe(1));
 test('pro ilimitado',()=>expect(propertyLimit('pro')).toBe(1000000));
+test('gasto migrado no se cuenta de nuevo',()=>expect(rentalBalance([{amount:28500,kind:'income',paid_on:'2026-11-08'},{amount:1500,kind:'expense',paid_on:'2026-11-08',migrated_expense_id:'credit'},{amount:2500,kind:'expense',paid_on:'2026-11-08'}],[{amount:1500,payer:'tenant',reimbursement:'rent_credit',paid_on:'2026-11-08'}],1500).net).toBe(26000));

@@ -43,6 +43,34 @@
       "when": 1794502853150,
       "tag": "0005_preserve_legacy_rent_accounting",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794503072447,
+      "tag": "0006_rental_reminder_security_and_installments",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794503113168,
+      "tag": "0007_enable_rental_daily_scheduler",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1794503179724,
+      "tag": "0008_contract_file_integrity_and_charge_dates",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1794503201581,
+      "tag": "0009_private_contract_file_cleanup",
+      "breakpoints": true
     }
   ]
 }

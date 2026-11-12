@@ -1,0 +1,1 @@
+CREATE POLICY "Owners remove contract files" ON storage.objects FOR DELETE TO authenticated USING(bucket_id='contract-files' AND public.contract_owner((storage.foldername(name))[1]::uuid));

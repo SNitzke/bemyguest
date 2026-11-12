@@ -540,6 +540,7 @@ export type Database = {
       notifications: {
         Row: {
           created_at: string
+          event_key: string | null
           id: string
           path: string
           read_at: string | null
@@ -549,6 +550,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          event_key?: string | null
           id?: string
           path: string
           read_at?: string | null
@@ -558,6 +560,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          event_key?: string | null
           id?: string
           path?: string
           read_at?: string | null
@@ -771,6 +774,7 @@ export type Database = {
           category: string
           created_at: string
           id: string
+          installments: number
           issue_id: string | null
           note: string | null
           paid_on: string
@@ -786,6 +790,7 @@ export type Database = {
           category: string
           created_at?: string
           id?: string
+          installments?: number
           issue_id?: string | null
           note?: string | null
           paid_on?: string
@@ -801,6 +806,7 @@ export type Database = {
           category?: string
           created_at?: string
           id?: string
+          installments?: number
           issue_id?: string | null
           note?: string | null
           paid_on?: string
@@ -1003,6 +1009,7 @@ export type Database = {
         }
         Returns: string
       }
+      refresh_rental_reminders: { Args: never; Returns: undefined }
       resolve_repair: {
         Args: { _cost: number; _issue: string; _months?: number }
         Returns: undefined
