@@ -15,6 +15,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import RepairDetails from "@/components/rental/RepairDetails";
+import { uploadContractFile, validateFile } from "@/lib/rental-files";
 
 export const ReportIssueDialog: React.FC<{ open: boolean; onOpenChange: (o: boolean) => void }> = ({ open, onOpenChange }) => {
   const { user } = useAuth();
@@ -23,6 +25,7 @@ export const ReportIssueDialog: React.FC<{ open: boolean; onOpenChange: (o: bool
   const mine = tenancies.filter((t) => t.tenant_id === user?.id && t.status === "active");
   const [f, setF] = useState({ title: "", description: "", priority: "medium", tenancy: "", paid: false, amount: "", mode: "single", months: "3", note: "" });
   const [file, setFile] = useState<File | null>(null);
+  const [media, setMedia] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const tenancyId = f.tenancy || mine[0]?.id || "";
 
@@ -30,6 +33,13 @@ export const ReportIssueDialog: React.FC<{ open: boolean; onOpenChange: (o: bool
     e.preventDefault();
     const t = mine.find((x) => x.id === tenancyId);
     if (!user || !t) return toast.error("No tienes una vivienda conectada");
+    let media_paths: string[] = [];
+    try {
+      if (media.length > 5 || (media.some(x=>x.type.startsWith('video')) && media.length!==1)) throw new Error('Adjunta hasta 5 fotos o un solo video');
+      media.forEach(x=>validateFile(x,true));
+      if(file) validateFile(file);
+      media_paths = await Promise.all(media.map(x=>uploadContractFile(t.id,user.id,x,true)));
+    } catch(e) {return toast.error(errorMessage(e));}
     setBusy(true);
     let receipt_path: string | null = null;
     if (f.paid && file) {
@@ -40,6 +50,9 @@ export const ReportIssueDialog: React.FC<{ open: boolean; onOpenChange: (o: bool
     }
     const { error } = await supabase.from("issues").insert({
       receipt_path,
+      tenancy_id: t.id,
+      media_paths,
+      payer: f.paid ? "tenant_credit" : "landlord",
       payment_note: f.paid && f.note.trim() ? f.note.trim() : null,
       property_id: t.property_id,
       landlord_id: t.landlord_id,
@@ -62,7 +75,7 @@ export const ReportIssueDialog: React.FC<{ open: boolean; onOpenChange: (o: bool
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
         <DialogHeader><DialogTitle>Solicitar reparación</DialogTitle></DialogHeader>
         {mine.length === 0 ? (
           <p className="text-sm text-muted-foreground">Aún no estás conectado a una vivienda. Abre el enlace de invitación de tu arrendador.</p>
@@ -93,9 +106,11 @@ export const ReportIssueDialog: React.FC<{ open: boolean; onOpenChange: (o: bool
               </Select>
             </div>
             <label className="flex items-center gap-2 text-sm">
+              <span className="sr-only">Pago de reparación</span>
               <input type="checkbox" checked={f.paid} onChange={(e) => setF({ ...f, paid: e.target.checked })} />
               Yo ya pagué esta reparación
             </label>
+            <div className="space-y-2"><Label htmlFor="issue-media">Hasta 5 fotos (10 MB cada una) o un video de hasta 60 segundos (20 MB)</Label><Input id="issue-media" type="file" multiple accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" onChange={e=>setMedia(Array.from(e.target.files??[]))}/></div>
             {f.paid && (
               <div className="space-y-4 rounded-md border p-3">
                 <div className="space-y-2">
@@ -196,7 +211,7 @@ const Issues = () => {
                       : "en una sola exhibición"}
                     {i.payment_note && <span className="block pt-1 italic">“{i.payment_note}”</span>}
                     {i.receipt_path && (
-                      <button type="button" className="block pt-1 font-medium underline" onClick={() => openReceipt(i.receipt_path!)}>Ver recibo</button>
+                      <Button variant="link" onClick={() => {if(i.receipt_path)openReceipt(i.receipt_path);}}>Ver recibo</Button>
                     )}
                   </p>
                 )}
@@ -206,11 +221,12 @@ const Issues = () => {
                 {isLandlord ? (
                   <Select value={i.status} onValueChange={(v) => setStatus(i.id, v)}>
                     <SelectTrigger className="w-44"><SelectValue /></SelectTrigger>
-                    <SelectContent>{Object.entries(ISSUE_STATUS).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}</SelectContent>
+                    <SelectContent>{Object.entries(ISSUE_STATUS).filter(([k])=>k!=="resolved").map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}</SelectContent>
                   </Select>
                 ) : (
                   <Badge variant={i.status === "resolved" ? "secondary" : "default"}>{ISSUE_STATUS[i.status] ?? i.status}</Badge>
                 )}
+                <RepairDetails issue={i} />
               </CardContent>
             </Card>
           ))}
