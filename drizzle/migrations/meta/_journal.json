@@ -43,6 +43,13 @@
       "when": 1794502853150,
       "tag": "0005_preserve_legacy_rent_accounting",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794503072447,
+      "tag": "0006_rental_reminder_security_and_installments",
+      "breakpoints": true
     }
   ]
 }
